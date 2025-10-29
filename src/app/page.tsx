@@ -194,88 +194,87 @@ export default function Home() {
       </section>
 
       {/* Simple. Safe. Local. Section */}
-      <section className="py-32 px-6 bg-gray-50">
+      <section className="py-32 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-5xl md:text-6xl font-semibold text-center text-gray-900 mb-20">
             Simple. Safe. Local.
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-12 lg:gap-16 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Simple */}
-            <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-                <Zap className="w-10 h-10 text-green-600" />
+            <div className="relative bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-green-100">
+              <div className="absolute top-6 right-6">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
+                  <Zap className="w-8 h-8 text-green-600" />
+                </div>
               </div>
-              <h3 className="text-3xl font-semibold text-gray-900 mb-4">Simple</h3>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <h3 className="text-4xl font-semibold text-gray-900 mb-6 mt-16">Simple</h3>
+              <p className="text-lg text-gray-700 leading-relaxed">
                 Easy setup and intuitive interface. Get started in minutes and connect with your neighborhood effortlessly.
               </p>
             </div>
 
             {/* Safe */}
-            <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-                <Shield className="w-10 h-10 text-green-600" />
+            <div className="relative bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 text-white transform md:-translate-y-4">
+              <div className="absolute top-6 right-6">
+                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
               </div>
-              <h3 className="text-3xl font-semibold text-gray-900 mb-4">Safe</h3>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <h3 className="text-4xl font-semibold mb-6 mt-16">Safe</h3>
+              <p className="text-lg text-green-50 leading-relaxed">
                 Verified neighbors and secure transactions. Your safety and privacy are our top priorities.
               </p>
             </div>
 
             {/* Local */}
-            <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-                <MapPin className="w-10 h-10 text-green-600" />
+            <div className="relative bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-green-100">
+              <div className="absolute top-6 right-6">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
+                  <MapPin className="w-8 h-8 text-green-600" />
+                </div>
               </div>
-              <h3 className="text-3xl font-semibold text-gray-900 mb-4">Local</h3>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <h3 className="text-4xl font-semibold text-gray-900 mb-6 mt-16">Local</h3>
+              <p className="text-lg text-gray-700 leading-relaxed">
                 Connect with real neighbors nearby. Everything happens within your immediate community.
               </p>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* How It Works Section */}
-          <div className="max-w-7xl mx-auto mt-32">
-            <h2 className="text-4xl md:text-5xl font-semibold text-center text-gray-900 mb-16">
-              How It Works
-            </h2>
-            <div className="grid md:grid-cols-3 gap-12 lg:gap-16">
-              {/* Step 1 */}
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <UserCheck className="w-10 h-10 text-green-600" />
-                </div>
-                <div className="w-10 h-10 mx-auto mb-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xl font-semibold">
-                  1
-                </div>
-                <h3 className="text-3xl font-semibold text-gray-900 mb-4">Sign Up and Verify</h3>
-                <p className="text-xl text-gray-600 leading-relaxed">Confirm your identity and location for a trusted community.</p>
+      {/* How It Works Section */}
+      <section className="py-32 px-6 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-semibold text-center text-gray-900 mb-16">
+            How It Works
+          </h2>
+          <div className="grid md:grid-cols-3 gap-12 lg:gap-16 max-w-5xl mx-auto">
+            {/* Step 1 */}
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-6 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+                1
               </div>
+              <h3 className="text-3xl font-semibold text-gray-900 mb-4">Sign Up and Verify</h3>
+              <p className="text-xl text-gray-600 leading-relaxed">Confirm your identity and location for a trusted community.</p>
+            </div>
 
-              {/* Step 2 */}
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <Users className="w-10 h-10 text-green-600" />
-                </div>
-                <div className="w-10 h-10 mx-auto mb-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xl font-semibold">
-                  2
-                </div>
-                <h3 className="text-3xl font-semibold text-gray-900 mb-4">Join Your Neighborhood</h3>
-                <p className="text-xl text-gray-600 leading-relaxed">Connect with real people nearby who share your community.</p>
+            {/* Step 2 */}
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-6 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+                2
               </div>
+              <h3 className="text-3xl font-semibold text-gray-900 mb-4">Join Your Neighborhood</h3>
+              <p className="text-xl text-gray-600 leading-relaxed">Connect with real people nearby who share your community.</p>
+            </div>
 
-              {/* Step 3 */}
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <Search className="w-10 h-10 text-green-600" />
-                </div>
-                <div className="w-10 h-10 mx-auto mb-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xl font-semibold">
-                  3
-                </div>
-                <h3 className="text-3xl font-semibold text-gray-900 mb-4">Discover and Engage</h3>
-                <p className="text-xl text-gray-600 leading-relaxed">Buy, sell, chat, or help others safely in your neighborhood.</p>
+            {/* Step 3 */}
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-6 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+                3
               </div>
+              <h3 className="text-3xl font-semibold text-gray-900 mb-4">Discover and Engage</h3>
+              <p className="text-xl text-gray-600 leading-relaxed">Buy, sell, chat, or help others safely in your neighborhood.</p>
             </div>
           </div>
 
@@ -299,13 +298,17 @@ export default function Home() {
             </h3>
           </div>
 
-          {/* Asymmetric Gallery Grid - 6 cards with varied layouts */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Brick Layout Grid - 6 cards with brick pattern */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
             {/* Row 1 */}
-            {/* Feature 1 - Large card with image on top */}
+            {/* Feature 1 - Larger card */}
             <div className="md:col-span-5 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 h-48 flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Community Image</p>
+              <div className="h-48 overflow-hidden">
+                <img 
+                  src="/assets/images/hero1.jpeg" 
+                  alt="Community Feed" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-8">
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">Community Feed</h3>
@@ -315,10 +318,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Feature 2 - Large card with image on top */}
+            {/* Feature 2 - Same size as Feature 3 */}
             <div className="md:col-span-4 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 h-48 flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Verification Image</p>
+              <div className="h-48 overflow-hidden">
+                <img 
+                  src="/assets/images/hero2.jpeg" 
+                  alt="Verified Neighbors" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-8">
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">Verified Neighbors</h3>
@@ -328,10 +335,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Feature 3 - Large card with image on top */}
-            <div className="md:col-span-4 bg-gray-50 rounded-3xl overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 h-48 flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Events Image</p>
+            {/* Feature 3 - Same size as Feature 2 */}
+            <div className="md:col-span-3 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
+              <div className="h-48 overflow-hidden">
+                <img 
+                  src="/assets/images/hero1.jpeg" 
+                  alt="Local Events" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-8">
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">Local Events</h3>
@@ -342,10 +353,14 @@ export default function Home() {
             </div>
 
             {/* Row 2 */}
-            {/* Feature 4 - Wider card spanning more columns */}
-            <div className="md:col-span-4 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 h-48 flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Setup Image</p>
+            {/* Feature 4 - Same size as Feature 5 */}
+            <div className="md:col-span-3 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
+              <div className="h-48 overflow-hidden">
+                <img 
+                  src="/assets/images/hero2.jpeg" 
+                  alt="Instant Account Setup" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-8">
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">Instant Account Setup</h3>
@@ -355,10 +370,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Feature 5 - Narrower card */}
+            {/* Feature 5 - Same size as Feature 4 */}
             <div className="md:col-span-4 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 h-48 flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Marketplace</p>
+              <div className="h-48 overflow-hidden">
+                <img 
+                  src="/assets/images/hero1.jpeg" 
+                  alt="Safe Marketplace" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-8">
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">Safe Marketplace</h3>
@@ -368,10 +387,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Feature 6 - Another size variation */}
+            {/* Feature 6 - Larger card */}
             <div className="md:col-span-5 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 h-48 flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Support Image</p>
+              <div className="h-48 overflow-hidden">
+                <img 
+                  src="/assets/images/hero2.jpeg" 
+                  alt="Neighborhood Support" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-8">
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">Neighborhood Support</h3>
@@ -393,9 +416,12 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-3xl h-80 mb-8 flex items-center justify-center">
-                {/* Photo placeholder */}
-                <p className="text-gray-400 text-lg">Resident Photo</p>
+              <div className="rounded-3xl h-80 mb-8 overflow-hidden">
+                <img 
+                  src="/assets/images/hero1.jpeg" 
+                  alt="Residents" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h3 className="text-3xl font-semibold text-gray-900 mb-4">Residents</h3>
               <p className="text-xl text-gray-600 leading-relaxed">
@@ -404,9 +430,12 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-3xl h-80 mb-8 flex items-center justify-center">
-                {/* Photo placeholder */}
-                <p className="text-gray-400 text-lg">Business Photo</p>
+              <div className="rounded-3xl h-80 mb-8 overflow-hidden">
+                <img 
+                  src="/assets/images/hero2.jpeg" 
+                  alt="Businesses" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h3 className="text-3xl font-semibold text-gray-900 mb-4">Businesses</h3>
               <p className="text-xl text-gray-600 leading-relaxed">
@@ -415,9 +444,12 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-3xl h-80 mb-8 flex items-center justify-center">
-                {/* Photo placeholder */}
-                <p className="text-gray-400 text-lg">Community Photo</p>
+              <div className="rounded-3xl h-80 mb-8 overflow-hidden">
+                <img 
+                  src="/assets/images/hero1.jpeg" 
+                  alt="Communities and Estates" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h3 className="text-3xl font-semibold text-gray-900 mb-4">Communities and Estates</h3>
               <p className="text-xl text-gray-600 leading-relaxed">
@@ -427,88 +459,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="py-32 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-5xl md:text-6xl font-semibold text-gray-900 mb-8">
-            Be Part of the Movement
-          </h2>
-          <p className="text-2xl text-gray-600 mb-12 leading-relaxed">
-            We are launching soon across Lagos, Abuja, Port Harcourt, Ibadan, and Kano. Help us build the first wave of connected communities.
-          </p>
-
-          {/* Email Capture Form */}
-          <div className="max-w-md mx-auto mb-8">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-4 text-lg border-2 border-gray-300 rounded-full focus:outline-none focus:border-green-600 transition-all duration-200"
-              />
-              <button className="px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium whitespace-nowrap">
-                Get Notified
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium min-w-[280px]">
-              Create Your Neighborhood Now
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Countdown + Social Proof Section */}
-      <section className="py-32 px-6 bg-gradient-to-br from-green-600 to-green-700 text-white">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold mb-12">
-            The Neighborhood Revolution Starts In:
-          </h2>
-
-          {/* Countdown Timer */}
-          <div className="flex justify-center gap-4 md:gap-8 mb-16">
-            <div className="flex flex-col items-center">
-              <div className="text-6xl md:text-7xl font-semibold">{timeLeft.days}</div>
-              <div className="text-sm uppercase tracking-wide opacity-80 mt-2">Days</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-6xl md:text-7xl font-semibold">{timeLeft.hours}</div>
-              <div className="text-sm uppercase tracking-wide opacity-80 mt-2">Hours</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-6xl md:text-7xl font-semibold">{timeLeft.minutes}</div>
-              <div className="text-sm uppercase tracking-wide opacity-80 mt-2">Minutes</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-6xl md:text-7xl font-semibold">{timeLeft.seconds}</div>
-              <div className="text-sm uppercase tracking-wide opacity-80 mt-2">Seconds</div>
-            </div>
-          </div>
-
-          <p className="text-2xl mb-8 opacity-90">
-            Join 2,000+ Nigerians already on the waitlist!
-          </p>
-
-          {/* Social Media Links */}
-          <div className="flex justify-center gap-6">
-            <a href="#" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
-              {/* Twitter icon placeholder */}
-              <div className="w-6 h-6 bg-white rounded-full" />
-            </a>
-            <a href="#" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
-              {/* Instagram icon placeholder */}
-              <div className="w-6 h-6 bg-white rounded-full" />
-            </a>
-            <a href="#" className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200">
-              {/* LinkedIn icon placeholder */}
-              <div className="w-6 h-6 bg-white rounded-full" />
-            </a>
-          </div>
-        </div>
-      </section>
-
+   
       {/* FAQ Section */}
       <section className="py-32 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
