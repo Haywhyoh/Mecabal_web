@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserX, ShieldAlert, CircleAlert, Rss, ShoppingCart, CalendarDays, Building2, Heart, Zap, Shield, MapPin, UserCheck, Users, Search } from "lucide-react";
+import Header from "../components/Header";
 
 export default function Home() {
   const [timeLeft, setTimeLeft] = useState({
@@ -32,6 +33,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-white">
+      <Header />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Image */}
@@ -244,7 +246,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-32 px-6 bg-gray-50">
+      <section id="how-it-works" className="py-32 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-semibold text-center text-gray-900 mb-16">
             How It Works
@@ -287,7 +289,7 @@ export default function Home() {
       </section>
 
       {/* Core Features Section */}
-      <section className="py-32 px-6 bg-white">
+      <section id="features" className="py-32 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
@@ -408,7 +410,7 @@ export default function Home() {
       </section>
 
       {/* For Whom Section */}
-      <section className="py-32 px-6 bg-gray-50">
+      <section id="for-whom" className="py-32 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-5xl md:text-6xl font-semibold text-center text-gray-900 mb-20">
             Who MeCabal Is For
@@ -461,7 +463,7 @@ export default function Home() {
       </section>
    
       {/* FAQ Section */}
-      <section className="py-32 px-6 bg-white">
+      <section id="faq" className="py-32 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-semibold text-gray-900 mb-4">
@@ -568,12 +570,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="text-center mt-12">
-            <p className="text-lg text-gray-600 mb-4">Still have questions?</p>
-            <a href="#" className="text-green-600 hover:text-green-700 font-semibold text-lg underline">
-              Contact our support team
-            </a>
-          </div>
+          
         </div>
       </section>
 
