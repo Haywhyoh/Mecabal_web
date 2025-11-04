@@ -48,14 +48,14 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/40" />
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto text-center">
+        <div className="relative z-10 max-w-6xl mx-auto text-center">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-white mb-6">
-            Rebuilding Nigerian Communities
+            Connecting Nigerian Communities
           </h1>
-          <p className="text-2xl md:text-3xl font-light text-white mb-4">
+          {/* <p className="text-2xl md:text-3xl font-light text-white mb-4">
             One Neighborhood at a Time
-          </p>
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 font-light">
+          </p> */}
+          <p className="text-lg md:text-xl text-white/90 max-w-4xl mx-auto mb-12 font-light">
             Discover, connect, and trade safely within your neighborhood. MeCabal is your digital town square for trusted local interactions.
           </p>
 
@@ -88,7 +88,7 @@ export default function Home() {
               Create Your Neighborhood
             </button>
             <button className="px-8 py-4 border-2 border-green-600 text-green-600 text-lg rounded-full hover:bg-green-50 transition-all duration-200 font-medium min-w-[280px]">
-              Join the Waitlist
+              Join a neighborhood
             </button>
           </div>
         </div>
@@ -581,7 +581,7 @@ export default function Home() {
           <div className="bg-white rounded-3xl p-12 mb-16">
             <div className="max-w-5xl mx-auto text-center">
               <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
-                Start Managing Your Money Globally, Stress Free
+                Download MeCabal and connect with your neighborhood today
               </h2>
               <p className="text-xl text-gray-600 mb-8">
                 Download MeCabal and connect with your neighborhood today

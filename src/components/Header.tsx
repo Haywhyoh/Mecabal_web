@@ -13,7 +13,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <img 
-              src="/assets/images/mecabal.png" 
+              src="/assets/images/logo.png" 
               alt="MeCabal" 
               className="h-10 w-auto"
             />
