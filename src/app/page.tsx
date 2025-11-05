@@ -84,12 +84,12 @@ export default function Home() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium min-w-[280px]">
+            <a href="/onboarding" className="px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium min-w-[280px] text-center">
               Create Your Neighborhood
-            </button>
-            <button className="px-8 py-4 border-2 border-green-600 text-green-600 text-lg rounded-full hover:bg-green-50 transition-all duration-200 font-medium min-w-[280px]">
+            </a>
+            <a href="/onboarding" className="px-8 py-4 border-2 border-green-600 text-green-600 text-lg rounded-full hover:bg-green-50 transition-all duration-200 font-medium min-w-[280px] text-center">
               Join a neighborhood
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -281,9 +281,9 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-16">
-            <button className="px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium">
+            <a href="/onboarding" className="inline-block px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium">
               Join the Waitlist
-            </button>
+            </a>
           </div>
         </div>
       </section>

@@ -37,12 +37,12 @@ export default function Header() {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <button className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium">
+            <a href="/onboarding" className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium">
               Join
-            </button>
-            <button className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium">
+            </a>
+            <a href="/onboarding" className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium">
               Create Neighborhood
-            </button>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -87,12 +87,12 @@ export default function Header() {
                 FAQ
               </a>
               <div className="flex flex-col gap-3 pt-4">
-                <button className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium text-left">
+                <a href="/onboarding" className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium text-left">
                   Join
-                </button>
-                <button className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium">
+                </a>
+                <a href="/onboarding" className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium text-center">
                   Create Neighborhood
-                </button>
+                </a>
               </div>
             </nav>
           </div>
