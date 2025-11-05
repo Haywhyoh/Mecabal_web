@@ -147,32 +147,32 @@ export default function Home() {
               </h2>
 
               <ul className="space-y-6 mb-10">
-                <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <li className="flex items-start gap-4 align-middle">
+                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Rss className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-xl text-gray-700">Neighborhood feed for local updates and recommendations</p>
                 </li>
                 <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 ">
                     <ShoppingCart className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-xl text-gray-700">Trusted marketplace for goods, services, and housing</p>
                 </li>
                 <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <CalendarDays className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-xl text-gray-700">Local events, town halls, and meetups</p>
                 </li>
                 <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Building2 className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-xl text-gray-700">Verified business directory</p>
                 </li>
                 <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Heart className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-xl text-gray-700">Neighborhood help and volunteering</p>

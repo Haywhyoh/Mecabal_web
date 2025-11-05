@@ -1,0 +1,107 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { OnboardingStep, OnboardingUser, LocationData } from '@/types/onboarding';
+
+interface OnboardingContextType {
+  currentStep: OnboardingStep;
+  user: Partial<OnboardingUser>;
+  phoneNumber?: string;
+  setCurrentStep: (step: OnboardingStep) => void;
+  updateUser: (userData: Partial<OnboardingUser>) => void;
+  setPhoneNumber: (phone: string) => void;
+  setTokens: (accessToken: string, refreshToken: string) => void;
+  resetOnboarding: () => void;
+}
+
+const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+
+export function OnboardingProvider({ children }: { children: ReactNode }) {
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
+  const [user, setUser] = useState<Partial<OnboardingUser>>({});
+  const [phoneNumber, setPhoneNumber] = useState<string>();
+
+  // Load from session storage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedStep = sessionStorage.getItem('onboarding_step') as OnboardingStep;
+      const savedUser = sessionStorage.getItem('onboarding_user');
+      const savedPhone = sessionStorage.getItem('onboarding_phone');
+
+      if (savedStep) setCurrentStep(savedStep);
+      if (savedUser) setUser(JSON.parse(savedUser));
+      if (savedPhone) setPhoneNumber(savedPhone);
+    }
+  }, []);
+
+  // Save to session storage on change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('onboarding_step', currentStep);
+    }
+  }, [currentStep]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (Object.keys(user).length > 0) {
+        sessionStorage.setItem('onboarding_user', JSON.stringify(user));
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (phoneNumber) {
+        sessionStorage.setItem('onboarding_phone', phoneNumber);
+      }
+    }
+  }, [phoneNumber]);
+
+  const updateUser = (userData: Partial<OnboardingUser>) => {
+    setUser((prev) => ({ ...prev, ...userData }));
+  };
+
+  const setTokens = (accessToken: string, refreshToken: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+    }
+  };
+
+  const resetOnboarding = () => {
+    setCurrentStep('welcome');
+    setUser({});
+    setPhoneNumber(undefined);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('onboarding_step');
+      sessionStorage.removeItem('onboarding_user');
+      sessionStorage.removeItem('onboarding_phone');
+    }
+  };
+
+  return (
+    <OnboardingContext.Provider
+      value={{
+        currentStep,
+        user,
+        phoneNumber,
+        setCurrentStep,
+        updateUser,
+        setPhoneNumber,
+        setTokens,
+        resetOnboarding,
+      }}
+    >
+      {children}
+    </OnboardingContext.Provider>
+  );
+}
+
+export function useOnboarding() {
+  const context = useContext(OnboardingContext);
+  if (context === undefined) {
+    throw new Error('useOnboarding must be used within an OnboardingProvider');
+  }
+  return context;
+}
+
