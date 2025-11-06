@@ -6,43 +6,286 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
+interface State {
+  id: string;
+  name: string;
+  code: string;
+}
+
+interface LGA {
+  id: string;
+  name: string;
+  code: string;
+  type: 'LGA' | 'LCDA';
+}
+
+interface Neighborhood {
+  id: string;
+  name: string;
+  type: string;
+  isGated: boolean;
+}
+
 export default function LocationSetupForm() {
   const { user, setCurrentStep, updateUser, setTokens, resetOnboarding } = useOnboarding();
   const router = useRouter();
+
   const [formData, setFormData] = useState({
-    state: '',
-    city: '',
-    estate: '',
+    stateId: '',
+    stateName: '',
+    lgaId: '',
+    lgaName: '',
+    neighborhoodId: '',
+    neighborhoodName: '',
     address: '',
+    formattedAddress: '', // Human-readable address from GPS
   });
+
   const [locationMethod, setLocationMethod] = useState<'gps' | 'manual'>('manual');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [coordinates, setCoordinates] = useState<{ latitude?: number; longitude?: number }>({});
 
+  // Data lists
+  const [states, setStates] = useState<State[]>([]);
+  const [lgas, setLGAs] = useState<LGA[]>([]);
+  const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
+  const [neighborhoodSearchQuery, setNeighborhoodSearchQuery] = useState('');
+
+  // Loading states
+  const [isLoadingStates, setIsLoadingStates] = useState(false);
+  const [isLoadingLGAs, setIsLoadingLGAs] = useState(false);
+  const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
+
+  // Load states on mount
+  useEffect(() => {
+    loadStates();
+  }, []);
+
+  // Load LGAs when state changes
+  useEffect(() => {
+    if (formData.stateId) {
+      loadLGAs(formData.stateId);
+    } else {
+      setLGAs([]);
+      setFormData(prev => ({ ...prev, lgaId: '', lgaName: '', neighborhoodId: '', neighborhoodName: '' }));
+    }
+  }, [formData.stateId]);
+
+  // Load neighborhoods when LGA changes
+  useEffect(() => {
+    if (formData.lgaId) {
+      loadNeighborhoods(formData.lgaId);
+    } else {
+      setNeighborhoods([]);
+      setFormData(prev => ({ ...prev, neighborhoodId: '', neighborhoodName: '' }));
+    }
+  }, [formData.lgaId]);
+
+  // Reverse geocode function (defined before useEffect that uses it)
+  const reverseGeocode = async (latitude: number, longitude: number) => {
+    try {
+      // Use backend Google Maps reverse geocoding service
+      const response = await apiClient.reverseGeocode(latitude, longitude);
+
+      if (response.success && response.data) {
+        const { state, lga, city, formattedAddress } = response.data;
+
+        // Format address in Nigerian style (e.g., "Alimosho, Lagos")
+        const displayAddress = [city, lga, state].filter(Boolean).join(', ');
+
+        setFormData(prev => ({
+          ...prev,
+          formattedAddress: displayAddress || formattedAddress || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+        }));
+
+        // Try to auto-select state if we got one
+        if (state) {
+          const matchingState = states.find(s =>
+            s.name.toLowerCase() === state.toLowerCase() ||
+            state.toLowerCase().includes(s.name.toLowerCase())
+          );
+
+          if (matchingState) {
+            setFormData(prev => ({
+              ...prev,
+              stateId: matchingState.id,
+              stateName: matchingState.name
+            }));
+          }
+        }
+      } else {
+        // Fallback to coordinates if backend geocoding fails
+        setFormData(prev => ({
+          ...prev,
+          formattedAddress: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+        }));
+      }
+    } catch (err) {
+      console.error('Reverse geocoding failed:', err);
+      // Fallback to coordinates
+      setFormData(prev => ({
+        ...prev,
+        formattedAddress: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+      }));
+    }
+  };
+
+  // Handle GPS location
   useEffect(() => {
     if (locationMethod === 'gps' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
           setCoordinates({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+            latitude: lat,
+            longitude: lng,
           });
+
+          // Reverse geocode to get human-readable address
+          await reverseGeocode(lat, lng);
+
+          // Load nearby neighborhoods based on GPS
+          loadNearbyNeighborhoods(lat, lng);
         },
         () => {
           setError('Unable to get your location. Please select manually.');
           setLocationMethod('manual');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
     }
-  }, [locationMethod]);
+  }, [locationMethod, states]); // Added states to dependency array
+
+  const loadStates = async () => {
+    try {
+      setIsLoadingStates(true);
+      const response = await apiClient.getStates();
+
+      if (response.success && response.data) {
+        setStates(response.data);
+      } else {
+        setError('Failed to load states. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to load states.');
+    } finally {
+      setIsLoadingStates(false);
+    }
+  };
+
+  const loadLGAs = async (stateId: string) => {
+    try {
+      setIsLoadingLGAs(true);
+      const response = await apiClient.getLGAsByState(stateId);
+
+      if (response.success && response.data) {
+        setLGAs(response.data);
+      } else {
+        setError('Failed to load LGAs. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to load LGAs.');
+    } finally {
+      setIsLoadingLGAs(false);
+    }
+  };
+
+  const loadNeighborhoods = async (lgaId: string, query?: string) => {
+    try {
+      setIsLoadingNeighborhoods(true);
+      const response = await apiClient.searchNeighborhoods({
+        lgaId,
+        query,
+        limit: 50,
+      });
+
+      if (response.success && response.data) {
+        setNeighborhoods(response.data);
+      } else {
+        setError('Failed to load neighborhoods. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to load neighborhoods.');
+    } finally {
+      setIsLoadingNeighborhoods(false);
+    }
+  };
+
+  const loadNearbyNeighborhoods = async (latitude: number, longitude: number) => {
+    try {
+      setIsLoadingNeighborhoods(true);
+      const response = await apiClient.recommendNeighborhoods({
+        latitude,
+        longitude,
+        radius: 2000,
+        limit: 20,
+      });
+
+      if (response.success && response.data?.recommendations) {
+        const recommendedNeighborhoods = response.data.recommendations.map((rec: any) => rec.neighborhood);
+        setNeighborhoods(recommendedNeighborhoods);
+      }
+    } catch (err) {
+      console.error('Failed to load nearby neighborhoods:', err);
+    } finally {
+      setIsLoadingNeighborhoods(false);
+    }
+  };
+
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedState = states.find(s => s.id === e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      stateId: e.target.value,
+      stateName: selectedState?.name || '',
+      lgaId: '',
+      lgaName: '',
+      neighborhoodId: '',
+      neighborhoodName: '',
+    }));
+  };
+
+  const handleLGAChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLGA = lgas.find(l => l.id === e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      lgaId: e.target.value,
+      lgaName: selectedLGA?.name || '',
+      neighborhoodId: '',
+      neighborhoodName: '',
+    }));
+  };
+
+  const handleNeighborhoodSelect = (neighborhood: Neighborhood) => {
+    setFormData(prev => ({
+      ...prev,
+      neighborhoodId: neighborhood.id,
+      neighborhoodName: neighborhood.name,
+    }));
+  };
+
+  const handleNeighborhoodSearch = (query: string) => {
+    setNeighborhoodSearchQuery(query);
+    if (formData.lgaId && query.length >= 2) {
+      loadNeighborhoods(formData.lgaId, query);
+    } else if (query.length === 0 && formData.lgaId) {
+      loadNeighborhoods(formData.lgaId);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(undefined);
 
-    if (!formData.state || !formData.city) {
-      setError('Please select at least state and city');
+    if (!formData.stateId || !formData.lgaId) {
+      setError('Please select at least state and LGA');
       return;
     }
 
@@ -50,13 +293,13 @@ export default function LocationSetupForm() {
 
     try {
       const response = await apiClient.setupLocation({
-        state: formData.state,
-        city: formData.city,
-        estate: formData.estate || undefined,
+        state: formData.stateName,
+        city: formData.lgaName,
+        estate: formData.neighborhoodName || undefined,
         address: formData.address || undefined,
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
-        completeRegistration: true, // Important: marks registration as complete
+        completeRegistration: true,
       });
 
       if (response.success && response.data) {
@@ -74,10 +317,7 @@ export default function LocationSetupForm() {
           });
         }
 
-        // Clear onboarding state
         resetOnboarding();
-
-        // Redirect to dashboard or home
         router.push('/dashboard');
       } else {
         setError(response.error || 'Failed to complete registration');
@@ -89,13 +329,7 @@ export default function LocationSetupForm() {
     }
   };
 
-  const nigerianStates = [
-    'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
-    'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT', 'Gombe',
-    'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara',
-    'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau',
-    'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara'
-  ];
+  const filteredNeighborhoods = neighborhoods;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white px-6 py-12">
@@ -139,7 +373,7 @@ export default function LocationSetupForm() {
                   <MapPin className="w-5 h-5 text-gray-600" />
                   <div className="flex-1 text-left">
                     <div className="font-medium text-gray-900">Select Manually</div>
-                    <div className="text-sm text-gray-600">Choose your state, city, and area</div>
+                    <div className="text-sm text-gray-600">Choose your state, LGA, and area</div>
                   </div>
                 </button>
               </div>
@@ -148,58 +382,120 @@ export default function LocationSetupForm() {
             {/* Manual Location Form */}
             {locationMethod === 'manual' && (
               <>
+                {/* State Selection */}
                 <div>
                   <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
                     State *
                   </label>
-                  <select
-                    id="state"
-                    value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
-                    required
-                  >
-                    <option value="">Select State</option>
-                    {nigerianStates.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
-                    ))}
-                  </select>
+                  {isLoadingStates ? (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">Loading states...</span>
+                    </div>
+                  ) : (
+                    <select
+                      id="state"
+                      value={formData.stateId}
+                      onChange={handleStateChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
+                      required
+                    >
+                      <option value="">Select State</option>
+                      {states.map((state) => (
+                        <option key={state.id} value={state.id}>
+                          {state.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
-                <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                    City *
-                  </label>
-                  <input
-                    id="city"
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
-                    placeholder="e.g., Ikeja"
-                    required
-                  />
-                </div>
+                {/* LGA Selection */}
+                {formData.stateId && (
+                  <div>
+                    <label htmlFor="lga" className="block text-sm font-medium text-gray-700 mb-2">
+                      LGA (Local Government Area) *
+                    </label>
+                    {isLoadingLGAs ? (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Loading LGAs...</span>
+                      </div>
+                    ) : (
+                      <select
+                        id="lga"
+                        value={formData.lgaId}
+                        onChange={handleLGAChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
+                        required
+                      >
+                        <option value="">Select LGA</option>
+                        {lgas.map((lga) => (
+                          <option key={lga.id} value={lga.id}>
+                            {lga.name} {lga.type === 'LCDA' ? '(LCDA)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                )}
 
-                <div>
-                  <label htmlFor="estate" className="block text-sm font-medium text-gray-700 mb-2">
-                    Estate/Area (Optional)
-                  </label>
-                  <input
-                    id="estate"
-                    type="text"
-                    value={formData.estate}
-                    onChange={(e) => setFormData({ ...formData, estate: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
-                    placeholder="e.g., Victoria Island Estate"
-                  />
-                </div>
+                {/* Neighborhood/Estate Search */}
+                {formData.lgaId && (
+                  <div>
+                    <label htmlFor="neighborhood" className="block text-sm font-medium text-gray-700 mb-2">
+                      Neighborhood/Estate (Optional)
+                    </label>
+                    <input
+                      id="neighborhood"
+                      type="text"
+                      value={neighborhoodSearchQuery}
+                      onChange={(e) => handleNeighborhoodSearch(e.target.value)}
+                      placeholder="Search for your neighborhood or estate"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
+                    />
 
+                    {isLoadingNeighborhoods && (
+                      <div className="flex items-center gap-2 text-gray-600 mt-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Searching neighborhoods...</span>
+                      </div>
+                    )}
+
+                    {!isLoadingNeighborhoods && filteredNeighborhoods.length > 0 && (
+                      <div className="mt-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
+                        {filteredNeighborhoods.map((neighborhood) => (
+                          <button
+                            key={neighborhood.id}
+                            type="button"
+                            onClick={() => {
+                              handleNeighborhoodSelect(neighborhood);
+                              setNeighborhoodSearchQuery(neighborhood.name);
+                            }}
+                            className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                              formData.neighborhoodId === neighborhood.id ? 'bg-green-50' : ''
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium text-gray-900">{neighborhood.name}</div>
+                                <div className="text-sm text-gray-600">{neighborhood.type}</div>
+                              </div>
+                              {neighborhood.isGated && (
+                                <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Gated</span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Street Address */}
                 <div>
                   <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                    Address (Optional)
+                    Street Address (Optional)
                   </label>
                   <textarea
                     id="address"
@@ -219,49 +515,90 @@ export default function LocationSetupForm() {
                 <p className="text-sm text-gray-700 mb-2">
                   <strong>Location detected:</strong>
                 </p>
-                <p className="text-xs text-gray-600">
-                  Latitude: {coordinates.latitude.toFixed(6)}, Longitude: {coordinates.longitude?.toFixed(6)}
-                </p>
-                <p className="text-sm text-gray-600 mt-2">
-                  Please fill in your state and city below for better accuracy.
+                {formData.formattedAddress ? (
+                  <p className="text-base font-medium text-gray-900 mb-2">
+                    📍 {formData.formattedAddress}
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-600 mb-2">
+                    Getting address...
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mb-4">
+                  Coordinates: {coordinates.latitude.toFixed(6)}, {coordinates.longitude?.toFixed(6)}
                 </p>
 
-                <div className="mt-4 space-y-3">
+                {!isLoadingNeighborhoods && neighborhoods.length > 0 && (
                   <div>
-                    <label htmlFor="gps-state" className="block text-sm font-medium text-gray-700 mb-2">
-                      State *
+                    <p className="text-sm font-medium text-gray-700 mb-2">Nearby neighborhoods:</p>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {neighborhoods.slice(0, 5).map((neighborhood) => (
+                        <button
+                          key={neighborhood.id}
+                          type="button"
+                          onClick={() => {
+                            handleNeighborhoodSelect(neighborhood);
+                            setNeighborhoodSearchQuery(neighborhood.name);
+                          }}
+                          className={`w-full text-left px-3 py-2 bg-white rounded-lg hover:bg-gray-50 transition-colors ${
+                            formData.neighborhoodId === neighborhood.id ? 'ring-2 ring-green-600' : ''
+                          }`}
+                        >
+                          <div className="font-medium text-gray-900 text-sm">{neighborhood.name}</div>
+                          <div className="text-xs text-gray-600">{neighborhood.type}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-sm text-gray-600 mt-4">
+                  Please confirm your state and LGA below:
+                </p>
+
+                {/* State Selection for GPS */}
+                <div className="mt-3">
+                  <label htmlFor="gps-state" className="block text-sm font-medium text-gray-700 mb-2">
+                    State *
+                  </label>
+                  <select
+                    id="gps-state"
+                    value={formData.stateId}
+                    onChange={handleStateChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
+                    required
+                  >
+                    <option value="">Select State</option>
+                    {states.map((state) => (
+                      <option key={state.id} value={state.id}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* LGA Selection for GPS */}
+                {formData.stateId && (
+                  <div className="mt-3">
+                    <label htmlFor="gps-lga" className="block text-sm font-medium text-gray-700 mb-2">
+                      LGA *
                     </label>
                     <select
-                      id="gps-state"
-                      value={formData.state}
-                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                      id="gps-lga"
+                      value={formData.lgaId}
+                      onChange={handleLGAChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                       required
                     >
-                      <option value="">Select State</option>
-                      {nigerianStates.map((state) => (
-                        <option key={state} value={state}>
-                          {state}
+                      <option value="">Select LGA</option>
+                      {lgas.map((lga) => (
+                        <option key={lga.id} value={lga.id}>
+                          {lga.name} {lga.type === 'LCDA' ? '(LCDA)' : ''}
                         </option>
                       ))}
                     </select>
                   </div>
-
-                  <div>
-                    <label htmlFor="gps-city" className="block text-sm font-medium text-gray-700 mb-2">
-                      City *
-                    </label>
-                    <input
-                      id="gps-city"
-                      type="text"
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
-                      placeholder="e.g., Ikeja"
-                      required
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -273,7 +610,7 @@ export default function LocationSetupForm() {
 
             <button
               type="submit"
-              disabled={!formData.state || !formData.city || isLoading}
+              disabled={!formData.stateId || !formData.lgaId || isLoading}
               className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {isLoading ? (
@@ -291,4 +628,3 @@ export default function LocationSetupForm() {
     </div>
   );
 }
-

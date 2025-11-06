@@ -7,5 +7,7 @@
 			"path": "../../../mecabal"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"powershell.cwd": "mecabal"
+	}
 }

@@ -31,6 +31,7 @@ class ApiClient {
         ...options,
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': '69420', // Bypass ngrok browser warning
           ...(token && { Authorization: `Bearer ${token}` }),
           ...options.headers,
         },
@@ -141,6 +142,74 @@ class ApiClient {
   // User Profile
   async getCurrentUser() {
     return this.request('/auth/me');
+  }
+
+  // Location Service Methods
+  async getStates() {
+    return this.request('/location/states');
+  }
+
+  async getLGAsByState(stateId: string) {
+    if (!stateId) {
+      console.error('getLGAsByState called with empty stateId');
+      return {
+        success: false,
+        error: 'State ID is required',
+      };
+    }
+    console.log('getLGAsByState called with stateId:', stateId);
+    const endpoint = `/location/states/${stateId}/lgas`;
+    console.log('Full endpoint:', endpoint);
+    return this.request(endpoint);
+  }
+
+  async getWardsByLGA(lgaId: string) {
+    return this.request(`/location/lgas/${lgaId}/wards`);
+  }
+
+  async getNeighborhoodsByWard(wardId: string) {
+    return this.request(`/location/wards/${wardId}/neighborhoods`);
+  }
+
+  async searchNeighborhoods(params: {
+    query?: string;
+    stateId?: string;
+    lgaId?: string;
+    type?: string;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params.query) queryParams.append('query', params.query);
+    if (params.stateId) queryParams.append('stateId', params.stateId);
+    if (params.lgaId) queryParams.append('lgaId', params.lgaId);
+    if (params.type) queryParams.append('type', params.type);
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+
+    return this.request(`/location/neighborhoods/search?${queryParams.toString()}`);
+  }
+
+  async recommendNeighborhoods(params: {
+    latitude: number;
+    longitude: number;
+    radius?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('latitude', params.latitude.toString());
+    queryParams.append('longitude', params.longitude.toString());
+    if (params.radius) queryParams.append('radius', params.radius.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+
+    return this.request(`/location/neighborhoods/recommend?${queryParams.toString()}`);
+  }
+
+  // Geocoding Methods
+  async reverseGeocode(latitude: number, longitude: number) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('latitude', latitude.toString());
+    queryParams.append('longitude', longitude.toString());
+
+    return this.request(`/location/geocoding/reverse?${queryParams.toString()}`);
   }
 }
 

@@ -15,13 +15,12 @@ export default function PhoneVerificationForm() {
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
-    
-    // If starts with 0, keep it; otherwise add +234
-    if (digits.startsWith('0')) {
-      return digits;
-    } else if (digits.length > 0) {
-      return `+234${digits}`;
+
+    // Remove 234 prefix if user pastes it (since it's already displayed)
+    if (digits.startsWith('234')) {
+      return digits.slice(3);
     }
+
     return digits;
   };
 
@@ -89,8 +88,8 @@ export default function PhoneVerificationForm() {
                   value={phone}
                   onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
-                  placeholder="8012345678 or 08012345678"
-                  maxLength={15}
+                  placeholder="8012345678"
+                  maxLength={11}
                   required
                 />
               </div>
