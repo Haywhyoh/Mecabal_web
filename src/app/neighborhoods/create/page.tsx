@@ -247,9 +247,14 @@ export default function CreateNeighborhoodPage() {
                 <div className="pt-4">
                   <button
                     onClick={() => {
+                      // Validate that a valid LGA was selected (not just the placeholder)
+                      if (!lgaId || lgaId === '') {
+                        alert('Please select a valid LGA');
+                        return;
+                      }
                       // Reload page with lgaId in query params
                       const returnTo = searchParams.get('returnTo');
-                      const newUrl = `/neighborhoods/create?lgaId=${lgaId}${returnTo ? `&returnTo=${returnTo}` : ''}`;
+                      const newUrl = `/neighborhoods/create?lgaId=${encodeURIComponent(lgaId)}${returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : ''}`;
                       router.push(newUrl);
                     }}
                     className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
