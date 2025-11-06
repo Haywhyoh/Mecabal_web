@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowLeft, Loader2, MessageCircle, Phone } from 'lucide-react';
+import { Loader2, MessageCircle, Phone } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 
@@ -71,14 +71,6 @@ export default function PhoneVerificationForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white px-6 py-12">
       <div className="max-w-md w-full">
-        <button
-          onClick={() => setCurrentStep('email-verification')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
-        </button>
-
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Phone</h2>
           <p className="text-gray-600 mb-8">We'll send a code to keep your account safe</p>
@@ -96,7 +88,7 @@ export default function PhoneVerificationForm() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                   placeholder="8012345678 or 08012345678"
                   maxLength={15}
                   required

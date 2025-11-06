@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Loader2, MapPin, Navigation } from 'lucide-react';
+import { Loader2, MapPin, Navigation } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 import { useRouter } from 'next/navigation';
@@ -100,14 +100,6 @@ export default function LocationSetupForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white px-6 py-12">
       <div className="max-w-md w-full">
-        <button
-          onClick={() => setCurrentStep('phone-otp-verification')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
-        </button>
-
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Set Your Location</h2>
           <p className="text-gray-600 mb-8">Let's find your neighborhood</p>
@@ -164,7 +156,7 @@ export default function LocationSetupForm() {
                     id="state"
                     value={formData.state}
                     onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                     required
                   >
                     <option value="">Select State</option>
@@ -185,7 +177,7 @@ export default function LocationSetupForm() {
                     type="text"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                     placeholder="e.g., Ikeja"
                     required
                   />
@@ -200,7 +192,7 @@ export default function LocationSetupForm() {
                     type="text"
                     value={formData.estate}
                     onChange={(e) => setFormData({ ...formData, estate: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                     placeholder="e.g., Victoria Island Estate"
                   />
                 </div>
@@ -213,7 +205,7 @@ export default function LocationSetupForm() {
                     id="address"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                     placeholder="Street address or landmark"
                     rows={3}
                   />
@@ -243,7 +235,7 @@ export default function LocationSetupForm() {
                       id="gps-state"
                       value={formData.state}
                       onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                       required
                     >
                       <option value="">Select State</option>
@@ -264,7 +256,7 @@ export default function LocationSetupForm() {
                       type="text"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                       placeholder="e.g., Ikeja"
                       required
                     />
