@@ -5,7 +5,8 @@
       "Read(//c/Users/USER/Documents/Adedayo/mecabal/Hommie_Mobile/src/components/location/**)",
       "Read(//c/Users/USER/Documents/Adedayo/mecabal/backend/apps/location-service/src/**)",
       "Read(//c/Users/USER/Documents/Adedayo/mecabal/backend/apps/api-gateway/src/**)",
-      "Read(//c/Users/USER/Documents/Adedayo/mecabal/backend/**)"
+      "Read(//c/Users/USER/Documents/Adedayo/mecabal/backend/**)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

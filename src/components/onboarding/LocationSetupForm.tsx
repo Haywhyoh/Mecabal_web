@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2, MapPin, Navigation } from 'lucide-react';
+import Link from 'next/link';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 import { useRouter } from 'next/navigation';
@@ -37,6 +38,7 @@ export default function LocationSetupForm() {
     lgaName: '',
     neighborhoodId: '',
     neighborhoodName: '',
+    cityTown: '',
     address: '',
     formattedAddress: '', // Human-readable address from GPS
   });
@@ -56,6 +58,7 @@ export default function LocationSetupForm() {
   const [isLoadingStates, setIsLoadingStates] = useState(false);
   const [isLoadingLGAs, setIsLoadingLGAs] = useState(false);
   const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
+
 
   // Load states on mount
   useEffect(() => {
@@ -94,12 +97,14 @@ export default function LocationSetupForm() {
         // Format address in Nigerian style (e.g., "Alimosho, Lagos")
         const displayAddress = [city, lga, state].filter(Boolean).join(', ');
 
+        // Set formatted address and city
         setFormData(prev => ({
           ...prev,
+          cityTown: city || '',
           formattedAddress: displayAddress || formattedAddress || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
         }));
 
-        // Try to auto-select state if we got one
+        // Auto-select state if we got one
         if (state) {
           const matchingState = states.find(s =>
             s.name.toLowerCase() === state.toLowerCase() ||
@@ -110,8 +115,31 @@ export default function LocationSetupForm() {
             setFormData(prev => ({
               ...prev,
               stateId: matchingState.id,
-              stateName: matchingState.name
+              stateName: matchingState.name,
+              cityTown: city || '',
             }));
+
+            // Load LGAs and auto-select if we have LGA data
+            if (lga) {
+              const lgasResponse = await apiClient.getLGAsByState(matchingState.id);
+              if (lgasResponse.success && lgasResponse.data) {
+                setLGAs(lgasResponse.data);
+
+                // Try to find matching LGA
+                const matchingLGA = lgasResponse.data.find((l: LGA) =>
+                  l.name.toLowerCase().includes(lga.toLowerCase()) ||
+                  lga.toLowerCase().includes(l.name.toLowerCase())
+                );
+
+                if (matchingLGA) {
+                  setFormData(prev => ({
+                    ...prev,
+                    lgaId: matchingLGA.id,
+                    lgaName: matchingLGA.name,
+                  }));
+                }
+              }
+            }
           }
         }
       } else {
@@ -280,6 +308,7 @@ export default function LocationSetupForm() {
     }
   };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(undefined);
@@ -293,9 +322,10 @@ export default function LocationSetupForm() {
 
     try {
       const response = await apiClient.setupLocation({
-        state: formData.stateName,
-        city: formData.lgaName,
-        estate: formData.neighborhoodName || undefined,
+        stateId: formData.stateId,
+        lgaId: formData.lgaId,
+        neighborhoodId: formData.neighborhoodId || undefined,
+        cityTown: formData.cityTown || undefined,
         address: formData.address || undefined,
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
@@ -489,6 +519,14 @@ export default function LocationSetupForm() {
                         ))}
                       </div>
                     )}
+
+                    {/* Can't find your area? */}
+                    <Link
+                      href={`/neighborhoods/create?returnTo=/onboarding&lgaId=${formData.lgaId}`}
+                      className="text-sm text-green-600 hover:underline mt-2 inline-block"
+                    >
+                      Can't find your area? Create it
+                    </Link>
                   </div>
                 )}
 
@@ -623,6 +661,7 @@ export default function LocationSetupForm() {
               )}
             </button>
           </form>
+
         </div>
       </div>
     </div>

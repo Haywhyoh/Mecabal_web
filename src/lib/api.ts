@@ -122,11 +122,10 @@ class ApiClient {
   // Location Setup
   async setupLocation(
     locationData: {
-      state?: string;
-      city?: string;
-      estate?: string;
-      location?: string;
-      landmark?: string;
+      stateId: string;
+      lgaId: string;
+      neighborhoodId?: string;
+      cityTown?: string;
       address?: string;
       latitude?: number;
       longitude?: number;
@@ -203,6 +202,93 @@ class ApiClient {
     return this.request(`/location/neighborhoods/recommend?${queryParams.toString()}`);
   }
 
+  // Create Neighborhood
+  async createNeighborhood(data: {
+    name: string;
+    type: 'AREA' | 'ESTATE' | 'COMMUNITY';
+    lgaId: string;
+    centerLatitude?: number;
+    centerLongitude?: number;
+    isGated?: boolean;
+    boundaries?: {
+      type: 'Polygon';
+      coordinates: number[][][];
+    };
+  }) {
+    return this.request('/location/neighborhoods/create', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Update Neighborhood Boundaries
+  async updateNeighborhoodBoundaries(neighborhoodId: string, boundaries: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  }) {
+    return this.request(`/location/neighborhoods/${neighborhoodId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ boundaries }),
+    });
+  }
+
+  // Get Neighborhoods with Boundaries
+  async getNeighborhoodsWithBoundaries(lgaId: string) {
+    return this.request(`/location/lgas/${lgaId}/neighborhoods?includeBoundaries=true`);
+  }
+
+  // Get Neighborhood by ID
+  async getNeighborhoodById(id: string) {
+    return this.request(`/location/neighborhoods/${id}`);
+  }
+
+  // Get All Neighborhoods
+  async getAllNeighborhoods(params?: {
+    lgaId?: string;
+    stateId?: string;
+    type?: 'AREA' | 'ESTATE' | 'COMMUNITY';
+    isGated?: boolean;
+    limit?: number;
+    offset?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.lgaId) queryParams.append('lgaId', params.lgaId);
+    if (params?.stateId) queryParams.append('stateId', params.stateId);
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.isGated !== undefined) queryParams.append('isGated', params.isGated.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+
+    const queryString = queryParams.toString();
+    return this.request(`/location/neighborhoods${queryString ? `?${queryString}` : ''}`);
+  }
+
+  // Update Neighborhood
+  async updateNeighborhood(id: string, data: {
+    name?: string;
+    type?: 'AREA' | 'ESTATE' | 'COMMUNITY';
+    isGated?: boolean;
+    description?: string;
+    boundaries?: {
+      type: 'Polygon';
+      coordinates: number[][][];
+    };
+    requiresVerification?: boolean;
+    adminUserId?: string;
+  }) {
+    return this.request(`/location/neighborhoods/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Delete Neighborhood
+  async deleteNeighborhood(id: string) {
+    return this.request(`/location/neighborhoods/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Geocoding Methods
   async reverseGeocode(latitude: number, longitude: number) {
     const queryParams = new URLSearchParams();
@@ -210,6 +296,14 @@ class ApiClient {
     queryParams.append('longitude', longitude.toString());
 
     return this.request(`/location/geocoding/reverse?${queryParams.toString()}`);
+  }
+
+  // Google OAuth Methods
+  async googleAuthWeb(idToken: string) {
+    return this.request('/auth/google/web', {
+      method: 'POST',
+      body: JSON.stringify({ idToken }),
+    });
   }
 }
 

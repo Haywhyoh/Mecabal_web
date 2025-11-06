@@ -1,0 +1,8 @@
+Next Steps (Optional Enhancements):
+Add search within boundaries - Find users/posts within polygon
+Boundary validation - Check for overlapping neighborhoods
+Snap to roads - Auto-align drawn boundaries to streets
+Import KML/Shapefile - Bulk import neighborhood boundaries
+Mobile map drawing - Optimize touch controls for mobile
+3D visualization - Show neighborhoods in 3D
+Heat maps - Visualize activity density
