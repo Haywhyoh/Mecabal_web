@@ -37,11 +37,20 @@ function MapDrawerComponent({
   readOnly = false,
 }: NeighborhoodMapDrawerProps) {
   const [map, setMap] = useState<L.Map | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const [drawnBoundary, setDrawnBoundary] = useState<DrawnBoundary | null>(initialBoundary || null);
   const [activeDrawMode, setActiveDrawMode] = useState<'polygon' | 'rectangle' | 'circle' | null>(null);
   const featureGroupRef = useRef<L.FeatureGroup>(null);
   const drawControlRef = useRef<L.Control.Draw | null>(null);
   const drawHandlerRef = useRef<L.Draw.Polygon | L.Draw.Rectangle | L.Draw.Circle | null>(null);
+  
+  const handleMapCreated = (mapInstance: L.Map) => {
+    setMap(mapInstance);
+    // Give it a moment for the FeatureGroup to be ready
+    setTimeout(() => {
+      setMapReady(true);
+    }, 100);
+  };
 
   useEffect(() => {
     if (!map || !featureGroupRef.current) return;
@@ -236,288 +245,311 @@ function MapDrawerComponent({
 
   return (
     <div className="space-y-4">
-      {/* Instructions and Drawing Tools - Outside map */}
+      {/* Instructions - Above map */}
       {!readOnly && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Instructions */}
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-gray-900 mb-2">
-                How to draw your neighborhood:
-              </p>
-              <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
-                <li>Click a drawing tool below to activate it</li>
-                <li><strong>Polygon:</strong> Click points on the map, double-click to finish</li>
-                <li><strong>Rectangle:</strong> Click and drag on the map</li>
-                <li><strong>Circle:</strong> Click center, drag to set radius</li>
-                <li>Click <strong>"Clear"</strong> to remove your drawing and start over</li>
-              </ul>
-              {activeDrawMode && (
-                <p className="text-xs text-green-600 mt-2 font-medium">
-                  ✏️ Drawing mode active: <strong>{activeDrawMode}</strong> - Click on the map to draw
-                </p>
-              )}
-            </div>
-
-            {/* Drawing Tools */}
-            {map && featureGroupRef.current && (
-              <div className="lg:min-w-[200px]">
-                <p className="text-sm font-semibold text-gray-900 mb-2">Drawing Tools:</p>
-                <div className="flex flex-wrap gap-2">
-          <p className="text-xs text-gray-700 mb-1 px-2 font-semibold border-b border-gray-200 pb-1">Drawing Tools:</p>
-          <button
-            type="button"
-            onClick={() => {
-              if (!map || !featureGroupRef.current) return;
-              
-              // Cancel any existing drawing
-              if (drawHandlerRef.current) {
-                drawHandlerRef.current.disable();
-                drawHandlerRef.current = null;
-              }
-              
-              // Toggle polygon mode
-              if (activeDrawMode === 'polygon') {
-                // Cancel drawing
-                setActiveDrawMode(null);
-              } else {
-                setActiveDrawMode('polygon');
-                // Create polygon draw handler
-                const polygonHandler = new L.Draw.Polygon(map, {
-                  shapeOptions: {
-                    color: '#10b981',
-                    weight: 3,
-                    fillColor: '#10b981',
-                    fillOpacity: 0.2,
-                  },
-                  allowIntersection: false,
-                });
-                
-                drawHandlerRef.current = polygonHandler;
-                polygonHandler.enable();
-                
-                // Handle completion
-                map.once(L.Draw.Event.CREATED, (event: any) => {
-                  const layer = event.layer;
-                  featureGroupRef.current?.clearLayers();
-                  featureGroupRef.current?.addLayer(layer);
-                  
-                  const geoJSON = layer.toGeoJSON();
-                  const boundary: DrawnBoundary = {
-                    type: 'Polygon',
-                    coordinates: geoJSON.geometry.coordinates,
-                  };
-                  
-                  setDrawnBoundary(boundary);
-                  setActiveDrawMode(null);
-                  polygonHandler.disable();
-                  drawHandlerRef.current = null;
-                  
-                  if (onBoundaryDrawn) {
-                    onBoundaryDrawn(boundary);
-                  }
-                });
-              }
-            }}
-            className={`px-3 py-2 text-white rounded text-sm hover:opacity-90 flex items-center gap-2 transition-all ${
-              activeDrawMode === 'polygon' 
-                ? 'bg-green-700 ring-2 ring-green-400' 
-                : 'bg-green-600'
-            }`}
-            title="Draw Polygon (click points on map, double-click to finish)"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            {activeDrawMode === 'polygon' ? 'Drawing...' : 'Polygon'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!map || !featureGroupRef.current) return;
-              
-              if (drawHandlerRef.current) {
-                drawHandlerRef.current.disable();
-                drawHandlerRef.current = null;
-              }
-              
-              if (activeDrawMode === 'rectangle') {
-                setActiveDrawMode(null);
-              } else {
-                setActiveDrawMode('rectangle');
-                const rectHandler = new L.Draw.Rectangle(map, {
-                  shapeOptions: {
-                    color: '#10b981',
-                    weight: 3,
-                    fillColor: '#10b981',
-                    fillOpacity: 0.2,
-                  },
-                });
-                
-                drawHandlerRef.current = rectHandler;
-                rectHandler.enable();
-                
-                map.once(L.Draw.Event.CREATED, (event: any) => {
-                  const layer = event.layer;
-                  featureGroupRef.current?.clearLayers();
-                  featureGroupRef.current?.addLayer(layer);
-                  
-                  const geoJSON = layer.toGeoJSON();
-                  const boundary: DrawnBoundary = {
-                    type: 'Polygon',
-                    coordinates: geoJSON.geometry.coordinates,
-                  };
-                  
-                  setDrawnBoundary(boundary);
-                  setActiveDrawMode(null);
-                  rectHandler.disable();
-                  drawHandlerRef.current = null;
-                  
-                  if (onBoundaryDrawn) {
-                    onBoundaryDrawn(boundary);
-                  }
-                });
-              }
-            }}
-            className={`px-3 py-2 text-white rounded text-sm hover:opacity-90 ${
-              activeDrawMode === 'rectangle' 
-                ? 'bg-blue-700 ring-2 ring-blue-400' 
-                : 'bg-blue-600'
-            }`}
-            title="Draw Rectangle (click and drag on map)"
-          >
-            {activeDrawMode === 'rectangle' ? 'Drawing...' : 'Rectangle'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!map || !featureGroupRef.current) return;
-              
-              if (drawHandlerRef.current) {
-                drawHandlerRef.current.disable();
-                drawHandlerRef.current = null;
-              }
-              
-              if (activeDrawMode === 'circle') {
-                setActiveDrawMode(null);
-              } else {
-                setActiveDrawMode('circle');
-                const circleHandler = new L.Draw.Circle(map, {
-                  shapeOptions: {
-                    color: '#10b981',
-                    weight: 3,
-                    fillColor: '#10b981',
-                    fillOpacity: 0.2,
-                  },
-                });
-                
-                drawHandlerRef.current = circleHandler;
-                circleHandler.enable();
-                
-                map.once(L.Draw.Event.CREATED, (event: any) => {
-                  const layer = event.layer;
-                  featureGroupRef.current?.clearLayers();
-                  featureGroupRef.current?.addLayer(layer);
-                  
-                  // Convert circle to polygon
-                  const center = (layer as any).getLatLng();
-                  const radius = (layer as any).getRadius();
-                  const points = 32;
-                  const circleCoords: number[][] = [];
-                  
-                  for (let i = 0; i <= points; i++) {
-                    const angle = (i * 2 * Math.PI) / points;
-                    const lat = center.lat + (radius / 111320) * Math.cos(angle);
-                    const lng = center.lng + (radius / (111320 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
-                    circleCoords.push([lng, lat]);
-                  }
-                  
-                  const boundary: DrawnBoundary = {
-                    type: 'Polygon',
-                    coordinates: [circleCoords],
-                  };
-                  
-                  setDrawnBoundary(boundary);
-                  setActiveDrawMode(null);
-                  circleHandler.disable();
-                  drawHandlerRef.current = null;
-                  
-                  if (onBoundaryDrawn) {
-                    onBoundaryDrawn(boundary);
-                  }
-                });
-              }
-            }}
-            className={`px-3 py-2 text-white rounded text-sm hover:opacity-90 ${
-              activeDrawMode === 'circle' 
-                ? 'bg-purple-700 ring-2 ring-purple-400' 
-                : 'bg-purple-600'
-            }`}
-            title="Draw Circle (click center and drag to set radius)"
-          >
-            {activeDrawMode === 'circle' ? 'Drawing...' : 'Circle'}
-          </button>
-          {drawnBoundary && (
-            <button
-              type="button"
-              onClick={() => {
-                if (drawHandlerRef.current) {
-                  drawHandlerRef.current.disable();
-                  drawHandlerRef.current = null;
-                }
-                setActiveDrawMode(null);
-                setDrawnBoundary(null);
-                featureGroupRef.current?.clearLayers();
-              }}
-              className="px-3 py-1.5 bg-red-600 text-white rounded text-xs hover:bg-red-700 mt-1"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Action buttons */}
-      {!readOnly && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] flex gap-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!drawnBoundary}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg"
-          >
-            Save Boundary
-          </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 shadow-lg"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Instructions */}
-      {!readOnly && (
-        <div className="absolute top-4 left-4 z-[1000] bg-white px-4 py-3 rounded-lg shadow-lg max-w-sm border border-gray-200">
-          <p className="text-sm text-gray-700 mb-2">
-            <strong className="text-gray-900">How to draw your neighborhood:</strong>
+          <p className="text-sm font-semibold text-gray-900 mb-2">
+            How to draw your neighborhood:
           </p>
           <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
-            <li>Click <strong>"Polygon"</strong> to draw a custom boundary by clicking points on the map</li>
-            <li>Click <strong>"Rectangle"</strong> to draw a rectangular area (click and drag)</li>
-            <li>Click <strong>"Circle"</strong> to draw a circular area (click center, drag for radius)</li>
-            <li>For polygon: Click points on the map, then double-click or click the first point to finish</li>
+            <li>Click a drawing tool below to activate it</li>
+            <li><strong>Polygon:</strong> Click points on the map, double-click to finish</li>
+            <li><strong>Rectangle:</strong> Click and drag on the map</li>
+            <li><strong>Circle:</strong> Click center, drag to set radius</li>
             <li>Click <strong>"Clear"</strong> to remove your drawing and start over</li>
           </ul>
           {activeDrawMode && (
             <p className="text-xs text-green-600 mt-2 font-medium">
-              ✏️ Drawing mode active: {activeDrawMode} - Click on the map to draw
+              ✏️ Drawing mode active: <strong>{activeDrawMode}</strong> - Click on the map to draw
             </p>
           )}
+        </div>
+      )}
+
+      {/* Map Container */}
+      <div className="relative">
+        <MapContainer
+          center={center}
+          zoom={DEFAULT_ZOOM}
+          style={{ height: '500px', width: '100%', borderRadius: '8px' }}
+          whenCreated={handleMapCreated}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          <FeatureGroup ref={featureGroupRef}>
+            {/* Drawn shapes will be added here */}
+          </FeatureGroup>
+
+          {/* Show user location */}
+          <Marker position={center}>
+            <Popup>Your Location</Popup>
+          </Marker>
+        </MapContainer>
+      </div>
+
+      {/* Drawing Tools and Action buttons - Below map */}
+      {!readOnly && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white rounded-lg border border-gray-200 p-4">
+          {/* Drawing Tools */}
+          {mapReady ? (
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-900 mb-2">Drawing Tools:</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                    type="button"
+                    onClick={() => {
+                      if (!map) return;
+                      
+                      if (!featureGroupRef.current) {
+                        console.warn('FeatureGroup not ready yet');
+                        return;
+                      }
+                      
+                      // Cancel any existing drawing
+                      if (drawHandlerRef.current) {
+                        drawHandlerRef.current.disable();
+                        drawHandlerRef.current = null;
+                      }
+                      
+                      // Toggle polygon mode
+                      if (activeDrawMode === 'polygon') {
+                        // Cancel drawing
+                        setActiveDrawMode(null);
+                      } else {
+                        setActiveDrawMode('polygon');
+                        // Create polygon draw handler
+                        const polygonHandler = new L.Draw.Polygon(map, {
+                          shapeOptions: {
+                            color: '#10b981',
+                            weight: 3,
+                            fillColor: '#10b981',
+                            fillOpacity: 0.2,
+                          },
+                          allowIntersection: false,
+                        });
+                        
+                        drawHandlerRef.current = polygonHandler;
+                        polygonHandler.enable();
+                        
+                        // Handle completion
+                        map.once(L.Draw.Event.CREATED, (event: any) => {
+                          const layer = event.layer;
+                          featureGroupRef.current?.clearLayers();
+                          featureGroupRef.current?.addLayer(layer);
+                          
+                          const geoJSON = layer.toGeoJSON();
+                          const boundary: DrawnBoundary = {
+                            type: 'Polygon',
+                            coordinates: geoJSON.geometry.coordinates,
+                          };
+                          
+                          setDrawnBoundary(boundary);
+                          setActiveDrawMode(null);
+                          polygonHandler.disable();
+                          drawHandlerRef.current = null;
+                          
+                          if (onBoundaryDrawn) {
+                            onBoundaryDrawn(boundary);
+                          }
+                        });
+                      }
+                    }}
+                    className={`px-4 py-2 text-white rounded-lg text-sm hover:opacity-90 flex items-center gap-2 transition-all ${
+                      activeDrawMode === 'polygon' 
+                        ? 'bg-green-700 ring-2 ring-green-400' 
+                        : 'bg-green-600'
+                    }`}
+                    title="Draw Polygon (click points on map, double-click to finish)"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    {activeDrawMode === 'polygon' ? 'Drawing...' : 'Polygon'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!map) return;
+                      
+                      if (!featureGroupRef.current) {
+                        console.warn('FeatureGroup not ready yet');
+                        return;
+                      }
+                      
+                      if (drawHandlerRef.current) {
+                        drawHandlerRef.current.disable();
+                        drawHandlerRef.current = null;
+                      }
+                      
+                      if (activeDrawMode === 'rectangle') {
+                        setActiveDrawMode(null);
+                      } else {
+                        setActiveDrawMode('rectangle');
+                        const rectHandler = new L.Draw.Rectangle(map, {
+                          shapeOptions: {
+                            color: '#10b981',
+                            weight: 3,
+                            fillColor: '#10b981',
+                            fillOpacity: 0.2,
+                          },
+                        });
+                        
+                        drawHandlerRef.current = rectHandler;
+                        rectHandler.enable();
+                        
+                        map.once(L.Draw.Event.CREATED, (event: any) => {
+                          const layer = event.layer;
+                          featureGroupRef.current?.clearLayers();
+                          featureGroupRef.current?.addLayer(layer);
+                          
+                          const geoJSON = layer.toGeoJSON();
+                          const boundary: DrawnBoundary = {
+                            type: 'Polygon',
+                            coordinates: geoJSON.geometry.coordinates,
+                          };
+                          
+                          setDrawnBoundary(boundary);
+                          setActiveDrawMode(null);
+                          rectHandler.disable();
+                          drawHandlerRef.current = null;
+                          
+                          if (onBoundaryDrawn) {
+                            onBoundaryDrawn(boundary);
+                          }
+                        });
+                      }
+                    }}
+                    className={`px-4 py-2 text-white rounded-lg text-sm hover:opacity-90 ${
+                      activeDrawMode === 'rectangle' 
+                        ? 'bg-blue-700 ring-2 ring-blue-400' 
+                        : 'bg-blue-600'
+                    }`}
+                    title="Draw Rectangle (click and drag on map)"
+                  >
+                    {activeDrawMode === 'rectangle' ? 'Drawing...' : 'Rectangle'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!map) return;
+                      
+                      if (!featureGroupRef.current) {
+                        console.warn('FeatureGroup not ready yet');
+                        return;
+                      }
+                      
+                      if (drawHandlerRef.current) {
+                        drawHandlerRef.current.disable();
+                        drawHandlerRef.current = null;
+                      }
+                      
+                      if (activeDrawMode === 'circle') {
+                        setActiveDrawMode(null);
+                      } else {
+                        setActiveDrawMode('circle');
+                        const circleHandler = new L.Draw.Circle(map, {
+                          shapeOptions: {
+                            color: '#10b981',
+                            weight: 3,
+                            fillColor: '#10b981',
+                            fillOpacity: 0.2,
+                          },
+                        });
+                        
+                        drawHandlerRef.current = circleHandler;
+                        circleHandler.enable();
+                        
+                        map.once(L.Draw.Event.CREATED, (event: any) => {
+                          const layer = event.layer;
+                          featureGroupRef.current?.clearLayers();
+                          featureGroupRef.current?.addLayer(layer);
+                          
+                          // Convert circle to polygon
+                          const center = (layer as any).getLatLng();
+                          const radius = (layer as any).getRadius();
+                          const points = 32;
+                          const circleCoords: number[][] = [];
+                          
+                          for (let i = 0; i <= points; i++) {
+                            const angle = (i * 2 * Math.PI) / points;
+                            const lat = center.lat + (radius / 111320) * Math.cos(angle);
+                            const lng = center.lng + (radius / (111320 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
+                            circleCoords.push([lng, lat]);
+                          }
+                          
+                          const boundary: DrawnBoundary = {
+                            type: 'Polygon',
+                            coordinates: [circleCoords],
+                          };
+                          
+                          setDrawnBoundary(boundary);
+                          setActiveDrawMode(null);
+                          circleHandler.disable();
+                          drawHandlerRef.current = null;
+                          
+                          if (onBoundaryDrawn) {
+                            onBoundaryDrawn(boundary);
+                          }
+                        });
+                      }
+                    }}
+                    className={`px-4 py-2 text-white rounded-lg text-sm hover:opacity-90 ${
+                      activeDrawMode === 'circle' 
+                        ? 'bg-purple-700 ring-2 ring-purple-400' 
+                        : 'bg-purple-600'
+                    }`}
+                    title="Draw Circle (click center and drag to set radius)"
+                  >
+                    {activeDrawMode === 'circle' ? 'Drawing...' : 'Circle'}
+                  </button>
+                  {drawnBoundary && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (drawHandlerRef.current) {
+                          drawHandlerRef.current.disable();
+                          drawHandlerRef.current = null;
+                        }
+                        setActiveDrawMode(null);
+                        setDrawnBoundary(null);
+                        featureGroupRef.current?.clearLayers();
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1">
+                <div className="text-xs text-gray-500">Loading tools...</div>
+              </div>
+            )}
+
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-end">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!drawnBoundary}
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg font-semibold"
+            >
+              Save Boundary
+            </button>
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 shadow-lg"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
