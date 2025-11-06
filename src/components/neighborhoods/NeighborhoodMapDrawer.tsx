@@ -260,11 +260,9 @@ function MapDrawerComponent({
             </div>
 
             {/* Drawing Tools */}
-            {map && featureGroupRef.current && (
-              <div className="lg:min-w-[200px]">
-                <p className="text-sm font-semibold text-gray-900 mb-2">Drawing Tools:</p>
-                <div className="flex flex-wrap gap-2">
-          <p className="text-xs text-gray-700 mb-1 px-2 font-semibold border-b border-gray-200 pb-1">Drawing Tools:</p>
+            <div className="lg:min-w-[200px]">
+              <p className="text-sm font-semibold text-gray-900 mb-2">Drawing Tools:</p>
+              <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => {
@@ -474,52 +472,36 @@ function MapDrawerComponent({
               Clear
             </button>
           )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Action buttons */}
-      {!readOnly && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] flex gap-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!drawnBoundary}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg"
-          >
-            Save Boundary
-          </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 shadow-lg"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      )}
+      {/* The actual map */}
+      <div className="relative">
+        <MapContainer
+          center={center}
+          zoom={DEFAULT_ZOOM}
+          className="h-[500px] w-full rounded-lg z-0"
+          ref={setMap}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <FeatureGroup ref={featureGroupRef} />
+        </MapContainer>
 
-      {/* Instructions */}
-      {!readOnly && (
-        <div className="absolute top-4 left-4 z-[1000] bg-white px-4 py-3 rounded-lg shadow-lg max-w-sm border border-gray-200">
-          <p className="text-sm text-gray-700 mb-2">
-            <strong className="text-gray-900">How to draw your neighborhood:</strong>
-          </p>
-          <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
-            <li>Click <strong>"Polygon"</strong> to draw a custom boundary by clicking points on the map</li>
-            <li>Click <strong>"Rectangle"</strong> to draw a rectangular area (click and drag)</li>
-            <li>Click <strong>"Circle"</strong> to draw a circular area (click center, drag for radius)</li>
-            <li>For polygon: Click points on the map, then double-click or click the first point to finish</li>
-            <li>Click <strong>"Clear"</strong> to remove your drawing and start over</li>
-          </ul>
-          {activeDrawMode && (
-            <p className="text-xs text-green-600 mt-2 font-medium">
-              ✏️ Drawing mode active: {activeDrawMode} - Click on the map to draw
+        {/* Status indicator */}
+        {drawnBoundary && (
+          <div className="absolute top-4 right-4 z-[1000] bg-green-50 border border-green-200 px-3 py-2 rounded-lg shadow-lg">
+            <p className="text-xs text-green-800 font-medium">
+              ✓ Boundary drawn
             </p>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
