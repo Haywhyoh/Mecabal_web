@@ -6,7 +6,9 @@
       "Read(//c/Users/USER/Documents/Adedayo/mecabal/backend/apps/location-service/src/**)",
       "Read(//c/Users/USER/Documents/Adedayo/mecabal/backend/apps/api-gateway/src/**)",
       "Read(//c/Users/USER/Documents/Adedayo/mecabal/backend/**)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

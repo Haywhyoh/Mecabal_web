@@ -61,6 +61,35 @@ export default function CreateNeighborhoodWizard({
     setError(undefined);
 
     try {
+      // Validate lgaId is provided and not empty
+      if (!lgaId || lgaId.trim() === '') {
+        setError('Please select a Local Government Area (LGA) before creating a neighborhood.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare boundaries - ensure it's in the correct format
+      let boundaries = formData.boundaries;
+      if (boundaries) {
+        // Ensure coordinates are properly formatted
+        // GeoJSON Polygon format: coordinates[0] is the outer ring
+        if (boundaries.coordinates && boundaries.coordinates[0]) {
+          // Ensure the polygon is closed (first and last points are the same)
+          const ring = boundaries.coordinates[0];
+          if (ring.length > 0) {
+            const first = ring[0];
+            const last = ring[ring.length - 1];
+            if (first[0] !== last[0] || first[1] !== last[1]) {
+              // Close the polygon
+              boundaries = {
+                ...boundaries,
+                coordinates: [[...ring, [first[0], first[1]]]],
+              };
+            }
+          }
+        }
+      }
+
       const result = await apiClient.createNeighborhood({
         name: formData.name,
         type: formData.type,
@@ -68,16 +97,20 @@ export default function CreateNeighborhoodWizard({
         centerLatitude: userCoordinates?.latitude,
         centerLongitude: userCoordinates?.longitude,
         isGated: formData.isGated,
-        boundaries: formData.boundaries || undefined,
+        boundaries: boundaries || undefined,
       });
 
       if (result.success && result.data) {
         onComplete(result.data);
       } else {
-        setError(result.error || 'Failed to create neighborhood');
+        const errorMsg = result.error || 'Failed to create neighborhood';
+        console.error('Create neighborhood error:', errorMsg, result);
+        setError(errorMsg);
       }
-    } catch (err) {
-      setError('Failed to create neighborhood. Please try again.');
+    } catch (err: any) {
+      console.error('Create neighborhood exception:', err);
+      const errorMsg = err?.message || err?.response?.data?.error || 'Failed to create neighborhood. Please try again.';
+      setError(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -234,6 +267,7 @@ export default function CreateNeighborhoodWizard({
               setFormData({ ...formData, boundaries: boundary });
             }}
             readOnly={false}
+            lgaId={lgaId}
           />
 
           {formData.boundaries && (
