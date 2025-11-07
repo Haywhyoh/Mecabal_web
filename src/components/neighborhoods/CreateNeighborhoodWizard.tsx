@@ -278,6 +278,7 @@ export default function CreateNeighborhoodWizard({
               setFormData({ ...formData, boundaries: boundary });
             }}
             readOnly={false}
+            lgaId={lgaId}
           />
 
           {formData.boundaries && (

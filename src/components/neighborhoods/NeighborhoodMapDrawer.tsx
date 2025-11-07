@@ -9,6 +9,7 @@ import 'leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { fixLeafletMarkerIcons, DEFAULT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
+import { apiClient } from '@/lib/api';
 
 // Types
 export interface DrawnBoundary {
@@ -22,6 +23,7 @@ interface NeighborhoodMapDrawerProps {
   onBoundaryDrawn?: (boundary: DrawnBoundary) => void;
   onCancel?: () => void;
   readOnly?: boolean;
+  lgaId?: string; // LGA ID to fetch existing neighborhoods
 }
 
 // Fix Leaflet icons
@@ -35,13 +37,17 @@ function MapDrawerComponent({
   onBoundaryDrawn,
   onCancel,
   readOnly = false,
+  lgaId,
 }: NeighborhoodMapDrawerProps) {
   const [map, setMap] = useState<L.Map | null>(null);
   const [drawnBoundary, setDrawnBoundary] = useState<DrawnBoundary | null>(initialBoundary || null);
   const [activeDrawMode, setActiveDrawMode] = useState<'polygon' | 'rectangle' | 'circle' | null>(null);
+  const [existingNeighborhoods, setExistingNeighborhoods] = useState<any[]>([]);
+  const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
   const featureGroupRef = useRef<L.FeatureGroup>(null);
   const drawControlRef = useRef<L.Control.Draw | null>(null);
   const drawHandlerRef = useRef<L.Draw.Polygon | L.Draw.Rectangle | L.Draw.Circle | null>(null);
+  const existingLayersRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     if (!map || !featureGroupRef.current) return;
@@ -214,6 +220,73 @@ function MapDrawerComponent({
       }
     };
   }, [map, readOnly, onBoundaryDrawn]);
+
+  // Fetch existing neighborhoods for the LGA
+  useEffect(() => {
+    if (!lgaId || !map) return;
+
+    const fetchNeighborhoods = async () => {
+      setIsLoadingNeighborhoods(true);
+      try {
+        const response = await apiClient.request(`/location/neighborhoods?lgaId=${lgaId}&limit=100`);
+        if (response.success && response.data) {
+          setExistingNeighborhoods(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch existing neighborhoods:', error);
+      } finally {
+        setIsLoadingNeighborhoods(false);
+      }
+    };
+
+    fetchNeighborhoods();
+  }, [lgaId, map]);
+
+  // Display existing neighborhoods on the map
+  useEffect(() => {
+    if (!map || existingNeighborhoods.length === 0) return;
+
+    // Create a layer group for existing neighborhoods if it doesn't exist
+    if (!existingLayersRef.current) {
+      existingLayersRef.current = L.layerGroup().addTo(map);
+    }
+
+    // Clear existing layers
+    existingLayersRef.current.clearLayers();
+
+    // Add each neighborhood to the map
+    existingNeighborhoods.forEach((neighborhood) => {
+      if (neighborhood.boundaries?.coordinates) {
+        const coords = neighborhood.boundaries.coordinates[0].map(
+          ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
+        );
+
+        const polygon = L.polygon(coords, {
+          color: '#9ca3af', // Gray color for existing neighborhoods
+          fillColor: '#e5e7eb',
+          fillOpacity: 0.3,
+          weight: 2,
+          dashArray: '5, 5', // Dashed line
+        });
+
+        polygon.bindPopup(`
+          <div class="p-2">
+            <h4 class="font-bold text-sm">${neighborhood.name}</h4>
+            <p class="text-xs text-gray-600">${neighborhood.type}</p>
+            ${neighborhood.isGated ? '<span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded">Gated</span>' : ''}
+          </div>
+        `);
+
+        existingLayersRef.current?.addLayer(polygon);
+      }
+    });
+
+    return () => {
+      if (existingLayersRef.current) {
+        existingLayersRef.current.clearLayers();
+      }
+    };
+  }, [map, existingNeighborhoods]);
 
   // Load initial boundary
   useEffect(() => {
@@ -498,6 +571,37 @@ function MapDrawerComponent({
           <div className="absolute top-4 right-4 z-[1000] bg-green-50 border border-green-200 px-3 py-2 rounded-lg shadow-lg">
             <p className="text-xs text-green-800 font-medium">
               ✓ Boundary drawn
+            </p>
+          </div>
+        )}
+
+        {/* Existing neighborhoods info */}
+        {existingNeighborhoods.length > 0 && (
+          <div className="absolute bottom-4 left-4 z-[1000] bg-white border border-gray-200 px-3 py-2 rounded-lg shadow-lg max-w-xs">
+            <p className="text-xs font-semibold text-gray-900 mb-1">
+              📍 Existing Neighborhoods ({existingNeighborhoods.length})
+            </p>
+            <p className="text-xs text-gray-600 mb-2">
+              Gray dashed areas show neighborhoods already in this LGA. Click them to see details.
+            </p>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-0.5 border-t-2 border-dashed border-gray-400"></div>
+                <span className="text-gray-600">Existing</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-0.5 bg-green-600"></div>
+                <span className="text-gray-600">Your drawing</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading indicator */}
+        {isLoadingNeighborhoods && (
+          <div className="absolute top-4 left-4 z-[1000] bg-blue-50 border border-blue-200 px-3 py-2 rounded-lg shadow-lg">
+            <p className="text-xs text-blue-800 font-medium">
+              Loading existing neighborhoods...
             </p>
           </div>
         )}
