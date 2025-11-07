@@ -75,7 +75,7 @@ export default function ImprovedCreateWizard({
     const loadLgas = async () => {
       setLoadingLgas(true);
       try {
-        const response = await apiClient.getLgasByState(formData.stateId);
+        const response = await apiClient.getLGAsByState(formData.stateId);
         if (response.success && response.data) {
           setLgas(response.data);
         }

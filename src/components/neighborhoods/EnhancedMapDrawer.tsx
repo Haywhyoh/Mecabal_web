@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { fixLeafletMarkerIcons, DEFAULT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
 import { Search, MapPin, Loader2 } from 'lucide-react';
+import { apiClient } from '@/lib/api';
 
 // Helper component to capture map instance
 function MapInitializer({ setMap }: { setMap: (map: L.Map) => void }) {
@@ -70,23 +71,16 @@ function EnhancedMapDrawerComponent({
   // Reverse geocode using backend API
   const reverseGeocode = async (lat: number, lng: number): Promise<LocationData> => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/location/geocode/reverse?latitude=${lat}&longitude=${lng}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-            'ngrok-skip-browser-warning': '69420',
-          },
-        }
+      const response = await apiClient.request(
+        `/location/geocoding/reverse?latitude=${lat}&longitude=${lng}`
       );
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.success && response.data) {
         return {
-          state: data.data?.state || '',
-          lga: data.data?.lga || '',
-          city: data.data?.city || '',
-          formattedAddress: data.data?.formattedAddress || '',
+          state: response.data.state || '',
+          lga: response.data.lga || '',
+          city: response.data.city || '',
+          formattedAddress: response.data.formattedAddress || '',
         };
       }
     } catch (error) {
