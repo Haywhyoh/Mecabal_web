@@ -24,6 +24,7 @@ interface NeighborhoodMapDrawerProps {
   onCancel?: () => void;
   readOnly?: boolean;
   lgaId?: string; // LGA ID to fetch existing neighborhoods
+  showUserLocation?: boolean; // Show user's current location marker
 }
 
 // Fix Leaflet icons
@@ -38,16 +39,19 @@ function MapDrawerComponent({
   onCancel,
   readOnly = false,
   lgaId,
+  showUserLocation = true,
 }: NeighborhoodMapDrawerProps) {
   const [map, setMap] = useState<L.Map | null>(null);
   const [drawnBoundary, setDrawnBoundary] = useState<DrawnBoundary | null>(initialBoundary || null);
   const [activeDrawMode, setActiveDrawMode] = useState<'polygon' | 'rectangle' | 'circle' | null>(null);
   const [existingNeighborhoods, setExistingNeighborhoods] = useState<any[]>([]);
   const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const featureGroupRef = useRef<L.FeatureGroup>(null);
   const drawControlRef = useRef<L.Control.Draw | null>(null);
   const drawHandlerRef = useRef<L.Draw.Polygon | L.Draw.Rectangle | L.Draw.Circle | null>(null);
   const existingLayersRef = useRef<L.LayerGroup | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
     if (!map || !featureGroupRef.current) return;
@@ -288,6 +292,75 @@ function MapDrawerComponent({
     };
   }, [map, existingNeighborhoods]);
 
+  // Get user's current location
+  useEffect(() => {
+    if (!showUserLocation || !map) return;
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setUserLocation([lat, lng]);
+
+          // Create a custom icon for user location
+          const userIcon = L.divIcon({
+            html: `
+              <div style="position: relative;">
+                <div style="
+                  width: 20px;
+                  height: 20px;
+                  background: #3b82f6;
+                  border: 3px solid white;
+                  border-radius: 50%;
+                  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+                "></div>
+                <div style="
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  width: 40px;
+                  height: 40px;
+                  background: rgba(59, 130, 246, 0.2);
+                  border-radius: 50%;
+                  animation: pulse 2s infinite;
+                "></div>
+              </div>
+            `,
+            className: 'user-location-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+          });
+
+          // Add user location marker
+          if (userMarkerRef.current) {
+            userMarkerRef.current.remove();
+          }
+
+          userMarkerRef.current = L.marker([lat, lng], { icon: userIcon })
+            .addTo(map)
+            .bindPopup('📍 Your Location');
+        },
+        (error) => {
+          console.log('Could not get user location:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    }
+
+    return () => {
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+    };
+  }, [map, showUserLocation]);
+
   // Load initial boundary
   useEffect(() => {
     if (initialBoundary && featureGroupRef.current) {
@@ -295,11 +368,17 @@ function MapDrawerComponent({
       const polygon = L.polygon(coords, {
         color: readOnly ? '#3b82f6' : '#10b981',
         weight: 3,
+        fillOpacity: readOnly ? 0.2 : 0.3,
       });
       featureGroupRef.current.clearLayers();
       featureGroupRef.current.addLayer(polygon);
+
+      // Fit map to boundary if in read-only mode (edit view)
+      if (readOnly && map) {
+        map.fitBounds(polygon.getBounds(), { padding: [50, 50] });
+      }
     }
-  }, [initialBoundary, readOnly]);
+  }, [initialBoundary, readOnly, map]);
 
   const handleSave = () => {
     if (drawnBoundary && onBoundaryDrawn) {

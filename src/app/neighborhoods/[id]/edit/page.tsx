@@ -263,7 +263,7 @@ export default function EditNeighborhoodPage() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
                     placeholder="Enter neighborhood name"
                     required
                   />
@@ -282,11 +282,11 @@ export default function EditNeighborhoodPage() {
                         type: e.target.value as 'AREA' | 'ESTATE' | 'COMMUNITY',
                       }))
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
                   >
-                    <option value="AREA">Area</option>
-                    <option value="ESTATE">Estate</option>
-                    <option value="COMMUNITY">Community</option>
+                    <option value="AREA" className="text-gray-900">Area</option>
+                    <option value="ESTATE" className="text-gray-900">Estate</option>
+                    <option value="COMMUNITY" className="text-gray-900">Community</option>
                   </select>
                 </div>
 
@@ -301,7 +301,7 @@ export default function EditNeighborhoodPage() {
                       setFormData((prev) => ({ ...prev, description: e.target.value }))
                     }
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
                     placeholder="Describe this neighborhood..."
                   />
                 </div>
