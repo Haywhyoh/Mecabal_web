@@ -42,9 +42,18 @@ export default function DashboardPage() {
       // Load user's neighborhoods (neighborhoods they created)
       const neighborhoodsResponse = await apiClient.getAllNeighborhoods();
       if (neighborhoodsResponse.success && neighborhoodsResponse.data) {
-        const allNeighborhoods = Array.isArray(neighborhoodsResponse.data)
-          ? neighborhoodsResponse.data
-          : neighborhoodsResponse.data.neighborhoods || [];
+        // Handle both array response and object with neighborhoods property
+        let allNeighborhoods: any[] = [];
+        if (Array.isArray(neighborhoodsResponse.data)) {
+          allNeighborhoods = neighborhoodsResponse.data;
+        } else if (
+          neighborhoodsResponse.data &&
+          typeof neighborhoodsResponse.data === 'object' &&
+          'neighborhoods' in neighborhoodsResponse.data &&
+          Array.isArray((neighborhoodsResponse.data as { neighborhoods: any[] }).neighborhoods)
+        ) {
+          allNeighborhoods = (neighborhoodsResponse.data as { neighborhoods: any[] }).neighborhoods;
+        }
         
         // Filter to show only neighborhoods created by current user
         // For now, show all neighborhoods (backend should filter by createdBy)

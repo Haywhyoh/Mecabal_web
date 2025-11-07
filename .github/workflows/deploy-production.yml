@@ -51,8 +51,31 @@ jobs:
           script: |
             set -e
             
-            # Navigate to web app directory
-            cd ${{ secrets.PRODUCTION_WEB_APP_PATH || '/opt/mecabal/web-app' }}
+            # Determine project directory
+            PROJECT_DIR="${{ secrets.PRODUCTION_WEB_APP_PATH }}"
+            if [ -z "$PROJECT_DIR" ]; then
+              # Try to detect common locations
+              if [ -d "/root/Mecabal_web" ]; then
+                PROJECT_DIR="/root/Mecabal_web"
+              elif [ -d "/opt/mecabal/web-app" ]; then
+                PROJECT_DIR="/opt/mecabal/web-app"
+              else
+                echo "ERROR: Could not determine project directory. Set PRODUCTION_WEB_APP_PATH secret."
+                exit 1
+              fi
+            fi
+            
+            echo "Using project directory: $PROJECT_DIR"
+            cd "$PROJECT_DIR" || {
+              echo "ERROR: Project directory not found: $PROJECT_DIR"
+              exit 1
+            }
+            
+            # Verify we're in the right directory
+            if [ ! -f "Dockerfile" ] && [ ! -f "docker-compose.production.yml" ]; then
+              echo "ERROR: Does not appear to be a valid project directory"
+              exit 1
+            fi
             
             # Pull latest code (if not using Docker registry)
             if [ "${{ env.DOCKER_REGISTRY }}" != "dockerhub" ]; then
