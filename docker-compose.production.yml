@@ -27,4 +27,4 @@ services:
 networks:
   mecabal-network:
     external: true
-    name: mecabal_mecabal-network
+    name: backend_mecabal-network
