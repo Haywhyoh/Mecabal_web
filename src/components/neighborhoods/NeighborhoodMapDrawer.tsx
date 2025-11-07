@@ -55,6 +55,7 @@ function MapDrawerComponent({
   showUserLocation = true,
 }: NeighborhoodMapDrawerProps) {
   const [map, setMap] = useState<L.Map | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const [drawnBoundary, setDrawnBoundary] = useState<DrawnBoundary | null>(initialBoundary || null);
   const [existingNeighborhoods, setExistingNeighborhoods] = useState<any[]>([]);
   const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
@@ -149,11 +150,6 @@ function MapDrawerComponent({
                 fillColor: '#10b981',
                 fillOpacity: 0.2,
               },
-              tooltip: {
-                start: 'Click to start drawing polygon',
-                cont: 'Click to continue drawing',
-                end: 'Click first point to close this polygon',
-              },
             },
             rectangle: {
               shapeOptions: {
@@ -162,9 +158,6 @@ function MapDrawerComponent({
                 fillColor: '#10b981',
                 fillOpacity: 0.2,
               },
-              tooltip: {
-                start: 'Click and drag to draw rectangle',
-              },
             },
             circle: {
               shapeOptions: {
@@ -172,9 +165,6 @@ function MapDrawerComponent({
                 weight: 3,
                 fillColor: '#10b981',
                 fillOpacity: 0.2,
-              },
-              tooltip: {
-                start: 'Click and drag to draw circle',
               },
             },
             polyline: false,
@@ -243,9 +233,9 @@ function MapDrawerComponent({
     const fetchNeighborhoods = async () => {
       setIsLoadingNeighborhoods(true);
       try {
-        const response = await apiClient.request(`/location/neighborhoods?lgaId=${lgaId}&limit=100`);
+        const response = await apiClient.getAllNeighborhoods({ lgaId, limit: 100 });
         if (response.success && response.data) {
-          setExistingNeighborhoods(response.data);
+          setExistingNeighborhoods(Array.isArray(response.data) ? response.data : []);
         }
       } catch (error) {
         console.error('Failed to fetch existing neighborhoods:', error);
@@ -399,6 +389,22 @@ function MapDrawerComponent({
 
   return (
     <div className="space-y-4">
+      {/* Instructions - Above map */}
+      {!readOnly && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <p className="text-sm font-semibold text-gray-900 mb-2">
+            How to draw your neighborhood:
+          </p>
+          <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+            <li>Look for the <strong>drawing toolbar in the top-right corner</strong> of the map</li>
+            <li><strong>Polygon:</strong> Click points on the map, double-click to finish</li>
+            <li><strong>Rectangle:</strong> Click and drag on the map</li>
+            <li><strong>Circle:</strong> Click center, drag to set radius</li>
+            <li>After drawing, you can edit or delete your boundary using the edit tools</li>
+          </ul>
+        </div>
+      )}
+
       {/* The actual map */}
       <div className="relative">
         <MapContainer

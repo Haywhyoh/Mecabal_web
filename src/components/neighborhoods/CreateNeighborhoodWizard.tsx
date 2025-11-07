@@ -255,17 +255,6 @@ export default function CreateNeighborhoodWizard({
           <p className="text-gray-600 mb-4">
             Draw the boundary of your neighborhood on the map. You can skip this step to use a default circular boundary.
           </p>
-          
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800 font-medium mb-2">
-              📍 Drawing Tools Location:
-            </p>
-            <p className="text-xs text-blue-700">
-              Look for the <strong>drawing toolbar in the top-right corner</strong> of the map. 
-              You'll see icons for drawing polygons, rectangles, and circles. 
-              Click any tool to start drawing on the map.
-            </p>
-          </div>
 
           <NeighborhoodMapDrawer
             center={
@@ -285,15 +274,6 @@ export default function CreateNeighborhoodWizard({
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-sm text-green-800">
                 ✓ Custom boundary drawn ({formData.boundaries.coordinates[0].length} points)
-              </p>
-            </div>
-          )}
-          
-          {!formData.boundaries && (
-            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-xs text-amber-700">
-                💡 <strong>Can't see the drawing tools?</strong> They should appear as icon buttons in the top-right corner of the map. 
-                If they're not visible, try refreshing the page or check your browser console for errors.
               </p>
             </div>
           )}
