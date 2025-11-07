@@ -39,43 +39,135 @@ fi
 
 # Create webroot directory for certbot challenges
 WEBROOT="/var/www/certbot"
+echo -e "${GREEN}Creating webroot directory: $WEBROOT${NC}"
 mkdir -p "$WEBROOT"
+chmod 755 "$WEBROOT"
 
 # Ensure nginx is running and can serve certbot challenges
-echo -e "${GREEN}Ensuring nginx can serve certbot challenges...${NC}"
+echo -e "${GREEN}Verifying nginx configuration...${NC}"
+
+NGINX_RUNNING=false
 if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
-  # If using Docker nginx, ensure volume is mounted
-  echo -e "${YELLOW}Make sure nginx container has /var/www/certbot volume mounted${NC}"
+  NGINX_RUNNING=true
+  echo -e "${GREEN}Docker nginx container found${NC}"
+  # Check if volume is mounted
+  if docker inspect mecabal-nginx 2>/dev/null | grep -q "/var/www/certbot"; then
+    echo -e "${GREEN}Certbot webroot volume is mounted in nginx container${NC}"
+  else
+    echo -e "${YELLOW}Warning: /var/www/certbot may not be mounted in nginx container${NC}"
+    echo -e "${YELLOW}Make sure nginx container has volume: -v /var/www/certbot:/var/www/certbot${NC}"
+  fi
+elif systemctl is-active --quiet nginx 2>/dev/null || service nginx status >/dev/null 2>&1; then
+  NGINX_RUNNING=true
+  echo -e "${GREEN}System nginx service is running${NC}"
+  # Ensure nginx can read the webroot
+  chown -R www-data:www-data "$WEBROOT" 2>/dev/null || \
+  chown -R nginx:nginx "$WEBROOT" 2>/dev/null || \
+  chown -R "$(stat -c '%U:%G' /var/www 2>/dev/null || echo 'root:root')" "$WEBROOT"
+  chmod 755 "$WEBROOT"
 else
-  # If using system nginx, ensure webroot is accessible
-  if [ ! -d "/etc/nginx/sites-available" ]; then
-    echo -e "${YELLOW}Nginx configuration directory not found. Skipping nginx setup.${NC}"
+  echo -e "${RED}Error: Nginx is not running!${NC}"
+  echo -e "${YELLOW}Please start nginx before running certbot:${NC}"
+  echo -e "${YELLOW}  - Docker: docker start mecabal-nginx${NC}"
+  echo -e "${YELLOW}  - System: sudo systemctl start nginx${NC}"
+  exit 1
+fi
+
+# Test if nginx can serve files from webroot
+echo -e "${GREEN}Testing nginx access to webroot...${NC}"
+TEST_FILE="$WEBROOT/test-$(date +%s).txt"
+echo "test" > "$TEST_FILE"
+chmod 644 "$TEST_FILE"
+
+# Test HTTP access to the test file
+sleep 2
+if curl -f -s "http://localhost/.well-known/acme-challenge/$(basename $TEST_FILE)" >/dev/null 2>&1 || \
+   curl -f -s "http://mecabal.com/.well-known/acme-challenge/$(basename $TEST_FILE)" >/dev/null 2>&1; then
+  echo -e "${GREEN}Nginx can serve files from webroot${NC}"
+  rm -f "$TEST_FILE"
+else
+  echo -e "${YELLOW}Warning: Could not verify nginx can serve webroot files${NC}"
+  echo -e "${YELLOW}This might be okay if nginx is behind a firewall or not accessible from localhost${NC}"
+  rm -f "$TEST_FILE"
+  
+  # Verify nginx config has the location block
+  if [ "$NGINX_RUNNING" = true ]; then
+    if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
+      if docker exec mecabal-nginx nginx -T 2>/dev/null | grep -q "location.*\.well-known/acme-challenge"; then
+        echo -e "${GREEN}Nginx config includes ACME challenge location block${NC}"
+      else
+        echo -e "${RED}Error: Nginx config missing ACME challenge location block!${NC}"
+        echo -e "${YELLOW}Make sure your nginx config includes:${NC}"
+        echo -e "${YELLOW}  location /.well-known/acme-challenge/ {${NC}"
+        echo -e "${YELLOW}      root /var/www/certbot;${NC}"
+        echo -e "${YELLOW}  }${NC}"
+        exit 1
+      fi
+    elif [ -f "/etc/nginx/sites-available/mecabal" ] || [ -f "/etc/nginx/conf.d/mecabal.conf" ]; then
+      if grep -q "location.*\.well-known/acme-challenge" /etc/nginx/sites-available/mecabal /etc/nginx/conf.d/mecabal.conf 2>/dev/null; then
+        echo -e "${GREEN}Nginx config includes ACME challenge location block${NC}"
+      else
+        echo -e "${RED}Error: Nginx config missing ACME challenge location block!${NC}"
+        exit 1
+      fi
+    fi
   fi
 fi
 
-# Obtain certificates for each domain
+# Obtain certificates - combine all domains in one request (recommended)
+echo -e "${GREEN}Obtaining certificates for all domains...${NC}"
+
+# Check if any certificates already exist
+EXISTING_DOMAINS=()
 for domain in "${DOMAINS[@]}"; do
-  echo -e "${GREEN}Obtaining certificate for $domain...${NC}"
-  
-  # Check if certificate already exists
   if [ -d "/etc/letsencrypt/live/$domain" ]; then
-    echo -e "${YELLOW}Certificate for $domain already exists. Skipping...${NC}"
-    continue
+    EXISTING_DOMAINS+=("$domain")
   fi
-  
-  # Obtain certificate
-  certbot certonly \
-    --webroot \
-    --webroot-path="$WEBROOT" \
-    --email "$EMAIL" \
-    --agree-tos \
-    --no-eff-email \
-    --non-interactive \
-    -d "$domain" || {
-      echo -e "${RED}Failed to obtain certificate for $domain${NC}"
-      exit 1
-    }
 done
+
+if [ ${#EXISTING_DOMAINS[@]} -gt 0 ]; then
+  echo -e "${YELLOW}Certificates already exist for: ${EXISTING_DOMAINS[*]}${NC}"
+  echo -e "${YELLOW}To renew existing certificates, use: sudo certbot renew${NC}"
+  echo -e "${YELLOW}Continuing with certificate request...${NC}"
+fi
+
+# Build domain list for certbot
+DOMAIN_ARGS=()
+for domain in "${DOMAINS[@]}"; do
+  DOMAIN_ARGS+=("-d" "$domain")
+done
+
+# Obtain certificate for all domains at once
+echo -e "${GREEN}Requesting certificate for: ${DOMAINS[*]}${NC}"
+if certbot certonly \
+  --webroot \
+  --webroot-path="$WEBROOT" \
+  --email "$EMAIL" \
+  --agree-tos \
+  --no-eff-email \
+  --non-interactive \
+  --verbose \
+  "${DOMAIN_ARGS[@]}"; then
+  echo -e "${GREEN}Successfully obtained certificates!${NC}"
+else
+  echo -e "${RED}Failed to obtain certificates${NC}"
+  echo -e "${YELLOW}Troubleshooting steps:${NC}"
+  echo -e "${YELLOW}1. Verify nginx is running and accessible:${NC}"
+  echo -e "${YELLOW}   curl -I http://mecabal.com${NC}"
+  echo -e "${YELLOW}2. Verify domain DNS points to this server:${NC}"
+  echo -e "${YELLOW}   dig mecabal.com +short${NC}"
+  echo -e "${YELLOW}3. Test webroot access manually:${NC}"
+  echo -e "${YELLOW}   echo 'test' > $WEBROOT/test.txt${NC}"
+  echo -e "${YELLOW}   curl http://mecabal.com/.well-known/acme-challenge/test.txt${NC}"
+  echo -e "${YELLOW}4. Check nginx logs:${NC}"
+  if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
+    echo -e "${YELLOW}   docker logs mecabal-nginx${NC}"
+  else
+    echo -e "${YELLOW}   tail -f /var/log/nginx/error.log${NC}"
+  fi
+  echo -e "${YELLOW}5. Verify nginx config includes ACME challenge location block${NC}"
+  exit 1
+fi
 
 # Set up auto-renewal
 echo -e "${GREEN}Setting up certificate auto-renewal...${NC}"
