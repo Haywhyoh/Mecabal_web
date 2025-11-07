@@ -59,13 +59,11 @@ function EnhancedMapDrawerComponent({
 }: EnhancedMapDrawerProps) {
   const [map, setMap] = useState<L.Map | null>(null);
   const [drawnBoundary, setDrawnBoundary] = useState<DrawnBoundary | null>(null);
-  const [activeDrawMode, setActiveDrawMode] = useState<'polygon' | 'rectangle' | 'circle' | null>(null);
   const [searchMarker, setSearchMarker] = useState<[number, number] | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [detectedLocation, setDetectedLocation] = useState<LocationData | null>(null);
 
   const featureGroupRef = useRef<L.FeatureGroup>(null);
-  const drawHandlerRef = useRef<L.Draw.Polygon | L.Draw.Rectangle | L.Draw.Circle | null>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const searchMarkerRef = useRef<L.Marker | null>(null);
 
@@ -175,8 +173,51 @@ function EnhancedMapDrawerComponent({
     // Attach event handlers
     map.on(L.Draw.Event.CREATED, handleCreated);
 
+    // Add Leaflet Draw control to the map
+    const drawControl = new L.Control.Draw({
+      position: 'topright',
+      draw: {
+        polygon: {
+          allowIntersection: false,
+          showArea: true,
+          shapeOptions: {
+            color: '#10b981',
+            weight: 3,
+            fillColor: '#10b981',
+            fillOpacity: 0.2,
+          },
+        },
+        rectangle: {
+          shapeOptions: {
+            color: '#10b981',
+            weight: 3,
+            fillColor: '#10b981',
+            fillOpacity: 0.2,
+          },
+        },
+        circle: {
+          shapeOptions: {
+            color: '#10b981',
+            weight: 3,
+            fillColor: '#10b981',
+            fillOpacity: 0.2,
+          },
+        },
+        polyline: false,
+        marker: false,
+        circlemarker: false,
+      },
+      edit: {
+        featureGroup: featureGroup,
+        remove: true,
+      },
+    });
+
+    map.addControl(drawControl);
+
     return () => {
       map.off(L.Draw.Event.CREATED, handleCreated);
+      map.removeControl(drawControl);
     };
   }, [map, onBoundaryDrawn, onLocationDetected]);
 
@@ -207,80 +248,6 @@ function EnhancedMapDrawerComponent({
     }
   };
 
-  const startDrawing = (mode: 'polygon' | 'rectangle' | 'circle') => {
-    if (!map || !featureGroupRef.current) {
-      console.log('Map or feature group not ready');
-      return;
-    }
-
-    console.log('Starting drawing mode:', mode);
-
-    // Cancel any existing drawing
-    if (drawHandlerRef.current) {
-      drawHandlerRef.current.disable();
-      drawHandlerRef.current = null;
-    }
-
-    // Toggle drawing mode
-    if (activeDrawMode === mode) {
-      setActiveDrawMode(null);
-      return;
-    }
-
-    setActiveDrawMode(mode);
-
-    let handler: any;
-
-    const shapeOptions = {
-      color: '#10b981',
-      weight: 3,
-      fillColor: '#10b981',
-      fillOpacity: 0.2,
-    };
-
-    try {
-      switch (mode) {
-        case 'polygon':
-          handler = new (L.Draw as any).Polygon(map, {
-            shapeOptions,
-            allowIntersection: false,
-          });
-          break;
-        case 'rectangle':
-          handler = new (L.Draw as any).Rectangle(map, { shapeOptions });
-          break;
-        case 'circle':
-          handler = new (L.Draw as any).Circle(map, { shapeOptions });
-          break;
-      }
-
-      drawHandlerRef.current = handler;
-      handler.enable();
-      console.log('Drawing handler enabled');
-
-      map.once((L.Draw as any).Event.CREATED, () => {
-        console.log('Drawing created');
-        setActiveDrawMode(null);
-        handler.disable();
-        drawHandlerRef.current = null;
-      });
-    } catch (error) {
-      console.error('Error starting drawing:', error);
-      setActiveDrawMode(null);
-    }
-  };
-
-  const clearDrawing = () => {
-    featureGroupRef.current?.clearLayers();
-    setDrawnBoundary(null);
-    setDetectedLocation(null);
-    setActiveDrawMode(null);
-
-    if (drawHandlerRef.current) {
-      drawHandlerRef.current.disable();
-      drawHandlerRef.current = null;
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -315,58 +282,6 @@ function EnhancedMapDrawerComponent({
         </LoadScript>
       )}
 
-      {/* Drawing Instructions */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-900 mb-2">
-          📐 Draw Your Neighborhood Boundary
-        </h3>
-        <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside mb-4">
-          <li>Click a tool below to start drawing</li>
-          <li><strong>Polygon:</strong> Click points, double-click to finish</li>
-          <li><strong>Rectangle:</strong> Click and drag</li>
-          <li><strong>Circle:</strong> Click center, drag for radius</li>
-        </ul>
-
-        {/* Drawing Tools */}
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => startDrawing('polygon')}
-            className={`px-4 py-2 text-white rounded-lg hover:opacity-90 flex items-center gap-2 ${
-              activeDrawMode === 'polygon' ? 'bg-green-700 ring-2 ring-green-400' : 'bg-green-600'
-            }`}
-          >
-            {activeDrawMode === 'polygon' ? 'Drawing...' : '⬡ Polygon'}
-          </button>
-          <button
-            type="button"
-            onClick={() => startDrawing('rectangle')}
-            className={`px-4 py-2 text-white rounded-lg hover:opacity-90 ${
-              activeDrawMode === 'rectangle' ? 'bg-blue-700 ring-2 ring-blue-400' : 'bg-blue-600'
-            }`}
-          >
-            {activeDrawMode === 'rectangle' ? 'Drawing...' : '▭ Rectangle'}
-          </button>
-          <button
-            type="button"
-            onClick={() => startDrawing('circle')}
-            className={`px-4 py-2 text-white rounded-lg hover:opacity-90 ${
-              activeDrawMode === 'circle' ? 'bg-purple-700 ring-2 ring-purple-400' : 'bg-purple-600'
-            }`}
-          >
-            {activeDrawMode === 'circle' ? 'Drawing...' : '⬤ Circle'}
-          </button>
-          {drawnBoundary && (
-            <button
-              type="button"
-              onClick={clearDrawing}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      </div>
 
       {/* Map */}
       <div className="relative">
