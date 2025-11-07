@@ -1,0 +1,190 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  DOCKER_IMAGE_NAME: mecabal-web-app
+  DOCKER_IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy to Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub (if using registry)
+        if: env.DOCKER_REGISTRY == 'dockerhub'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ env.DOCKER_REGISTRY == 'dockerhub' }}
+          tags: |
+            ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+            ${{ env.DOCKER_IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_SSH_PORT || 22 }}
+          script: |
+            set -e
+            
+            # Navigate to web app directory
+            cd ${{ secrets.PRODUCTION_WEB_APP_PATH || '/opt/mecabal/web-app' }}
+            
+            # Pull latest code (if not using Docker registry)
+            if [ "${{ env.DOCKER_REGISTRY }}" != "dockerhub" ]; then
+              git fetch origin
+              git reset --hard origin/main
+            fi
+            
+            # Ensure Docker network exists
+            docker network inspect mecabal_mecabal-network >/dev/null 2>&1 || \
+              docker network create mecabal_mecabal-network
+            
+            # Stop existing container gracefully
+            if [ "$(docker ps -q -f name=mecabal-web-app)" ]; then
+              echo "Stopping existing container..."
+              docker stop mecabal-web-app || true
+              docker rm mecabal-web-app || true
+            fi
+            
+            # Pull image if using registry, otherwise build locally
+            if [ "${{ env.DOCKER_REGISTRY }}" == "dockerhub" ]; then
+              docker pull ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} || true
+              docker tag ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} ${{ env.DOCKER_IMAGE_NAME }}:latest
+            else
+              # Build image locally on server
+              docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} -t ${{ env.DOCKER_IMAGE_NAME }}:latest -f Dockerfile .
+            fi
+            
+            # Start new container
+            echo "Starting new container..."
+            docker-compose -f docker-compose.production.yml up -d
+            
+            # Wait for health check
+            echo "Waiting for container to be healthy..."
+            timeout=60
+            counter=0
+            while [ $counter -lt $timeout ]; do
+              if docker exec mecabal-web-app node -e "require('http').get('http://localhost:3015', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" 2>/dev/null; then
+                echo "Container is healthy!"
+                break
+              fi
+              sleep 2
+              counter=$((counter + 2))
+            done
+            
+            if [ $counter -ge $timeout ]; then
+              echo "Container health check failed!"
+              docker logs mecabal-web-app --tail 50
+              exit 1
+            fi
+            
+            # Clean up old images (keep last 3)
+            echo "Cleaning up old Docker images..."
+            docker image prune -f
+            docker images ${{ env.DOCKER_IMAGE_NAME }} --format "{{.ID}} {{.Tag}}" | \
+              grep -v latest | \
+              tail -n +4 | \
+              awk '{print $1}' | \
+              xargs -r docker rmi -f || true
+            
+            # Reload nginx if it exists
+            if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
+              echo "Reloading nginx..."
+              docker exec mecabal-nginx nginx -s reload || true
+            fi
+            
+            echo "Deployment completed successfully!"
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_SSH_PORT || 22 }}
+          script: |
+            # Wait a bit for service to fully start
+            sleep 5
+            
+            # Check container status
+            if ! docker ps | grep -q mecabal-web-app; then
+              echo "ERROR: Container is not running!"
+              docker logs mecabal-web-app --tail 50
+              exit 1
+            fi
+            
+            # Health check
+            if ! docker exec mecabal-web-app node -e "require('http').get('http://localhost:3015', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" 2>/dev/null; then
+              echo "ERROR: Health check failed!"
+              docker logs mecabal-web-app --tail 50
+              exit 1
+            fi
+            
+            echo "Deployment verification successful!"
+
+  ssl-renewal:
+    name: SSL Certificate Renewal
+    runs-on: ubuntu-latest
+    # Run on the 1st of every month at 2 AM UTC
+    schedule:
+      - cron: '0 2 1 * *'
+    # Also allow manual triggering
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Renew SSL certificates
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_SSH_PORT || 22 }}
+          script: |
+            set -e
+            
+            # Renew certificates for both domains
+            echo "Renewing SSL certificates..."
+            
+            # Check if certbot container exists
+            if docker ps -a | grep -q mecabal-certbot; then
+              # Renew certificates using certbot container
+              docker exec mecabal-certbot certbot renew --dry-run || \
+                docker exec mecabal-certbot certbot renew
+              
+              # Reload nginx to use new certificates
+              if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
+                docker exec mecabal-nginx nginx -s reload
+              fi
+            else
+              # Manual certbot renewal (if not using container)
+              certbot renew --nginx || certbot renew
+              systemctl reload nginx || service nginx reload
+            fi
+            
+            echo "SSL certificate renewal completed!"
+

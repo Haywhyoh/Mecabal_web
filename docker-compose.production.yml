@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Next.js Web App
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mecabal-web-app
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3015
+    ports:
+      - "3015:3015"
+    networks:
+      - mecabal-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3015', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  mecabal-network:
+    external: true
+    name: mecabal_mecabal-network
