@@ -262,6 +262,98 @@ curl http://localhost:3015
 ```
 
 **SSL Certificate Issues:**
+
+**ACME Challenge 404 Error (Certbot can't access challenge files):**
+
+This error occurs when Let's Encrypt can't access the temporary challenge files. Common causes and solutions:
+
+1. **Nginx not running or not configured correctly:**
+```bash
+# Check if nginx is running
+docker ps | grep mecabal-nginx
+# OR
+sudo systemctl status nginx
+
+# Verify nginx config includes ACME challenge location
+docker exec mecabal-nginx nginx -T | grep -A 3 "acme-challenge"
+# OR
+grep -A 3 "acme-challenge" /etc/nginx/sites-available/mecabal
+```
+
+2. **Webroot directory doesn't exist or has wrong permissions:**
+```bash
+# Create webroot directory
+sudo mkdir -p /var/www/certbot
+sudo chmod 755 /var/www/certbot
+
+# For Docker nginx, ensure volume is mounted
+# Check docker-compose or docker run command includes:
+# -v /var/www/certbot:/var/www/certbot
+
+# For system nginx, set correct ownership
+sudo chown -R www-data:www-data /var/www/certbot
+# OR
+sudo chown -R nginx:nginx /var/www/certbot
+```
+
+3. **Test webroot access manually:**
+```bash
+# Create a test file
+echo "test" | sudo tee /var/www/certbot/test.txt
+
+# Test if nginx can serve it
+curl http://mecabal.com/.well-known/acme-challenge/test.txt
+
+# If this fails, nginx isn't serving the webroot correctly
+# Clean up
+sudo rm /var/www/certbot/test.txt
+```
+
+4. **Verify domain DNS points to your server:**
+```bash
+# Check DNS resolution
+dig mecabal.com +short
+# Should return your server's IP address (159.195.25.24)
+
+# Verify from external network
+curl -I http://mecabal.com
+```
+
+5. **Check nginx configuration:**
+```bash
+# For Docker nginx
+docker exec mecabal-nginx nginx -t
+docker exec mecabal-nginx cat /etc/nginx/conf.d/mecabal.conf | grep -A 5 "acme-challenge"
+
+# For system nginx
+sudo nginx -t
+sudo cat /etc/nginx/sites-available/mecabal | grep -A 5 "acme-challenge"
+```
+
+6. **Ensure nginx HTTP server block allows ACME challenges:**
+The nginx config must have this in the HTTP (port 80) server block:
+```nginx
+location /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+}
+```
+
+7. **Reload nginx after configuration changes:**
+```bash
+# Docker nginx
+docker exec mecabal-nginx nginx -s reload
+
+# System nginx
+sudo systemctl reload nginx
+```
+
+8. **Retry certificate request:**
+```bash
+# After fixing issues, retry
+sudo CERTBOT_EMAIL=your-email@example.com ./scripts/setup-ssl.sh
+```
+
+**General SSL Certificate Troubleshooting:**
 ```bash
 # Check certificate expiration
 sudo certbot certificates
@@ -271,6 +363,9 @@ sudo certbot renew --dry-run
 
 # Verify nginx can read certificates
 sudo nginx -t
+
+# View certbot logs
+sudo tail -f /var/log/letsencrypt/letsencrypt.log
 ```
 
 ### Logs
