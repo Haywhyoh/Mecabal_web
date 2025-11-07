@@ -37,11 +37,48 @@ if ! command -v certbot &> /dev/null; then
   fi
 fi
 
-# Create webroot directory for certbot challenges
+# Determine webroot directory based on nginx container mount
 WEBROOT="/var/www/certbot"
+if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
+  # Get the actual host path from nginx container mount
+  # Try to extract from docker inspect JSON output
+  MOUNT_PATH=$(docker inspect mecabal-nginx 2>/dev/null | \
+    grep -A 10 "Mounts" | \
+    grep -A 5 "/var/www/certbot" | \
+    grep '"Source"' | \
+    head -1 | \
+    sed 's/.*"Source": *"\([^"]*\)".*/\1/' || echo "")
+  
+  # Alternative: try to parse the mount string directly
+  if [ -z "$MOUNT_PATH" ]; then
+    MOUNT_INFO=$(docker inspect mecabal-nginx 2>/dev/null | grep -A 2 "/var/www/certbot" | grep -o '"[^"]*:/var/www/certbot' | head -1 | sed 's/":\/var\/www\/certbot//' | tr -d '"' || echo "")
+    if [ -n "$MOUNT_INFO" ]; then
+      MOUNT_PATH="$MOUNT_INFO"
+    fi
+  fi
+  
+  if [ -n "$MOUNT_PATH" ] && [ -d "$MOUNT_PATH" ]; then
+    WEBROOT="$MOUNT_PATH"
+    echo -e "${GREEN}Detected nginx webroot mount: $WEBROOT${NC}"
+  else
+    # Try common backend paths
+    if [ -d "/root/mecabal/backend/ssl" ]; then
+      WEBROOT="/root/mecabal/backend/ssl"
+      echo -e "${GREEN}Using backend SSL directory: $WEBROOT${NC}"
+    elif [ -d "$(pwd)/../mecabal/backend/ssl" ]; then
+      WEBROOT="$(cd "$(pwd)/../mecabal/backend" && pwd)/ssl"
+      echo -e "${GREEN}Using relative backend SSL directory: $WEBROOT${NC}"
+    else
+      echo -e "${YELLOW}Warning: Could not detect nginx webroot mount path${NC}"
+      echo -e "${YELLOW}Using default: $WEBROOT${NC}"
+      echo -e "${YELLOW}If this fails, manually set WEBROOT to match nginx mount${NC}"
+    fi
+  fi
+fi
+
 echo -e "${GREEN}Creating webroot directory: $WEBROOT${NC}"
-mkdir -p "$WEBROOT"
-chmod 755 "$WEBROOT"
+mkdir -p "$WEBROOT/.well-known/acme-challenge"
+chmod -R 755 "$WEBROOT"
 
 # Ensure nginx is running and can serve certbot challenges
 echo -e "${GREEN}Verifying nginx configuration...${NC}"
@@ -75,7 +112,8 @@ fi
 
 # Test if nginx can serve files from webroot
 echo -e "${GREEN}Testing nginx access to webroot...${NC}"
-TEST_FILE="$WEBROOT/test-$(date +%s).txt"
+mkdir -p "$WEBROOT/.well-known/acme-challenge"
+TEST_FILE="$WEBROOT/.well-known/acme-challenge/test-$(date +%s).txt"
 echo "test" > "$TEST_FILE"
 chmod 644 "$TEST_FILE"
 

@@ -11,7 +11,38 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Determine webroot directory based on nginx container mount
 WEBROOT="/var/www/certbot"
+if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
+  # Get the actual host path from nginx container mount
+  # Try to extract from docker inspect JSON output
+  MOUNT_PATH=$(docker inspect mecabal-nginx 2>/dev/null | \
+    grep -A 10 "Mounts" | \
+    grep -A 5 "/var/www/certbot" | \
+    grep '"Source"' | \
+    head -1 | \
+    sed 's/.*"Source": *"\([^"]*\)".*/\1/' || echo "")
+  
+  # Alternative: try to parse the mount string directly
+  if [ -z "$MOUNT_PATH" ]; then
+    MOUNT_INFO=$(docker inspect mecabal-nginx 2>/dev/null | grep -A 2 "/var/www/certbot" | grep -o '"[^"]*:/var/www/certbot' | head -1 | sed 's/":\/var\/www\/certbot//' | tr -d '"' || echo "")
+    if [ -n "$MOUNT_INFO" ]; then
+      MOUNT_PATH="$MOUNT_INFO"
+    fi
+  fi
+  
+  if [ -n "$MOUNT_PATH" ] && [ -d "$MOUNT_PATH" ]; then
+    WEBROOT="$MOUNT_PATH"
+  else
+    # Try common backend paths
+    if [ -d "/root/mecabal/backend/ssl" ]; then
+      WEBROOT="/root/mecabal/backend/ssl"
+    elif [ -d "$(pwd)/../mecabal/backend/ssl" ]; then
+      WEBROOT="$(cd "$(pwd)/../mecabal/backend" && pwd)/ssl"
+    fi
+  fi
+fi
+
 TEST_FILE="test-$(date +%s).txt"
 TEST_PATH="$WEBROOT/.well-known/acme-challenge/$TEST_FILE"
 
