@@ -7,13 +7,7 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import type { State, LGA } from '@/types/location';
-
-interface Neighborhood {
-  id: string;
-  name: string;
-  type: string;
-  isGated: boolean;
-}
+import type { Neighborhood } from '@/types/neighborhood';
 
 export default function LocationSetupForm() {
   const { user, setCurrentStep, updateUser, setTokens, resetOnboarding } = useOnboarding();

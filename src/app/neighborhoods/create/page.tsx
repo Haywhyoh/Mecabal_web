@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle, MapPin, Loader2 } from 'lucide-react';
@@ -20,7 +20,7 @@ interface LGA {
   type: 'LGA' | 'LCDA';
 }
 
-export default function CreateNeighborhoodPage() {
+function CreateNeighborhoodPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -93,6 +93,18 @@ export default function CreateNeighborhoodPage() {
         onCancel={handleCancel}
       />
     </div>
+  );
+}
+
+export default function CreateNeighborhoodPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+      </div>
+    }>
+      <CreateNeighborhoodPageContent />
+    </Suspense>
   );
 }
 

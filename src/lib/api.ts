@@ -6,8 +6,8 @@
 import type { User } from '@/types/user';
 import type { Neighborhood } from '@/types/neighborhood';
 import type { ReverseGeocodeResponse } from '@/types/geocoding';
-import type { State, LGA } from '@/types/location';
-import type { EmailVerificationResponse, PhoneVerificationResponse } from '@/types/auth';
+import type { State, LGA, Ward } from '@/types/location';
+import type { EmailVerificationResponse, PhoneVerificationResponse, LocationSetupResponse, GoogleAuthResponse } from '@/types/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -138,7 +138,7 @@ class ApiClient {
       completeRegistration: boolean;
     }
   ) {
-    return this.request('/auth/location/setup', {
+    return this.request<LocationSetupResponse>('/auth/location/setup', {
       method: 'POST',
       body: JSON.stringify(locationData),
     });
@@ -169,11 +169,11 @@ class ApiClient {
   }
 
   async getWardsByLGA(lgaId: string) {
-    return this.request(`/location/lgas/${lgaId}/wards`);
+    return this.request<Ward[]>(`/location/lgas/${lgaId}/wards`);
   }
 
   async getNeighborhoodsByWard(wardId: string) {
-    return this.request(`/location/wards/${wardId}/neighborhoods`);
+    return this.request<Neighborhood[]>(`/location/wards/${wardId}/neighborhoods`);
   }
 
   async searchNeighborhoods(params: {
@@ -190,7 +190,7 @@ class ApiClient {
     if (params.type) queryParams.append('type', params.type);
     if (params.limit) queryParams.append('limit', params.limit.toString());
 
-    return this.request(`/location/neighborhoods/search?${queryParams.toString()}`);
+    return this.request<Neighborhood[]>(`/location/neighborhoods/search?${queryParams.toString()}`);
   }
 
   async recommendNeighborhoods(params: {
@@ -205,7 +205,7 @@ class ApiClient {
     if (params.radius) queryParams.append('radius', params.radius.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
 
-    return this.request(`/location/neighborhoods/recommend?${queryParams.toString()}`);
+    return this.request<{ recommendations?: Array<{ neighborhood: Neighborhood }> }>(`/location/neighborhoods/recommend?${queryParams.toString()}`);
   }
 
   // Create Neighborhood
@@ -307,7 +307,7 @@ class ApiClient {
 
   // Google OAuth Methods
   async googleAuthWeb(idToken: string) {
-    return this.request('/auth/google/web', {
+    return this.request<GoogleAuthResponse>('/auth/google/web', {
       method: 'POST',
       body: JSON.stringify({ idToken }),
     });
