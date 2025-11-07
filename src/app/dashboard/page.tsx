@@ -14,10 +14,28 @@ import {
 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
+interface User {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  isVerified?: boolean;
+}
+
+interface Neighborhood {
+  id: string;
+  name: string;
+  type: 'AREA' | 'ESTATE' | 'COMMUNITY';
+  lga?: {
+    name: string;
+  };
+  memberCount?: number;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [myNeighborhoods, setMyNeighborhoods] = useState<any[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [myNeighborhoods, setMyNeighborhoods] = useState<Neighborhood[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -43,16 +61,16 @@ export default function DashboardPage() {
       const neighborhoodsResponse = await apiClient.getAllNeighborhoods();
       if (neighborhoodsResponse.success && neighborhoodsResponse.data) {
         // Handle both array response and object with neighborhoods property
-        let allNeighborhoods: any[] = [];
+        let allNeighborhoods: Neighborhood[] = [];
         if (Array.isArray(neighborhoodsResponse.data)) {
-          allNeighborhoods = neighborhoodsResponse.data;
+          allNeighborhoods = neighborhoodsResponse.data as Neighborhood[];
         } else if (
           neighborhoodsResponse.data &&
           typeof neighborhoodsResponse.data === 'object' &&
           'neighborhoods' in neighborhoodsResponse.data &&
-          Array.isArray((neighborhoodsResponse.data as { neighborhoods: any[] }).neighborhoods)
+          Array.isArray((neighborhoodsResponse.data as { neighborhoods: Neighborhood[] }).neighborhoods)
         ) {
-          allNeighborhoods = (neighborhoodsResponse.data as { neighborhoods: any[] }).neighborhoods;
+          allNeighborhoods = (neighborhoodsResponse.data as { neighborhoods: Neighborhood[] }).neighborhoods;
         }
         
         // Filter to show only neighborhoods created by current user
@@ -206,7 +224,7 @@ export default function DashboardPage() {
             <div className="text-center py-12">
               <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 mb-4">
-                You haven't created any neighborhoods yet
+                You haven&apos;t created any neighborhoods yet
               </p>
               <Link
                 href="/neighborhoods/create"
