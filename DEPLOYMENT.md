@@ -347,7 +347,38 @@ docker exec mecabal-nginx nginx -s reload
 sudo systemctl reload nginx
 ```
 
-8. **Retry certificate request:**
+8. **Run diagnostic script:**
+```bash
+# Run the diagnostic script to identify the exact issue
+chmod +x scripts/diagnose-ssl.sh
+sudo ./scripts/diagnose-ssl.sh
+```
+
+9. **Verify nginx config is actually being used:**
+```bash
+# For Docker nginx, check what config is actually loaded
+docker exec mecabal-nginx nginx -T | grep -A 5 "acme-challenge"
+
+# Verify the config file is mounted correctly
+docker inspect mecabal-nginx | grep -A 5 "Mounts"
+
+# If config file isn't mounted, you need to:
+# 1. Copy nginx/mecabal.conf to the container, OR
+# 2. Mount it as a volume when starting the container
+```
+
+10. **Ensure nginx config is reloaded:**
+```bash
+# After updating nginx config, reload it
+docker exec mecabal-nginx nginx -s reload
+# OR
+sudo systemctl reload nginx
+
+# Verify the reload was successful
+docker exec mecabal-nginx nginx -t
+```
+
+11. **Retry certificate request:**
 ```bash
 # After fixing issues, retry
 sudo CERTBOT_EMAIL=your-email@example.com ./scripts/setup-ssl.sh

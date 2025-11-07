@@ -93,17 +93,29 @@ else
   # Verify nginx config has the location block
   if [ "$NGINX_RUNNING" = true ]; then
     if docker ps -q -f name=mecabal-nginx >/dev/null 2>&1; then
+      echo -e "${GREEN}Reloading nginx to ensure latest config is active...${NC}"
+      docker exec mecabal-nginx nginx -s reload 2>/dev/null || true
+      sleep 2
+      
       if docker exec mecabal-nginx nginx -T 2>/dev/null | grep -q "location.*\.well-known/acme-challenge"; then
         echo -e "${GREEN}Nginx config includes ACME challenge location block${NC}"
+        # Show the actual config being used
+        echo -e "${YELLOW}Active nginx config for ACME challenge:${NC}"
+        docker exec mecabal-nginx nginx -T 2>/dev/null | grep -A 3 "location.*\.well-known/acme-challenge" | head -4
       else
         echo -e "${RED}Error: Nginx config missing ACME challenge location block!${NC}"
         echo -e "${YELLOW}Make sure your nginx config includes:${NC}"
         echo -e "${YELLOW}  location /.well-known/acme-challenge/ {${NC}"
         echo -e "${YELLOW}      root /var/www/certbot;${NC}"
         echo -e "${YELLOW}  }${NC}"
+        echo -e "${YELLOW}And that the config file is mounted/loaded in the nginx container${NC}"
         exit 1
       fi
     elif [ -f "/etc/nginx/sites-available/mecabal" ] || [ -f "/etc/nginx/conf.d/mecabal.conf" ]; then
+      echo -e "${GREEN}Reloading nginx to ensure latest config is active...${NC}"
+      systemctl reload nginx 2>/dev/null || service nginx reload 2>/dev/null || true
+      sleep 2
+      
       if grep -q "location.*\.well-known/acme-challenge" /etc/nginx/sites-available/mecabal /etc/nginx/conf.d/mecabal.conf 2>/dev/null; then
         echo -e "${GREEN}Nginx config includes ACME challenge location block${NC}"
       else
