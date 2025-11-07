@@ -8,21 +8,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fixLeafletMarkerIcons, DEFAULT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
 import { apiClient } from '@/lib/api';
-
-// Types
-interface Neighborhood {
-  id: string;
-  name: string;
-  type: 'AREA' | 'ESTATE' | 'COMMUNITY';
-  isGated: boolean;
-  boundaries?: {
-    type: 'Polygon';
-    coordinates: number[][][];
-  };
-  centerLatitude?: number;
-  centerLongitude?: number;
-  radiusMeters?: number;
-}
+import type { Neighborhood } from '@/types/neighborhood';
 
 interface NeighborhoodMapViewProps {
   lgaId: string;

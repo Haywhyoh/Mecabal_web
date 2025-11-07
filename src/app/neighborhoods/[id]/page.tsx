@@ -102,10 +102,10 @@ export default function NeighborhoodDetailsPage() {
                 <div className="flex items-center gap-3 mt-2">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                      TYPE_COLORS[neighborhood.type]
+                      TYPE_COLORS[(neighborhood.type || 'AREA') as keyof typeof TYPE_COLORS]
                     }`}
                   >
-                    {neighborhood.type}
+                    {neighborhood.type || 'AREA'}
                   </span>
                   {neighborhood.isGated && (
                     <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-200 flex items-center gap-1">

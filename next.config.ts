@@ -6,7 +6,20 @@ const nextConfig: NextConfig = {
 
   // Image optimization
   images: {
-    domains: ['localhost', 'mecabal.com', 'api.mecabal.com'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mecabal.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.mecabal.com',
+      },
+    ],
     unoptimized: process.env.NODE_ENV === 'production',
   },
 

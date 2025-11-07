@@ -71,9 +71,7 @@ function EnhancedMapDrawerComponent({
   // Reverse geocode using backend API
   const reverseGeocode = async (lat: number, lng: number): Promise<LocationData> => {
     try {
-      const response = await apiClient.request(
-        `/location/geocoding/reverse?latitude=${lat}&longitude=${lng}`
-      );
+      const response = await apiClient.reverseGeocode(lat, lng);
 
       if (response.success && response.data) {
         return {

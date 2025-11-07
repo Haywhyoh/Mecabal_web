@@ -381,10 +381,10 @@ export default function EditNeighborhoodPage() {
                   <p className="text-sm text-gray-600">Type</p>
                   <span
                     className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium border ${
-                      TYPE_COLORS[neighborhood.type]
+                      TYPE_COLORS[(neighborhood.type || 'AREA') as keyof typeof TYPE_COLORS]
                     }`}
                   >
-                    {neighborhood.type}
+                    {neighborhood.type || 'AREA'}
                   </span>
                 </div>
 

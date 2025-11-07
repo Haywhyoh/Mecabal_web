@@ -3,6 +3,12 @@
  * Handles all authentication and onboarding API calls
  */
 
+import type { User } from '@/types/user';
+import type { Neighborhood } from '@/types/neighborhood';
+import type { ReverseGeocodeResponse } from '@/types/geocoding';
+import type { State, LGA } from '@/types/location';
+import type { EmailVerificationResponse, PhoneVerificationResponse } from '@/types/auth';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 interface ApiResponse<T = any> {
@@ -76,7 +82,7 @@ class ApiClient {
       preferred_language?: string;
     }
   ) {
-    return this.request('/auth/complete-email-verification', {
+    return this.request<EmailVerificationResponse>('/auth/complete-email-verification', {
       method: 'POST',
       body: JSON.stringify({
         email,
@@ -105,7 +111,7 @@ class ApiClient {
     otpCode: string,
     purpose: 'registration' | 'login' | 'password_reset' = 'registration'
   ) {
-    return this.request('/auth/phone/verify-otp', {
+    return this.request<PhoneVerificationResponse>('/auth/phone/verify-otp', {
       method: 'POST',
       body: JSON.stringify({
         phoneNumber,
@@ -140,12 +146,12 @@ class ApiClient {
 
   // User Profile
   async getCurrentUser() {
-    return this.request('/auth/me');
+    return this.request<User>('/auth/me');
   }
 
   // Location Service Methods
   async getStates() {
-    return this.request('/location/states');
+    return this.request<State[]>('/location/states');
   }
 
   async getLGAsByState(stateId: string) {
@@ -159,7 +165,7 @@ class ApiClient {
     console.log('getLGAsByState called with stateId:', stateId);
     const endpoint = `/location/states/${stateId}/lgas`;
     console.log('Full endpoint:', endpoint);
-    return this.request(endpoint);
+    return this.request<LGA[]>(endpoint);
   }
 
   async getWardsByLGA(lgaId: string) {
@@ -210,6 +216,7 @@ class ApiClient {
     centerLatitude?: number;
     centerLongitude?: number;
     isGated?: boolean;
+    description?: string;
     boundaries?: {
       type: 'Polygon';
       coordinates: number[][][];
@@ -234,12 +241,12 @@ class ApiClient {
 
   // Get Neighborhoods with Boundaries
   async getNeighborhoodsWithBoundaries(lgaId: string) {
-    return this.request(`/location/lgas/${lgaId}/neighborhoods?includeBoundaries=true`);
+    return this.request<Neighborhood[]>(`/location/lgas/${lgaId}/neighborhoods?includeBoundaries=true`);
   }
 
   // Get Neighborhood by ID
   async getNeighborhoodById(id: string) {
-    return this.request(`/location/neighborhoods/${id}`);
+    return this.request<Neighborhood>(`/location/neighborhoods/${id}`);
   }
 
   // Get All Neighborhoods
@@ -295,7 +302,7 @@ class ApiClient {
     queryParams.append('latitude', latitude.toString());
     queryParams.append('longitude', longitude.toString());
 
-    return this.request(`/location/geocoding/reverse?${queryParams.toString()}`);
+    return this.request<ReverseGeocodeResponse>(`/location/geocoding/reverse?${queryParams.toString()}`);
   }
 
   // Google OAuth Methods

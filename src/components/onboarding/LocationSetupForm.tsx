@@ -6,19 +6,7 @@ import Link from 'next/link';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-
-interface State {
-  id: string;
-  name: string;
-  code: string;
-}
-
-interface LGA {
-  id: string;
-  name: string;
-  code: string;
-  type: 'LGA' | 'LCDA';
-}
+import type { State, LGA } from '@/types/location';
 
 interface Neighborhood {
   id: string;
