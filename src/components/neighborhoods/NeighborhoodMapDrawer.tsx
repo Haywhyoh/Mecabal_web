@@ -559,10 +559,20 @@ function MapDrawerComponent({
           className="h-[500px] w-full rounded-lg z-0"
           ref={setMap}
         >
+          {/* Google Maps Tiles - Better street detail */}
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
+            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+            maxZoom={20}
+            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
           />
+          {/* Alternative: Google Satellite + Roads Hybrid
+          <TileLayer
+            attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
+            url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+            maxZoom={20}
+          />
+          */}
           <FeatureGroup ref={featureGroupRef} />
         </MapContainer>
 
