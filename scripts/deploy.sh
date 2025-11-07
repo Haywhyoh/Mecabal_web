@@ -12,18 +12,38 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_DIR="${PROJECT_DIR:-/opt/mecabal/web-app}"
+# Determine project directory: use PROJECT_DIR env var, or script's parent directory, or current directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "$PROJECT_DIR" ]; then
+  # Use explicitly set PROJECT_DIR
+  PROJECT_DIR="$PROJECT_DIR"
+elif [ -f "$SCRIPT_DIR/../docker-compose.production.yml" ] || [ -f "$SCRIPT_DIR/../Dockerfile" ]; then
+  # Script is in scripts/ subdirectory, go up one level
+  PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  # Fall back to current directory
+  PROJECT_DIR="$(pwd)"
+fi
+
 DOCKER_IMAGE_NAME="mecabal-web-app"
 DOCKER_IMAGE_TAG="${1:-latest}"
 COMPOSE_FILE="docker-compose.production.yml"
 
 echo -e "${GREEN}Starting deployment of MeCabal Web App...${NC}"
+echo -e "${GREEN}Project directory: $PROJECT_DIR${NC}"
 
 # Navigate to project directory
 cd "$PROJECT_DIR" || {
   echo -e "${RED}Error: Project directory not found: $PROJECT_DIR${NC}"
   exit 1
 }
+
+# Verify we're in the right directory
+if [ ! -f "Dockerfile" ] && [ ! -f "$COMPOSE_FILE" ]; then
+  echo -e "${RED}Error: Does not appear to be a valid project directory${NC}"
+  echo -e "${RED}Missing Dockerfile or $COMPOSE_FILE${NC}"
+  exit 1
+fi
 
 # Check if .env.production exists
 if [ ! -f ".env.production" ]; then
