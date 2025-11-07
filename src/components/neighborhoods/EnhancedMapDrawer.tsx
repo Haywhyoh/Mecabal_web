@@ -11,6 +11,19 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import { fixLeafletMarkerIcons, DEFAULT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
 import { Search, MapPin, Loader2 } from 'lucide-react';
 
+// Helper component to capture map instance
+function MapInitializer({ setMap }: { setMap: (map: L.Map) => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map) {
+      setMap(map);
+    }
+  }, [map, setMap]);
+
+  return null;
+}
+
 // Types
 export interface DrawnBoundary {
   type: 'Polygon';
@@ -361,9 +374,9 @@ function EnhancedMapDrawerComponent({
           center={DEFAULT_CENTER as [number, number]}
           zoom={DEFAULT_ZOOM}
           className="h-[500px] w-full rounded-lg z-0"
-          ref={setMap}
           preferCanvas={false}
         >
+          <MapInitializer setMap={setMap} />
           <TileLayer
             attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
             url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { MapContainer, TileLayer, FeatureGroup, Polygon, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, FeatureGroup, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet-draw';
 // Import Leaflet CSS
@@ -10,6 +10,19 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { fixLeafletMarkerIcons, DEFAULT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
 import { apiClient } from '@/lib/api';
+
+// Helper component to capture map instance
+function MapInitializer({ setMap }: { setMap: (map: L.Map) => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map) {
+      setMap(map);
+    }
+  }, [map, setMap]);
+
+  return null;
+}
 
 // Types
 export interface DrawnBoundary {
@@ -636,8 +649,8 @@ function MapDrawerComponent({
           center={center}
           zoom={DEFAULT_ZOOM}
           className="h-[500px] w-full rounded-lg z-0"
-          ref={setMap}
         >
+          <MapInitializer setMap={setMap} />
           {/* Google Maps Tiles - Better street detail */}
           <TileLayer
             attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
