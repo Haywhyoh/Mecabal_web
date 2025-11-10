@@ -30,9 +30,12 @@ export default function WelcomeScreen() {
         throw new Error(response.error || 'Google authentication failed');
       }
 
-      // Handle both response.data and direct response properties
-      const responseData = response.data || response;
-      const { accessToken, refreshToken, user, isNewUser } = responseData;
+      // Extract data from ApiResponse
+      if (!response.data) {
+        throw new Error('Invalid response: missing data');
+      }
+
+      const { accessToken, refreshToken, user, isNewUser } = response.data;
 
       if (!accessToken || !refreshToken) {
         throw new Error('Missing authentication tokens');
@@ -48,7 +51,7 @@ export default function WelcomeScreen() {
           email: user.email,
           firstName: user.firstName || user.name?.split(' ')[0] || '',
           lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
-          phoneNumber: user.phoneNumber || null,
+          phoneNumber: user.phoneNumber ?? undefined,
           phoneVerified: user.phoneVerified || false,
           isVerified: user.isVerified || user.isEmailVerified || user.verified_email || false,
         });

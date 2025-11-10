@@ -84,6 +84,11 @@ jobs:
           tags: |
             ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
             ${{ env.DOCKER_IMAGE_NAME }}:latest
+          build-args: |
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_APP_URL=${{ secrets.NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_ENVIRONMENT=production
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
 
@@ -145,13 +150,31 @@ jobs:
               docker pull ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} || true
               docker tag ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} ${{ env.DOCKER_IMAGE_NAME }}:latest
             else
-              # Build image locally on server
-              docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} -t ${{ env.DOCKER_IMAGE_NAME }}:latest -f Dockerfile .
+              # Load environment variables from .env.production
+              if [ -f ".env.production" ]; then
+                echo "Loading environment variables from .env.production..."
+                set -a
+                source .env.production
+                set +a
+              else
+                echo "WARNING: .env.production not found. Build args may be missing."
+              fi
+              
+              # Build image locally on server with build args from .env.production
+              echo "Building Docker image with environment variables..."
+              docker build \
+                --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID="${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}" \
+                --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-}" \
+                --build-arg NEXT_PUBLIC_APP_URL="${NEXT_PUBLIC_APP_URL:-}" \
+                --build-arg NEXT_PUBLIC_ENVIRONMENT="${NEXT_PUBLIC_ENVIRONMENT:-production}" \
+                -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} \
+                -t ${{ env.DOCKER_IMAGE_NAME }}:latest \
+                -f Dockerfile .
             fi
             
             # Start new container
             echo "Starting new container..."
-            docker-compose -f docker-compose.production.yml up -d
+            docker-compose -f docker-compose.production.yml up -d --build
             
             # Wait for health check
             echo "Waiting for container to be healthy..."
