@@ -6,31 +6,63 @@ import { Menu, X } from "lucide-react";
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+    setIsMenuOpen(false);
+  };
+
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center">
+          <a href="#hero" onClick={(e) => handleNavClick(e, "hero")} className="flex items-center">
             <img 
               src="/assets/images/logo.png" 
               alt="MeCabal" 
               className="h-10 w-auto"
             />
-          </div>
+          </a>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
+            <a 
+              href="#features" 
+              onClick={(e) => handleNavClick(e, "features")}
+              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
+            >
               Features
             </a>
-            <a href="#how-it-works" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
+            <a 
+              href="#how-it-works" 
+              onClick={(e) => handleNavClick(e, "how-it-works")}
+              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
+            >
               How It Works
             </a>
-            <a href="#for-whom" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
+            <a 
+              href="#for-whom" 
+              onClick={(e) => handleNavClick(e, "for-whom")}
+              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
+            >
               For Whom
             </a>
-            <a href="#faq" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
+            <a 
+              href="#faq" 
+              onClick={(e) => handleNavClick(e, "faq")}
+              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
+            >
               FAQ
             </a>
           </nav>
@@ -60,29 +92,29 @@ export default function Header() {
             <nav className="flex flex-col gap-4 pt-4">
               <a 
                 href="#features" 
+                onClick={(e) => handleNavClick(e, "features")}
                 className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
               >
                 Features
               </a>
               <a 
                 href="#how-it-works" 
+                onClick={(e) => handleNavClick(e, "how-it-works")}
                 className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
               >
                 How It Works
               </a>
               <a 
                 href="#for-whom" 
+                onClick={(e) => handleNavClick(e, "for-whom")}
                 className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
               >
                 For Whom
               </a>
               <a 
                 href="#faq" 
+                onClick={(e) => handleNavClick(e, "faq")}
                 className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
               >
                 FAQ
               </a>
