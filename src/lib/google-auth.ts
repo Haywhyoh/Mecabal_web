@@ -12,7 +12,7 @@ declare global {
             client_id: string;
             callback: (response: { credential: string }) => void;
           }) => void;
-          prompt: (notification?: () => void) => void;
+          prompt: (notificationCallback?: (notification: any) => void) => void;
           renderButton: (
             element: HTMLElement,
             config: {
