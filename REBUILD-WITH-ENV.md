@@ -10,19 +10,35 @@ Rebuild the Docker image with build arguments from `.env.production`.
 
 ## Quick Fix (On Server)
 
-### Option 1: Using docker-compose (Recommended)
+### Option 1: Using docker-compose with env file (Recommended)
 ```bash
-cd ~/mecabal/backend  # or wherever your web app is
+cd ~/Mecabal_web  # or wherever your web app is
+
+# Source the .env.production file to load variables into shell
+set -a
+source .env.production
+set +a
+
+# Build with the environment variables
 docker-compose -f docker-compose.production.yml build --no-cache web-app
+
+# Start the container
 docker-compose -f docker-compose.production.yml up -d web-app
+```
+
+**Or use a one-liner:**
+```bash
+cd ~/Mecabal_web && set -a && source .env.production && set +a && docker-compose -f docker-compose.production.yml build --no-cache web-app && docker-compose -f docker-compose.production.yml up -d web-app
 ```
 
 ### Option 2: Manual Docker Build
 ```bash
-cd ~/mecabal/backend  # or wherever your web app is
+cd ~/Mecabal_web  # or wherever your web app is
 
 # Load environment variables
+set -a
 source .env.production
+set +a
 
 # Rebuild with build args
 docker build \
@@ -36,6 +52,8 @@ docker build \
 # Restart container
 docker-compose -f docker-compose.production.yml up -d web-app
 ```
+
+**Note:** The `set -a` command exports all variables automatically, and `set +a` turns it off. This ensures docker-compose can access the variables.
 
 ---
 
