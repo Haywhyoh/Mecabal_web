@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserX, ShieldAlert, CircleAlert, Rss, ShoppingCart, CalendarDays, Building2, Heart, Zap, Shield, MapPin, UserCheck, Users, Search } from "lucide-react";
+import { UserX, ShieldAlert, CircleAlert, Rss, ShoppingCart, CalendarDays, Building2, Heart, Zap, Shield, MapPin, UserCheck, Users, Search, MessageSquare, CheckCircle2, Clock, Store } from "lucide-react";
 import Header from "../components/Header";
 
 export default function Home() {
@@ -300,109 +300,91 @@ export default function Home() {
             </h3>
           </div>
 
-          {/* Brick Layout Grid - 6 cards with brick pattern */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+          {/* Modern Grid Layout - 6 cards with masonry pattern */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Row 1 */}
-            {/* Feature 1 - Larger card */}
-            <div className="md:col-span-5 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src="/assets/images/hero1.jpeg" 
-                  alt="Community Feed" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Community Feed</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Talk to real neighbors, share updates, and stay connected with your community.
-                </p>
+            {/* Feature 1 - Community Feed - Larger card */}
+            <div className="md:col-span-5 bg-gradient-to-br from-green-50 via-green-100 to-emerald-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-green-200 group">
+              <div className="flex items-start gap-6 mb-6">
+                <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <MessageSquare className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-3xl font-semibold text-gray-900 mb-3">Community Feed</h3>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Talk to real neighbors, share updates, and stay connected with your community in real-time.
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Feature 2 - Same size as Feature 3 */}
-            <div className="md:col-span-4 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src="/assets/images/hero2.jpeg" 
-                  alt="Verified Neighbors" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Verified Neighbors</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">
+            {/* Feature 2 - Verified Neighbors */}
+            <div className="md:col-span-4 bg-gradient-to-br from-blue-50 via-blue-100 to-cyan-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-blue-200 group">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-3">Verified Neighbors</h3>
+                <p className="text-lg text-gray-700 leading-relaxed">
                   Buy and sell locally with trust, knowing you are dealing with verified neighbors.
                 </p>
               </div>
             </div>
 
-            {/* Feature 3 - Same size as Feature 2 */}
-            <div className="md:col-span-3 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src="/assets/images/hero1.jpeg" 
-                  alt="Local Events" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Local Events</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">
+            {/* Feature 3 - Local Events */}
+            <div className="md:col-span-3 bg-gradient-to-br from-purple-50 via-purple-100 to-pink-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-purple-200 group">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg mb-4">
+                  <CalendarDays className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-3">Local Events</h3>
+                <p className="text-lg text-gray-700 leading-relaxed">
                   Discover what is happening nearby and join local events that matter to you.
                 </p>
               </div>
             </div>
 
             {/* Row 2 */}
-            {/* Feature 4 - Same size as Feature 5 */}
-            <div className="md:col-span-3 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src="/assets/images/hero2.jpeg" 
-                  alt="Instant Account Setup" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Instant Account Setup</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">
+            {/* Feature 4 - Instant Account Setup */}
+            <div className="md:col-span-3 bg-gradient-to-br from-orange-50 via-orange-100 to-amber-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-orange-200 group">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 bg-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg mb-4">
+                  <Clock className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-3">Instant Account Setup</h3>
+                <p className="text-lg text-gray-700 leading-relaxed">
                   Get started in minutes with our simple verification process.
                 </p>
               </div>
             </div>
 
-            {/* Feature 5 - Same size as Feature 4 */}
-            <div className="md:col-span-4 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src="/assets/images/hero1.jpeg" 
-                  alt="Safe Marketplace" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Safe Marketplace</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Trade within your verified community.
-                </p>
+            {/* Feature 5 - Safe Marketplace */}
+            <div className="md:col-span-4 bg-gradient-to-br from-emerald-50 via-emerald-100 to-teal-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-emerald-200 group">
+              <div className="flex items-start gap-6 mb-6">
+                <div className="w-16 h-16 bg-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Store className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-3">Safe Marketplace</h3>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Trade within your verified community with confidence and security.
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Feature 6 - Larger card */}
-            <div className="md:col-span-5 bg-gray-50 rounded-sm overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src="/assets/images/hero2.jpeg" 
-                  alt="Neighborhood Support" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Neighborhood Support</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Ask or offer help to neighbors, building stronger bonds.
-                </p>
+            {/* Feature 6 - Neighborhood Support - Larger card */}
+            <div className="md:col-span-5 bg-gradient-to-br from-rose-50 via-rose-100 to-pink-50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-rose-200 group">
+              <div className="flex items-start gap-6 mb-6">
+                <div className="w-16 h-16 bg-rose-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-3xl font-semibold text-gray-900 mb-3">Neighborhood Support</h3>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    Ask or offer help to neighbors, building stronger bonds and a more connected community.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
