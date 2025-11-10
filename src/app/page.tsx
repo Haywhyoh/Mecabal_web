@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserX, ShieldAlert, CircleAlert, Rss, ShoppingCart, CalendarDays, Building2, Heart, Zap, Shield, MapPin, UserCheck, Users, Search, MessageSquare, CheckCircle2, Clock, Store } from "lucide-react";
+import { UserX, ShieldAlert, CircleAlert, Rss, ShoppingCart, CalendarDays, Building2, Heart, Zap, Shield, MapPin, UserCheck, Users, Search, MessageSquare, CheckCircle2, Clock, Store, Phone, Mail } from "lucide-react";
 import Header from "../components/Header";
 
 export default function Home() {
@@ -204,42 +204,42 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Simple */}
-            <div className="relative bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-green-100">
-              <div className="absolute top-6 right-6">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
-                  <Zap className="w-8 h-8 text-green-600" />
+            <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-green-100 group">
+              <div className="flex flex-col items-start">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="w-10 h-10 text-white" />
                 </div>
+                <h3 className="text-4xl font-semibold text-gray-900 mb-4">Simple</h3>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  Easy setup and intuitive interface. Get started in minutes and connect with your neighborhood effortlessly.
+                </p>
               </div>
-              <h3 className="text-4xl font-semibold text-gray-900 mb-6 mt-16">Simple</h3>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Easy setup and intuitive interface. Get started in minutes and connect with your neighborhood effortlessly.
-              </p>
             </div>
 
             {/* Safe */}
-            <div className="relative bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 text-white transform md:-translate-y-4">
-              <div className="absolute top-6 right-6">
-                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <Shield className="w-8 h-8 text-white" />
+            <div className="relative bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-white transform md:-translate-y-4 group">
+              <div className="flex flex-col items-start">
+                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="w-10 h-10 text-green-600" />
                 </div>
+                <h3 className="text-4xl font-semibold mb-4">Safe</h3>
+                <p className="text-lg text-green-50 leading-relaxed">
+                  Verified neighbors and secure transactions. Your safety and privacy are our top priorities.
+                </p>
               </div>
-              <h3 className="text-4xl font-semibold mb-6 mt-16">Safe</h3>
-              <p className="text-lg text-green-50 leading-relaxed">
-                Verified neighbors and secure transactions. Your safety and privacy are our top priorities.
-              </p>
             </div>
 
             {/* Local */}
-            <div className="relative bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-green-100">
-              <div className="absolute top-6 right-6">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
-                  <MapPin className="w-8 h-8 text-green-600" />
+            <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-green-100 group">
+              <div className="flex flex-col items-start">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <MapPin className="w-10 h-10 text-white" />
                 </div>
+                <h3 className="text-4xl font-semibold text-gray-900 mb-4">Local</h3>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  Connect with real neighbors nearby. Everything happens within your immediate community.
+                </p>
               </div>
-              <h3 className="text-4xl font-semibold text-gray-900 mb-6 mt-16">Local</h3>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Connect with real neighbors nearby. Everything happens within your immediate community.
-              </p>
             </div>
           </div>
         </div>
@@ -402,7 +402,7 @@ export default function Home() {
             <div className="text-center">
               <div className="rounded-3xl h-80 mb-8 overflow-hidden">
                 <img 
-                  src="/assets/images/hero1.jpeg" 
+                  src="/assets/images/neighbors.jpg" 
                   alt="Residents" 
                   className="w-full h-full object-cover"
                 />
@@ -416,7 +416,7 @@ export default function Home() {
             <div className="text-center">
               <div className="rounded-3xl h-80 mb-8 overflow-hidden">
                 <img 
-                  src="/assets/images/hero2.jpeg" 
+                  src="/assets/images/market.jpg" 
                   alt="Businesses" 
                   className="w-full h-full object-cover"
                 />
@@ -430,7 +430,7 @@ export default function Home() {
             <div className="text-center">
               <div className="rounded-3xl h-80 mb-8 overflow-hidden">
                 <img 
-                  src="/assets/images/hero1.jpeg" 
+                  src="/assets/images/people.jpg" 
                   alt="Communities and Estates" 
                   className="w-full h-full object-cover"
                 />
@@ -560,48 +560,77 @@ export default function Home() {
       <footer className="py-20 px-6 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto">
           {/* Big White/Light Box with App Download */}
-          <div className="bg-white rounded-3xl p-12 mb-16">
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-12 mb-16 shadow-xl border border-gray-100">
             <div className="max-w-5xl mx-auto text-center">
-              <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
-                Download MeCabal and connect with your neighborhood today
+              <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
+                Download MeCabal
               </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Download MeCabal and connect with your neighborhood today
+              <p className="text-xl text-gray-600 mb-10">
+                Connect with your neighborhood today
               </p>
 
               {/* App Store Badges */}
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
-                <div className="bg-gray-200 h-14 w-44 rounded-lg flex items-center justify-center">
-                  {/* App Store Badge Placeholder */}
-                  <span className="text-gray-500 text-sm">App Store</span>
-                </div>
-                <div className="bg-gray-200 h-14 w-44 rounded-lg flex items-center justify-center">
-                  {/* Google Play Badge Placeholder */}
-                  <span className="text-gray-500 text-sm">Google Play</span>
-                </div>
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-5 mb-10">
+                <a 
+                  href="#" 
+                  className="block transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+                  aria-label="Download on the App Store"
+                >
+                  <img 
+                    src="/assets/images/appstore.png" 
+                    alt="Download on the App Store" 
+                    className="h-14 w-auto object-contain"
+                  />
+                </a>
+                <a 
+                  href="#" 
+                  className="block transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+                  aria-label="Get it on Google Play"
+                >
+                  <img 
+                    src="/assets/images/googleplay.png" 
+                    alt="Get it on Google Play" 
+                    className="h-14 w-auto object-contain"
+                  />
+                </a>
               </div>
 
               {/* Ratings */}
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-8 text-gray-600">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="w-5 h-5 fill-current text-yellow-400" viewBox="0 0 20 20">
-                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                      </svg>
-                    ))}
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-12 text-gray-600">
+                {/* App Store Rating */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-2xl font-bold text-gray-900">4.8</span>
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <svg key={i} className="w-4 h-4 fill-current text-yellow-400" viewBox="0 0 20 20">
+                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                        </svg>
+                      ))}
+                    </div>
                   </div>
-                  <span className="text-sm font-medium">App Store</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-900">App Store</span>
+                    <span className="text-xs text-gray-500">500+ reviews</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="w-5 h-5 fill-current text-yellow-400" viewBox="0 0 20 20">
-                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                      </svg>
-                    ))}
+
+                {/* Google Play Rating */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-2xl font-bold text-gray-900">4.7</span>
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <svg key={i} className="w-4 h-4 fill-current text-yellow-400" viewBox="0 0 20 20">
+                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                        </svg>
+                      ))}
+                    </div>
                   </div>
-                  <span className="text-sm font-medium">300+ reviews on Google Play</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-900">Google Play</span>
+                    <span className="text-xs text-gray-500">300+ reviews</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -614,16 +643,6 @@ export default function Home() {
               <p className="text-gray-400 text-sm leading-relaxed">
                 Building Connected Neighborhoods, One Community at a Time.
               </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Product</h4>
-              <ul className="space-y-3 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">How it Works</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">For Businesses</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-              </ul>
             </div>
 
             <div>
@@ -645,6 +664,31 @@ export default function Home() {
                 <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
               </ul>
             </div>
+
+            <div>
+              <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Contact</h4>
+              <ul className="space-y-4 text-gray-400 text-sm">
+                <li className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span className="leading-relaxed">
+                    123 Main Street, Victoria Island<br />
+                    Lagos, Nigeria
+                  </span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <a href="tel:+2341234567890" className="hover:text-white transition-colors">
+                    +234 123 456 7890
+                  </a>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <a href="mailto:info@mecabal.com" className="hover:text-white transition-colors">
+                    info@mecabal.com
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Bottom Bar */}
@@ -652,18 +696,38 @@ export default function Home() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <p className="text-gray-400 text-sm">© 2025 MeCabal. All rights reserved.</p>
 
-              <div className="flex gap-6">
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-all duration-200">
-                  <div className="w-5 h-5 bg-white rounded-full" />
+              <div className="flex gap-4">
+                {/* TikTok */}
+                <a 
+                  href="#" 
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-200 hover:text-white text-gray-400"
+                  aria-label="TikTok"
+                >
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                  </svg>
                 </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-all duration-200">
-                  <div className="w-5 h-5 bg-white rounded-full" />
+
+                {/* Twitter/X */}
+                <a 
+                  href="#" 
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-200 hover:text-white text-gray-400"
+                  aria-label="Twitter"
+                >
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
                 </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-all duration-200">
-                  <div className="w-5 h-5 bg-white rounded-full" />
-                </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-all duration-200">
-                  <div className="w-5 h-5 bg-white rounded-full" />
+
+                {/* YouTube */}
+                <a 
+                  href="#" 
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-200 hover:text-white text-gray-400"
+                  aria-label="YouTube"
+                >
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
                 </a>
               </div>
             </div>
