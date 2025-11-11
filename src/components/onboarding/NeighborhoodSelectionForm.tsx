@@ -19,14 +19,29 @@ export default function NeighborhoodSelectionForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
 
-  // Load neighborhoods on mount
-  useEffect(() => {
-    if (locationData?.lgaId) {
-      loadNeighborhoods(locationData.lgaId);
-    }
-  }, [locationData?.lgaId]);
+  // Don't load neighborhoods on mount - only when user searches
+  // This prevents loading 100s of neighborhoods at once
 
-  const loadNeighborhoods = async (lgaId: string, query?: string) => {
+  // Debounce search - only search after user stops typing for 300ms
+  useEffect(() => {
+    if (!neighborhoodSearchQuery || neighborhoodSearchQuery.length < 3) {
+      setNeighborhoods([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      loadNeighborhoods(locationData?.lgaId!, neighborhoodSearchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [neighborhoodSearchQuery, locationData?.lgaId]);
+
+  const loadNeighborhoods = async (lgaId: string, query: string) => {
+    if (!lgaId || query.length < 3) {
+      setNeighborhoods([]);
+      return;
+    }
+
     try {
       setIsLoadingNeighborhoods(true);
       const response = await apiClient.searchNeighborhoods({
@@ -44,15 +59,6 @@ export default function NeighborhoodSelectionForm() {
       setError('Failed to load neighborhoods.');
     } finally {
       setIsLoadingNeighborhoods(false);
-    }
-  };
-
-  const handleNeighborhoodSearch = (query: string) => {
-    setNeighborhoodSearchQuery(query);
-    if (locationData?.lgaId && query.length >= 2) {
-      loadNeighborhoods(locationData.lgaId, query);
-    } else if (query.length === 0 && locationData?.lgaId) {
-      loadNeighborhoods(locationData.lgaId);
     }
   };
 
@@ -135,78 +141,83 @@ export default function NeighborhoodSelectionForm() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Neighborhood Search */}
+            {/* Neighborhood Search Input */}
             <div>
-              <label htmlFor="neighborhood" className="block text-sm font-medium text-gray-700 mb-2">
-                Search Neighborhood/Estate
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+                Search for your neighborhood
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  id="neighborhood"
+                  id="search"
                   type="text"
                   value={neighborhoodSearchQuery}
-                  onChange={(e) => handleNeighborhoodSearch(e.target.value)}
-                  placeholder="Type to search..."
+                  onChange={(e) => setNeighborhoodSearchQuery(e.target.value)}
+                  placeholder="Type at least 3 characters to search..."
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
                   autoFocus
                 />
               </div>
 
+              {!neighborhoodSearchQuery && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Type at least 3 characters to search for your neighborhood or estate
+                </p>
+              )}
+
+              {neighborhoodSearchQuery && neighborhoodSearchQuery.length < 3 && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Type {3 - neighborhoodSearchQuery.length} more character{3 - neighborhoodSearchQuery.length > 1 ? 's' : ''} to search...
+                </p>
+              )}
+
               {isLoadingNeighborhoods && (
-                <div className="flex items-center gap-2 text-gray-600 mt-3">
+                <div className="flex items-center gap-2 text-gray-600 mt-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Searching neighborhoods...</span>
                 </div>
               )}
-
-              {/* Neighborhoods List */}
-              {!isLoadingNeighborhoods && neighborhoods.length > 0 && (
-                <div className="mt-3 max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-                  {neighborhoods.map((neighborhood) => (
-                    <button
-                      key={neighborhood.id}
-                      type="button"
-                      onClick={() => handleNeighborhoodSelect(neighborhood)}
-                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                        selectedNeighborhood?.id === neighborhood.id ? 'bg-green-50 border-l-4 border-l-green-600' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900">{neighborhood.name}</div>
-                          <div className="text-sm text-gray-600">{neighborhood.type}</div>
-                        </div>
-                        {neighborhood.isGated && (
-                          <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Gated</span>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {!isLoadingNeighborhoods && neighborhoodSearchQuery && neighborhoods.length === 0 && (
-                <div className="mt-3 p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 mb-2">No neighborhoods found matching "{neighborhoodSearchQuery}"</p>
-                  <Link
-                    href={`/neighborhoods/create?returnTo=/onboarding&lgaId=${locationData?.lgaId}`}
-                    className="text-sm text-green-600 hover:underline"
-                  >
-                    Create your neighborhood
-                  </Link>
-                </div>
-              )}
-
-              {/* Selected Neighborhood Display */}
-              {selectedNeighborhood && (
-                <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-gray-700 mb-1">Selected:</p>
-                  <p className="font-medium text-gray-900">{selectedNeighborhood.name}</p>
-                  <p className="text-sm text-gray-600">{selectedNeighborhood.type}</p>
-                </div>
-              )}
             </div>
+
+            {/* Neighborhood Dropdown - only show when results are available */}
+            {!isLoadingNeighborhoods && neighborhoods.length > 0 && (
+              <div>
+                <label htmlFor="neighborhood" className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Neighborhood *
+                </label>
+                <select
+                  id="neighborhood"
+                  value={selectedNeighborhood?.id || ''}
+                  onChange={(e) => {
+                    const selected = neighborhoods.find(n => n.id === e.target.value);
+                    if (selected) {
+                      handleNeighborhoodSelect(selected);
+                    }
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
+                  required
+                >
+                  <option value="">Select a neighborhood</option>
+                  {neighborhoods.map((neighborhood) => (
+                    <option key={neighborhood.id} value={neighborhood.id}>
+                      {neighborhood.name} - {neighborhood.type} {neighborhood.isGated ? '(Gated)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {!isLoadingNeighborhoods && neighborhoodSearchQuery && neighborhoodSearchQuery.length >= 3 && neighborhoods.length === 0 && (
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                <p className="text-sm text-gray-600 mb-2">No neighborhoods found matching "{neighborhoodSearchQuery}"</p>
+                <Link
+                  href={`/neighborhoods/create?returnTo=/onboarding&lgaId=${locationData?.lgaId}`}
+                  className="text-sm text-green-600 hover:underline"
+                >
+                  Create your neighborhood
+                </Link>
+              </div>
+            )}
 
             {/* Can't find your area? */}
             {!neighborhoodSearchQuery && (
