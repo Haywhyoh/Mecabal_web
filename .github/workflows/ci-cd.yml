@@ -13,6 +13,7 @@ on:
 env:
   DOCKER_IMAGE_NAME: mecabal-web-app
   DOCKER_IMAGE_TAG: ${{ github.sha }}
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY || '' }}
 
 jobs:
   # CI: Run on all pushes and PRs
@@ -64,6 +65,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Validate deployment secrets
+        run: |
+          if [ -z "${{ secrets.PRODUCTION_HOST }}" ]; then
+            echo "ERROR: PRODUCTION_HOST secret is not set"
+            echo "Please configure the following secrets in your GitHub repository:"
+            echo "  - PRODUCTION_HOST"
+            echo "  - PRODUCTION_USER"
+            echo "  - PRODUCTION_SSH_KEY"
+            echo "  - PRODUCTION_WEB_APP_PATH (optional)"
+            echo "  - PRODUCTION_SSH_PORT (optional, defaults to 22)"
+            exit 1
+          fi
+          if [ -z "${{ secrets.PRODUCTION_USER }}" ]; then
+            echo "ERROR: PRODUCTION_USER secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.PRODUCTION_SSH_KEY }}" ]; then
+            echo "ERROR: PRODUCTION_SSH_KEY secret is not set"
+            exit 1
+          fi
+          echo "✓ All required deployment secrets are configured"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
