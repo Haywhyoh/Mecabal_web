@@ -13,7 +13,7 @@ import FooterSection from "../components/sections/FooterSection";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white"> 
       <Header />
       <HeroSection />
       <ProblemSection />
@@ -21,9 +21,10 @@ export default function Home() {
       <SimpleSafeLocalSection />
       <HowItWorksSection />
       <FeaturesSection />
-      <ForWhomSection />
+      <ForWhomSection />  
       <FAQSection />
-      <FooterSection />
+      <FooterSection /> 
     </main>
   );
 }
+    
