@@ -9,6 +9,7 @@ export type OnboardingStep =
   | 'phone-verification'
   | 'phone-otp-verification'
   | 'location-setup'
+  | 'neighborhood-selection'
   | 'complete';
 
 export interface OnboardingUser {
@@ -31,13 +32,15 @@ export interface OnboardingState {
 }
 
 export interface LocationData {
-  state?: string;
-  city?: string;
-  estate?: string;
-  location?: string;
-  landmark?: string;
+  stateId?: string;
+  stateName?: string;
+  lgaId?: string;
+  lgaName?: string;
+  cityTown?: string;
   address?: string;
-  latitude?: number;
-  longitude?: number;
+  coordinates?: {
+    latitude?: number;
+    longitude?: number;
+  };
 }
 

@@ -2,15 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2, MapPin, Navigation } from 'lucide-react';
-import Link from 'next/link';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import type { State, LGA } from '@/types/location';
-import type { Neighborhood } from '@/types/neighborhood';
 
 export default function LocationSetupForm() {
-  const { user, setCurrentStep, updateUser, setTokens, resetOnboarding } = useOnboarding();
+  const { user, setCurrentStep, updateUser, setTokens, resetOnboarding, setLocationData } = useOnboarding();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -18,8 +16,6 @@ export default function LocationSetupForm() {
     stateName: '',
     lgaId: '',
     lgaName: '',
-    neighborhoodId: '',
-    neighborhoodName: '',
     cityTown: '',
     address: '',
     formattedAddress: '', // Human-readable address from GPS
@@ -29,18 +25,14 @@ export default function LocationSetupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [coordinates, setCoordinates] = useState<{ latitude?: number; longitude?: number }>({});
-  const [showNeighborhoodStep, setShowNeighborhoodStep] = useState(false);
 
   // Data lists
   const [states, setStates] = useState<State[]>([]);
   const [lgas, setLGAs] = useState<LGA[]>([]);
-  const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
-  const [neighborhoodSearchQuery, setNeighborhoodSearchQuery] = useState('');
 
   // Loading states
   const [isLoadingStates, setIsLoadingStates] = useState(false);
   const [isLoadingLGAs, setIsLoadingLGAs] = useState(false);
-  const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
 
 
   // Load states on mount
@@ -54,19 +46,9 @@ export default function LocationSetupForm() {
       loadLGAs(formData.stateId);
     } else {
       setLGAs([]);
-      setFormData(prev => ({ ...prev, lgaId: '', lgaName: '', neighborhoodId: '', neighborhoodName: '' }));
+      setFormData(prev => ({ ...prev, lgaId: '', lgaName: '' }));
     }
   }, [formData.stateId]);
-
-  // Load neighborhoods when LGA changes and neighborhood step is shown
-  useEffect(() => {
-    if (formData.lgaId && showNeighborhoodStep) {
-      loadNeighborhoods(formData.lgaId);
-    } else if (!showNeighborhoodStep) {
-      setNeighborhoods([]);
-      setFormData(prev => ({ ...prev, neighborhoodId: '', neighborhoodName: '' }));
-    }
-  }, [formData.lgaId, showNeighborhoodStep]);
 
   // Reverse geocode function (defined before useEffect that uses it)
   const reverseGeocode = async (latitude: number, longitude: number) => {
@@ -157,9 +139,6 @@ export default function LocationSetupForm() {
 
           // Reverse geocode to get human-readable address
           await reverseGeocode(lat, lng);
-
-          // Load nearby neighborhoods based on GPS
-          loadNearbyNeighborhoods(lat, lng);
         },
         () => {
           setError('Unable to get your location. Please select manually.');
@@ -292,57 +271,34 @@ export default function LocationSetupForm() {
   };
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(undefined);
-
+  const handleContinueToNeighborhood = () => {
     if (!formData.stateId || !formData.lgaId) {
       setError('Please select at least state and LGA');
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      const response = await apiClient.setupLocation({
-        stateId: formData.stateId,
-        lgaId: formData.lgaId,
-        neighborhoodId: formData.neighborhoodId || undefined,
-        cityTown: formData.cityTown || undefined,
-        address: formData.address || undefined,
+    // Save location data to context
+    setLocationData({
+      stateId: formData.stateId,
+      stateName: formData.stateName,
+      lgaId: formData.lgaId,
+      lgaName: formData.lgaName,
+      cityTown: formData.cityTown,
+      address: formData.address,
+      coordinates: {
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
-        completeRegistration: true,
-      });
+      },
+    });
 
-      if (response.success && response.data) {
-        const userData = response.data.user;
-        const tokens = response.data;
-
-        if (tokens?.accessToken && tokens?.refreshToken) {
-          setTokens(tokens.accessToken, tokens.refreshToken);
-        }
-
-        if (userData) {
-          updateUser({
-            id: userData.id,
-            isVerified: userData.isVerified,
-          });
-        }
-
-        resetOnboarding();
-        router.push('/dashboard');
-      } else {
-        setError(response.error || 'Failed to complete registration');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    // Navigate to neighborhood selection step
+    setCurrentStep('neighborhood-selection');
   };
 
-  const filteredNeighborhoods = neighborhoods;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    handleContinueToNeighborhood();
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white px-6 py-12">
@@ -453,80 +409,6 @@ export default function LocationSetupForm() {
                   </div>
                 )}
 
-                {/* Neighborhood/Estate Search */}
-                {formData.lgaId && (
-                  <div>
-                    <label htmlFor="neighborhood" className="block text-sm font-medium text-gray-700 mb-2">
-                      Neighborhood/Estate (Optional)
-                    </label>
-                    <input
-                      id="neighborhood"
-                      type="text"
-                      value={neighborhoodSearchQuery}
-                      onChange={(e) => handleNeighborhoodSearch(e.target.value)}
-                      placeholder="Search for your neighborhood or estate"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
-                    />
-
-                    {isLoadingNeighborhoods && (
-                      <div className="flex items-center gap-2 text-gray-600 mt-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Searching neighborhoods...</span>
-                      </div>
-                    )}
-
-                    {!isLoadingNeighborhoods && filteredNeighborhoods.length > 0 && (
-                      <div className="mt-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
-                        {filteredNeighborhoods.map((neighborhood) => (
-                          <button
-                            key={neighborhood.id}
-                            type="button"
-                            onClick={() => {
-                              handleNeighborhoodSelect(neighborhood);
-                              setNeighborhoodSearchQuery(neighborhood.name);
-                            }}
-                            className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                              formData.neighborhoodId === neighborhood.id ? 'bg-green-50' : ''
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium text-gray-900">{neighborhood.name}</div>
-                                <div className="text-sm text-gray-600">{neighborhood.type}</div>
-                              </div>
-                              {neighborhood.isGated && (
-                                <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Gated</span>
-                              )}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Can't find your area? */}
-                    <Link
-                      href={`/neighborhoods/create?returnTo=/onboarding&lgaId=${formData.lgaId}`}
-                      className="text-sm text-green-600 hover:underline mt-2 inline-block"
-                    >
-                      Can't find your area? Create it
-                    </Link>
-                  </div>
-                )}
-
-                {/* Street Address */}
-                <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                    Street Address (Optional)
-                  </label>
-                  <textarea
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all text-gray-900"
-                    placeholder="Street address or landmark"
-                    rows={3}
-                  />
-                </div>
               </>
             )}
 
@@ -549,31 +431,7 @@ export default function LocationSetupForm() {
                   Coordinates: {coordinates.latitude.toFixed(6)}, {coordinates.longitude?.toFixed(6)}
                 </p>
 
-                {!isLoadingNeighborhoods && neighborhoods.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Nearby neighborhoods:</p>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {neighborhoods.slice(0, 5).map((neighborhood) => (
-                        <button
-                          key={neighborhood.id}
-                          type="button"
-                          onClick={() => {
-                            handleNeighborhoodSelect(neighborhood);
-                            setNeighborhoodSearchQuery(neighborhood.name);
-                          }}
-                          className={`w-full text-left px-3 py-2 bg-white rounded-lg hover:bg-gray-50 transition-colors ${
-                            formData.neighborhoodId === neighborhood.id ? 'ring-2 ring-green-600' : ''
-                          }`}
-                        >
-                          <div className="font-medium text-gray-900 text-sm">{neighborhood.name}</div>
-                          <div className="text-xs text-gray-600">{neighborhood.type}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <p className="text-sm text-gray-600 mt-4">
+                <p className="text-sm text-gray-600">
                   Please confirm your state and LGA below:
                 </p>
 
@@ -629,6 +487,7 @@ export default function LocationSetupForm() {
               </div>
             )}
 
+            {/* Submit button - Continue to next step */}
             <button
               type="submit"
               disabled={!formData.stateId || !formData.lgaId || isLoading}
@@ -637,10 +496,10 @@ export default function LocationSetupForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Completing Registration...
+                  Processing...
                 </>
               ) : (
-                'Complete Registration'
+                'Continue to Neighborhood Selection'
               )}
             </button>
           </form>

@@ -7,9 +7,11 @@ interface OnboardingContextType {
   currentStep: OnboardingStep;
   user: Partial<OnboardingUser>;
   phoneNumber?: string;
+  locationData?: LocationData;
   setCurrentStep: (step: OnboardingStep) => void;
   updateUser: (userData: Partial<OnboardingUser>) => void;
   setPhoneNumber: (phone: string) => void;
+  setLocationData: (data: LocationData) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   resetOnboarding: () => void;
 }
@@ -20,6 +22,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
   const [user, setUser] = useState<Partial<OnboardingUser>>({});
   const [phoneNumber, setPhoneNumber] = useState<string>();
+  const [locationData, setLocationData] = useState<LocationData>();
 
   // Load from session storage on mount
   useEffect(() => {
@@ -27,10 +30,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       const savedStep = sessionStorage.getItem('onboarding_step') as OnboardingStep;
       const savedUser = sessionStorage.getItem('onboarding_user');
       const savedPhone = sessionStorage.getItem('onboarding_phone');
+      const savedLocation = sessionStorage.getItem('onboarding_location');
 
       if (savedStep) setCurrentStep(savedStep);
       if (savedUser) setUser(JSON.parse(savedUser));
       if (savedPhone) setPhoneNumber(savedPhone);
+      if (savedLocation) setLocationData(JSON.parse(savedLocation));
     }
   }, []);
 
@@ -57,6 +62,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
   }, [phoneNumber]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (locationData) {
+        sessionStorage.setItem('onboarding_location', JSON.stringify(locationData));
+      }
+    }
+  }, [locationData]);
+
   const updateUser = (userData: Partial<OnboardingUser>) => {
     setUser((prev) => ({ ...prev, ...userData }));
   };
@@ -72,10 +85,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setCurrentStep('welcome');
     setUser({});
     setPhoneNumber(undefined);
+    setLocationData(undefined);
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('onboarding_step');
       sessionStorage.removeItem('onboarding_user');
       sessionStorage.removeItem('onboarding_phone');
+      sessionStorage.removeItem('onboarding_location');
     }
   };
 
@@ -85,9 +100,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         currentStep,
         user,
         phoneNumber,
+        locationData,
         setCurrentStep,
         updateUser,
         setPhoneNumber,
+        setLocationData,
         setTokens,
         resetOnboarding,
       }}
