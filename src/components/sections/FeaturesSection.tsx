@@ -9,6 +9,13 @@ export default function FeaturesSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+  // Map colSpan values to Tailwind classes (must be explicit for Tailwind to detect them)
+  const colSpanClasses: Record<number, string> = {
+    3: "md:col-span-3",
+    4: "md:col-span-4",
+    5: "md:col-span-5",
+  };
+
   const features = [
     { colSpan: 5, icon: MessageSquare, title: "Community Feed", description: "Talk to real neighbors, share updates, and stay connected with your community in real-time.", bg: "from-green-50 via-green-100 to-emerald-50", border: "border-green-200", iconBg: "bg-green-600" },
     { colSpan: 4, icon: CheckCircle2, title: "Verified Neighbors", description: "Buy and sell locally with trust, knowing you are dealing with verified neighbors.", bg: "from-blue-50 via-blue-100 to-cyan-50", border: "border-blue-200", iconBg: "bg-blue-600", center: true },
@@ -46,7 +53,7 @@ export default function FeaturesSection() {
             return (
               <motion.div
                 key={index}
-                className={`md:col-span-${feature.colSpan} bg-gradient-to-br ${feature.bg} rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border ${feature.border} group`}
+                className={`${colSpanClasses[feature.colSpan] || ''} bg-gradient-to-br ${feature.bg} rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border ${feature.border} group`}
                 variants={itemVariants}
                 whileHover={{ y: -5, scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
