@@ -29,6 +29,7 @@ export default function LocationSetupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [coordinates, setCoordinates] = useState<{ latitude?: number; longitude?: number }>({});
+  const [showNeighborhoodStep, setShowNeighborhoodStep] = useState(false);
 
   // Data lists
   const [states, setStates] = useState<State[]>([]);
@@ -57,15 +58,15 @@ export default function LocationSetupForm() {
     }
   }, [formData.stateId]);
 
-  // Load neighborhoods when LGA changes
+  // Load neighborhoods when LGA changes and neighborhood step is shown
   useEffect(() => {
-    if (formData.lgaId) {
+    if (formData.lgaId && showNeighborhoodStep) {
       loadNeighborhoods(formData.lgaId);
-    } else {
+    } else if (!showNeighborhoodStep) {
       setNeighborhoods([]);
       setFormData(prev => ({ ...prev, neighborhoodId: '', neighborhoodName: '' }));
     }
-  }, [formData.lgaId]);
+  }, [formData.lgaId, showNeighborhoodStep]);
 
   // Reverse geocode function (defined before useEffect that uses it)
   const reverseGeocode = async (latitude: number, longitude: number) => {
