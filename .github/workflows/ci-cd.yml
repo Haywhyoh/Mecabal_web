@@ -151,10 +151,25 @@ jobs:
               exit 1
             fi
             
+            # Backup .env.production before git operations to prevent it from being overwritten
+            ENV_BACKUP=""
+            if [ -f ".env.production" ]; then
+              ENV_BACKUP=".env.production.backup.$(date +%s)"
+              cp .env.production "$ENV_BACKUP"
+              echo "Backed up .env.production to $ENV_BACKUP"
+            fi
+            
             # Pull latest code (if not using Docker registry)
             if [ "${{ env.DOCKER_REGISTRY }}" != "dockerhub" ]; then
               git fetch origin
               git reset --hard origin/main
+              
+              # Restore .env.production after git reset
+              if [ -n "$ENV_BACKUP" ] && [ -f "$ENV_BACKUP" ]; then
+                cp "$ENV_BACKUP" .env.production
+                rm "$ENV_BACKUP"
+                echo "Restored .env.production after git reset"
+              fi
             fi
             
             # Ensure Docker network exists

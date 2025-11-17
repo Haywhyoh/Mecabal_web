@@ -57,6 +57,14 @@ if [ ! -f ".env.production" ]; then
   fi
 fi
 
+# Backup .env.production before git operations to prevent it from being overwritten
+ENV_BACKUP=""
+if [ -f ".env.production" ]; then
+  ENV_BACKUP=".env.production.backup.$(date +%s)"
+  cp .env.production "$ENV_BACKUP"
+  echo -e "${GREEN}Backed up .env.production to $ENV_BACKUP${NC}"
+fi
+
 # Ensure Docker network exists
 echo -e "${GREEN}Ensuring Docker network exists...${NC}"
 docker network inspect mecabal_mecabal-network >/dev/null 2>&1 || \
@@ -67,6 +75,13 @@ if [ -d ".git" ]; then
   echo -e "${GREEN}Pulling latest code...${NC}"
   git fetch origin
   git reset --hard origin/main || git reset --hard HEAD
+  
+  # Restore .env.production after git reset
+  if [ -n "$ENV_BACKUP" ] && [ -f "$ENV_BACKUP" ]; then
+    cp "$ENV_BACKUP" .env.production
+    rm "$ENV_BACKUP"
+    echo -e "${GREEN}Restored .env.production after git reset${NC}"
+  fi
 fi
 
 # Stop existing container gracefully
