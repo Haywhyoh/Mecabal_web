@@ -37,7 +37,10 @@ class ApiClient {
         ...options,
         headers: {
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': '69420', // Bypass ngrok browser warning
+          // Only add ngrok header in development
+          ...(process.env.NODE_ENV === 'development' && {
+            'ngrok-skip-browser-warning': '69420',
+          }),
           ...(token && { Authorization: `Bearer ${token}` }),
           ...options.headers,
         },
