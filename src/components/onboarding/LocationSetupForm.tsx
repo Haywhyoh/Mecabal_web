@@ -187,47 +187,8 @@ export default function LocationSetupForm() {
     }
   };
 
-  const loadNeighborhoods = async (lgaId: string, query?: string) => {
-    try {
-      setIsLoadingNeighborhoods(true);
-      const response = await apiClient.searchNeighborhoods({
-        lgaId,
-        query,
-        limit: 50,
-      });
-
-      if (response.success && response.data) {
-        setNeighborhoods(response.data);
-      } else {
-        setError('Failed to load neighborhoods. Please try again.');
-      }
-    } catch (err) {
-      setError('Failed to load neighborhoods.');
-    } finally {
-      setIsLoadingNeighborhoods(false);
-    }
-  };
-
-  const loadNearbyNeighborhoods = async (latitude: number, longitude: number) => {
-    try {
-      setIsLoadingNeighborhoods(true);
-      const response = await apiClient.recommendNeighborhoods({
-        latitude,
-        longitude,
-        radius: 2000,
-        limit: 20,
-      });
-
-      if (response.success && response.data?.recommendations) {
-        const recommendedNeighborhoods = response.data.recommendations.map((rec: any) => rec.neighborhood);
-        setNeighborhoods(recommendedNeighborhoods);
-      }
-    } catch (err) {
-      console.error('Failed to load nearby neighborhoods:', err);
-    } finally {
-      setIsLoadingNeighborhoods(false);
-    }
-  };
+  // Note: Neighborhood loading is handled in the NeighborhoodSelectionForm component
+  // These functions are kept for potential future use but are not currently used in this form
 
   const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedState = states.find(s => s.id === e.target.value);
@@ -237,8 +198,6 @@ export default function LocationSetupForm() {
       stateName: selectedState?.name || '',
       lgaId: '',
       lgaName: '',
-      neighborhoodId: '',
-      neighborhoodName: '',
     }));
   };
 
@@ -248,27 +207,11 @@ export default function LocationSetupForm() {
       ...prev,
       lgaId: e.target.value,
       lgaName: selectedLGA?.name || '',
-      neighborhoodId: '',
-      neighborhoodName: '',
     }));
   };
 
-  const handleNeighborhoodSelect = (neighborhood: Neighborhood) => {
-    setFormData(prev => ({
-      ...prev,
-      neighborhoodId: neighborhood.id,
-      neighborhoodName: neighborhood.name,
-    }));
-  };
-
-  const handleNeighborhoodSearch = (query: string) => {
-    setNeighborhoodSearchQuery(query);
-    if (formData.lgaId && query.length >= 2) {
-      loadNeighborhoods(formData.lgaId, query);
-    } else if (query.length === 0 && formData.lgaId) {
-      loadNeighborhoods(formData.lgaId);
-    }
-  };
+  // Note: Neighborhood selection is handled in the NeighborhoodSelectionForm component
+  // These handlers are kept for potential future use but are not currently used in this form
 
 
   const handleContinueToNeighborhood = () => {
