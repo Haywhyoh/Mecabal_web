@@ -33,8 +33,14 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
 
 networks:
   mecabal-network:
     external: true
-    name: backend_mecabal-network
+    name: mecabal_network
