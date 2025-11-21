@@ -11,6 +11,12 @@ export interface User {
   isVerified?: boolean;
   phoneVerified?: boolean;
   primaryLocationId?: string;
+  // Profile fields
+  stateOfOriginId?: string;
+  culturalBackgroundId?: string;
+  professionalCategoryId?: string;
+  professionalTitle?: string;
+  occupation?: string;
   [key: string]: any; // Allow additional properties
 }
 

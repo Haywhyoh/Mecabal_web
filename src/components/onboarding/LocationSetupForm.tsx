@@ -214,7 +214,7 @@ export default function LocationSetupForm() {
   // These handlers are kept for potential future use but are not currently used in this form
 
 
-  const handleContinueToNeighborhood = () => {
+  const handleContinueToEstateSelection = () => {
     if (!formData.stateId || !formData.lgaId) {
       setError('Please select at least state and LGA');
       return;
@@ -234,13 +234,13 @@ export default function LocationSetupForm() {
       },
     });
 
-    // Navigate to neighborhood selection step
-    setCurrentStep('neighborhood-selection');
+    // Navigate to estate selection step
+    setCurrentStep('estate-selection');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    handleContinueToNeighborhood();
+    handleContinueToEstateSelection();
   };
 
   return (
@@ -442,7 +442,7 @@ export default function LocationSetupForm() {
                   Processing...
                 </>
               ) : (
-                'Continue to Neighborhood Selection'
+                'Continue to Estate Selection'
               )}
             </button>
           </form>

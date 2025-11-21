@@ -9,7 +9,8 @@ export type OnboardingStep =
   | 'phone-verification'
   | 'phone-otp-verification'
   | 'location-setup'
-  | 'neighborhood-selection'
+  | 'estate-selection'
+  | 'profile-setup'
   | 'complete';
 
 export interface OnboardingUser {
@@ -21,6 +22,12 @@ export interface OnboardingUser {
   phoneVerified?: boolean;
   isVerified?: boolean;
   verificationLevel?: number;
+  // Profile fields
+  stateOfOriginId?: string;
+  culturalBackgroundId?: string;
+  professionalCategoryId?: string;
+  professionalTitle?: string;
+  occupation?: string;
 }
 
 export interface OnboardingState {
@@ -38,6 +45,7 @@ export interface LocationData {
   lgaName?: string;
   cityTown?: string;
   address?: string;
+  estateId?: string;
   coordinates?: {
     latitude?: number;
     longitude?: number;

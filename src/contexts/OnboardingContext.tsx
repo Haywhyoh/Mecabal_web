@@ -12,6 +12,7 @@ interface OnboardingContextType {
   updateUser: (userData: Partial<OnboardingUser>) => void;
   setPhoneNumber: (phone: string) => void;
   setLocationData: (data: LocationData) => void;
+  updateLocationData: (data: Partial<LocationData>) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   resetOnboarding: () => void;
 }
@@ -94,6 +95,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Helper to update location data with estate
+  const updateLocationData = (data: Partial<LocationData>) => {
+    setLocationData((prev) => ({ ...prev, ...data }));
+  };
+
   return (
     <OnboardingContext.Provider
       value={{
@@ -105,6 +111,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         updateUser,
         setPhoneNumber,
         setLocationData,
+        updateLocationData,
         setTokens,
         resetOnboarding,
       }}

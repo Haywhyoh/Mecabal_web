@@ -8,7 +8,8 @@ import EmailVerificationForm from '@/components/onboarding/EmailVerificationForm
 import PhoneVerificationForm from '@/components/onboarding/PhoneVerificationForm';
 import PhoneOTPVerificationForm from '@/components/onboarding/PhoneOTPVerificationForm';
 import LocationSetupForm from '@/components/onboarding/LocationSetupForm';
-import NeighborhoodSelectionForm from '@/components/onboarding/NeighborhoodSelectionForm';
+import EstateSelectionForm from '@/components/onboarding/EstateSelectionForm';
+import ProfileSetupForm from '@/components/onboarding/ProfileSetupForm';
 
 function OnboardingContent() {
   const { currentStep } = useOnboarding();
@@ -27,8 +28,10 @@ function OnboardingContent() {
         return <PhoneOTPVerificationForm />;
       case 'location-setup':
         return <LocationSetupForm />;
-      case 'neighborhood-selection':
-        return <NeighborhoodSelectionForm />;
+      case 'estate-selection':
+        return <EstateSelectionForm />;
+      case 'profile-setup':
+        return <ProfileSetupForm />;
       default:
         return <WelcomeScreen />;
     }
