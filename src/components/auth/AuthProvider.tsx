@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, ReactNode } from 'react';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore, useIsAuthenticated } from '@/store/authStore';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -13,15 +13,17 @@ interface AuthProviderProps {
  * Checks for existing tokens and validates them
  */
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const { initializeAuth, isLoading } = useAuthStore();
+  const { initializeAuth, isLoading, isInitialized } = useAuthStore();
 
   useEffect(() => {
-    // Initialize auth state on mount
-    initializeAuth();
-  }, [initializeAuth]);
+    // Initialize auth state on mount (only once)
+    if (!isInitialized) {
+      initializeAuth();
+    }
+  }, [initializeAuth, isInitialized]);
 
-  // Show loading state while initializing (optional - can be removed if not needed)
-  if (isLoading) {
+  // Show loading state while initializing
+  if (isLoading || !isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

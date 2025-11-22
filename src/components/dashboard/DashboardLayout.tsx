@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu } from 'lucide-react';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore, useIsAuthenticated } from '@/store/authStore';
 import Sidebar from './Sidebar';
 import Feed from './Feed';
 import RightSidebar from './RightSidebar';
@@ -15,16 +15,18 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const isAuthenticated = useIsAuthenticated();
+  const { isLoading, isInitialized } = useAuthStore();
 
   useEffect(() => {
-    // Redirect to onboarding if not authenticated
-    if (!isLoading && !isAuthenticated) {
+    // Wait for initialization to complete before checking authentication
+    if (isInitialized && !isLoading && !isAuthenticated) {
       router.push('/onboarding');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, isInitialized, router]);
 
-  if (isLoading) {
+  // Show loading while initializing or loading
+  if (isLoading || !isInitialized) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -35,6 +37,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
+  // Don't render if not authenticated (will redirect)
   if (!isAuthenticated) {
     return null;
   }

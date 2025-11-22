@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Camera, X, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ProfileSection from '@/components/profile/ProfileSection';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 import type { User } from '@/types/user';
 
 interface FormData {
@@ -22,6 +23,7 @@ interface FormData {
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { updateUser: updateAuthStoreUser } = useAuthStore();
   const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -38,6 +40,12 @@ export default function EditProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  
+  // Avatar upload state
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarUploadError, setAvatarUploadError] = useState<string | null>(null);
+  const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadUser();
@@ -75,6 +83,86 @@ export default function EditProfilePage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setError(null);
     setSuccess(false);
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setAvatarUploadError('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setAvatarUploadError('File size must be less than 5MB');
+      return;
+    }
+
+    setAvatarUploadError(null);
+    setIsUploadingAvatar(true);
+
+    try {
+      const response = await apiClient.uploadAvatar(file);
+      
+      if (response.success && response.data?.avatarUrl) {
+        // Update local user state
+        const updatedUser = { ...user!, profilePictureUrl: response.data.avatarUrl };
+        setUser(updatedUser);
+        
+        // Update auth store
+        updateAuthStoreUser({ profilePictureUrl: response.data.avatarUrl });
+      } else {
+        setAvatarUploadError(response.error || 'Failed to upload avatar');
+      }
+    } catch (error) {
+      setAvatarUploadError(error instanceof Error ? error.message : 'Failed to upload avatar');
+    } finally {
+      setIsUploadingAvatar(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    if (!user?.profilePictureUrl) return;
+    
+    if (!window.confirm('Are you sure you want to delete your profile picture?')) {
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setAvatarUploadError(null);
+
+    try {
+      const response = await apiClient.deleteAvatar();
+      
+      if (response.success) {
+        // Update local user state
+        const updatedUser = { ...user, profilePictureUrl: undefined };
+        setUser(updatedUser);
+        
+        // Update auth store
+        updateAuthStoreUser({ profilePictureUrl: undefined });
+      } else {
+        setAvatarUploadError(response.error || 'Failed to delete avatar');
+      }
+    } catch (error) {
+      setAvatarUploadError(error instanceof Error ? error.message : 'Failed to delete avatar');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    if (!isUploadingAvatar) {
+      fileInputRef.current?.click();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -163,6 +251,114 @@ export default function EditProfilePage() {
         )}
 
         <form onSubmit={handleSubmit}>
+          {/* Avatar Upload Section */}
+          <ProfileSection title="Profile Picture">
+            <div className="flex flex-col items-center gap-4">
+              <div
+                className="relative cursor-pointer group"
+                onMouseEnter={() => setIsHoveringAvatar(true)}
+                onMouseLeave={() => setIsHoveringAvatar(false)}
+                onClick={handleAvatarClick}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarUpload}
+                  accept="image/*"
+                  className="hidden"
+                  disabled={isUploadingAvatar}
+                />
+                
+                {user?.profilePictureUrl ? (
+                  <div className="relative">
+                    <img
+                      src={user.profilePictureUrl}
+                      alt={user.firstName || 'Profile'}
+                      className="w-32 h-32 rounded-full border-4 border-gray-200 object-cover transition-opacity"
+                      style={{ opacity: isUploadingAvatar ? 0.5 : 1 }}
+                    />
+                    {/* Upload overlay */}
+                    {(isHoveringAvatar || isUploadingAvatar) && (
+                      <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center">
+                        {isUploadingAvatar ? (
+                          <Loader2 className="w-8 h-8 text-white animate-spin" />
+                        ) : (
+                          <Camera className="w-8 h-8 text-white" />
+                        )}
+                      </div>
+                    )}
+                    {/* Delete button */}
+                    {user.profilePictureUrl && isHoveringAvatar && !isUploadingAvatar && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAvatarDelete();
+                        }}
+                        className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-10"
+                        title="Delete avatar"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div
+                      className="w-32 h-32 rounded-full border-4 border-gray-200 bg-green-600 flex items-center justify-center transition-opacity group-hover:bg-green-700"
+                      style={{ opacity: isUploadingAvatar ? 0.5 : 1 }}
+                    >
+                      {isUploadingAvatar ? (
+                        <Loader2 className="w-12 h-12 text-white animate-spin" />
+                      ) : (
+                        <span className="text-white font-bold text-4xl">
+                          {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                        </span>
+                      )}
+                    </div>
+                    {/* Upload overlay */}
+                    {isHoveringAvatar && !isUploadingAvatar && (
+                      <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center">
+                        <Camera className="w-8 h-8 text-white" />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={handleAvatarClick}
+                  disabled={isUploadingAvatar}
+                  className="px-4 py-2 text-sm font-medium text-green-600 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {user?.profilePictureUrl ? 'Change Photo' : 'Upload Photo'}
+                </button>
+                {user?.profilePictureUrl && (
+                  <button
+                    type="button"
+                    onClick={handleAvatarDelete}
+                    disabled={isUploadingAvatar}
+                    className="ml-4 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Remove Photo
+                  </button>
+                )}
+              </div>
+              
+              {avatarUploadError && (
+                <div className="w-full p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600 text-center">{avatarUploadError}</p>
+                </div>
+              )}
+              
+              <p className="text-xs text-gray-500 text-center max-w-md">
+                Click on the photo or use the button to upload a new profile picture. Maximum file size is 5MB.
+              </p>
+            </div>
+          </ProfileSection>
+
           {/* Basic Information */}
           <ProfileSection title="Basic Information">
             <div className="space-y-4">

@@ -2,7 +2,7 @@
 
 import React, { useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore, useIsAuthenticated } from '@/store/authStore';
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -18,18 +18,19 @@ export default function AuthGuard({
   children, 
   redirectTo = '/onboarding' 
 }: AuthGuardProps) {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const isAuthenticated = useIsAuthenticated();
+  const { isLoading, isInitialized } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    // Wait for auth initialization to complete
-    if (!isLoading && !isAuthenticated) {
+    // Wait for auth initialization to complete before checking authentication
+    if (isInitialized && !isLoading && !isAuthenticated) {
       router.push(redirectTo);
     }
-  }, [isAuthenticated, isLoading, router, redirectTo]);
+  }, [isAuthenticated, isLoading, isInitialized, router, redirectTo]);
 
   // Show loading state while checking auth
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

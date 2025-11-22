@@ -13,7 +13,7 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isLoading: boolean;
-  isAuthenticated: boolean;
+  isInitialized: boolean;
   authProvider: 'local' | 'google' | 'phone' | null;
   
   // Actions
@@ -38,14 +38,11 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isLoading: false,
-      isAuthenticated: false,
+      isInitialized: false,
       authProvider: null,
 
       setUser: (user) => {
-        set({ 
-          user, 
-          isAuthenticated: !!user 
-        });
+        set({ user });
       },
 
       setTokens: (accessToken, refreshToken) => {
@@ -62,7 +59,6 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           accessToken: null,
           refreshToken: null,
-          isAuthenticated: false,
           authProvider: null,
         });
         if (typeof window !== 'undefined') {
@@ -200,6 +196,18 @@ export const useAuthStore = create<AuthState>()(
           const response = await apiClient.getCurrentUserProfile();
           if (response.success && response.data) {
             get().setUser(response.data);
+          } else {
+            // If user fetch fails, try refreshing token
+            const refreshResponse = await apiClient.refreshToken();
+            if (refreshResponse.success && refreshResponse.data) {
+              const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data;
+              get().setTokens(newAccessToken, newRefreshToken);
+              // Retry getting user
+              const retryResponse = await apiClient.getCurrentUserProfile();
+              if (retryResponse.success && retryResponse.data) {
+                get().setUser(retryResponse.data);
+              }
+            }
           }
         } catch (error) {
           console.error('Refresh user error:', error);
@@ -215,7 +223,7 @@ export const useAuthStore = create<AuthState>()(
 
       initializeAuth: async () => {
         try {
-          set({ isLoading: true });
+          set({ isLoading: true, isInitialized: false });
           
           // Check for tokens in localStorage (for API client compatibility)
           if (typeof window !== 'undefined') {
@@ -223,32 +231,61 @@ export const useAuthStore = create<AuthState>()(
             const storedRefreshToken = localStorage.getItem('refreshToken');
 
             if (storedAccessToken && storedRefreshToken) {
-              // Update store with tokens
+              // Update store with tokens immediately - this sets isAuthenticated to true
               set({ 
                 accessToken: storedAccessToken, 
                 refreshToken: storedRefreshToken 
               });
 
               // Try to fetch current user
-              const response = await apiClient.getCurrentUserProfile();
+              let response = await apiClient.getCurrentUserProfile();
+              
+              // If user fetch fails with 401, try refreshing token
+              if (!response.success && (response.error?.includes('401') || response.error?.includes('Unauthorized') || response.error?.includes('expired'))) {
+                console.log('🔄 Access token expired, attempting refresh...');
+                // refreshToken() reads from localStorage, which we just set
+                const refreshResponse = await apiClient.refreshToken();
+                
+                if (refreshResponse.success && refreshResponse.data) {
+                  const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data;
+                  get().setTokens(newAccessToken, newRefreshToken);
+                  
+                  // Retry getting user with new token
+                  response = await apiClient.getCurrentUserProfile();
+                } else {
+                  // Refresh failed, clear auth
+                  console.log('❌ Token refresh failed, clearing auth');
+                  get().clearAuth();
+                  set({ isInitialized: true });
+                  return;
+                }
+              }
+
               if (response.success && response.data) {
                 get().setUser(response.data);
-                // Try to determine auth provider from storage or user data
+                // Try to determine auth provider from storage
                 const storedProvider = localStorage.getItem('authProvider') as 'local' | 'google' | 'phone' | null;
                 if (storedProvider) {
                   set({ authProvider: storedProvider });
                 }
               } else {
-                // Token might be invalid, clear auth
-                get().clearAuth();
+                // Token might be invalid, but keep tokens if refresh token exists
+                // Only clear if we can't refresh
+                if (!storedRefreshToken) {
+                  get().clearAuth();
+                }
               }
             }
           }
         } catch (error) {
           console.error('Initialize auth error:', error);
-          get().clearAuth();
+          // Don't clear auth on network errors, only on auth errors
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+            get().clearAuth();
+          }
         } finally {
-          set({ isLoading: false });
+          set({ isLoading: false, isInitialized: true });
         }
       },
     }),
@@ -263,4 +300,9 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Selector for isAuthenticated - computed from accessToken
+export const useIsAuthenticated = () => {
+  return useAuthStore((state) => !!state.accessToken);
+};
 

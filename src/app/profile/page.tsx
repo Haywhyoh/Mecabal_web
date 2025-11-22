@@ -50,11 +50,15 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarUploadSuccess = (avatarUrl: string) => {
+  const handleAvatarUploadSuccess = async (avatarUrl: string | null) => {
     if (user) {
-      setUser({ ...user, profilePictureUrl: avatarUrl });
+      setUser({ ...user, profilePictureUrl: avatarUrl || undefined });
     }
-    loadProfile(); // Refresh to get updated data
+    // Refresh profile to get updated data
+    await loadProfile();
+    // Update auth store
+    const { useAuthStore } = await import('@/store/authStore');
+    useAuthStore.getState().updateUser({ profilePictureUrl: avatarUrl || undefined });
   };
 
   if (isLoading) {
@@ -96,6 +100,7 @@ export default function ProfilePage() {
           user={user}
           showEditButton
           onEditClick={() => router.push('/profile/edit')}
+          onAvatarUpdate={handleAvatarUploadSuccess}
         />
 
         {/* Profile Completion */}
@@ -206,16 +211,38 @@ export default function ProfilePage() {
         )}
 
         {/* Location Information */}
-        {(user.state || user.city || user.estate) && (
+        {(user.state || user.city || user.estate || user.landmark || user.address) && (
           <ProfileSection title="Location">
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="text-gray-900">{user.locationString || 'Not set'}</p>
+              {user.estate && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-green-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">Estate/Neighborhood</p>
+                    <p className="text-gray-900 font-medium">{user.estate}</p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {user.city && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">City</p>
+                    <p className="text-gray-900">{user.city}</p>
+                  </div>
+                </div>
+              )}
+
+              {user.state && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">State</p>
+                    <p className="text-gray-900">{user.state}</p>
+                  </div>
+                </div>
+              )}
 
               {user.landmark && (
                 <div className="flex items-start gap-3">
@@ -223,6 +250,16 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-sm text-gray-500">Landmark</p>
                     <p className="text-gray-900">{user.landmark}</p>
+                  </div>
+                </div>
+              )}
+
+              {user.address && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">Address</p>
+                    <p className="text-gray-900">{user.address}</p>
                   </div>
                 </div>
               )}
