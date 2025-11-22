@@ -6,11 +6,14 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { apiClient } from '@/lib/api';
 
 export default function PhoneVerificationForm() {
-  const { user, setCurrentStep, setPhoneNumber } = useOnboarding();
+  const { user, setCurrentStep, setPhoneNumber, isLoginMode } = useOnboarding();
   const [phone, setPhone] = useState('');
   const [method, setMethod] = useState<'sms' | 'whatsapp'>('sms');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
+  
+  // Detect if this is login mode
+  const isLogin = isLoginMode || !user.firstName;
 
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
@@ -45,9 +48,10 @@ export default function PhoneVerificationForm() {
         ? `+234${phone.slice(1)}` 
         : `+234${phone}`;
 
+      const purpose = isLogin ? 'login' : 'registration';
       const response = await apiClient.sendPhoneOTP(
         normalizedPhone,
-        'registration',
+        purpose,
         method,
         user.email
       );

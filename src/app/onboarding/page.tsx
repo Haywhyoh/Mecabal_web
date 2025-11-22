@@ -3,6 +3,7 @@
 import React from 'react';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import WelcomeScreen from '@/components/onboarding/WelcomeScreen';
+import LoginForm from '@/components/onboarding/LoginForm';
 import EmailRegistrationForm from '@/components/onboarding/EmailRegistrationForm';
 import EmailVerificationForm from '@/components/onboarding/EmailVerificationForm';
 import PhoneVerificationForm from '@/components/onboarding/PhoneVerificationForm';
@@ -18,6 +19,8 @@ function OnboardingContent() {
     switch (currentStep) {
       case 'welcome':
         return <WelcomeScreen />;
+      case 'login':
+        return <LoginForm />;
       case 'email-registration':
         return <EmailRegistrationForm />;
       case 'email-verification':

@@ -116,6 +116,17 @@ class ApiClient {
     });
   }
 
+  /**
+   * Complete email login after OTP verification
+   * POST /auth/complete-email-login
+   */
+  async completeEmailLogin(email: string, otpCode: string) {
+    return this.request<EmailVerificationResponse>('/auth/complete-email-login', {
+      method: 'POST',
+      body: JSON.stringify({ email, otpCode }),
+    });
+  }
+
   // Phone OTP Methods
   async sendPhoneOTP(
     phone: string,
@@ -397,6 +408,34 @@ class ApiClient {
     return this.request<GoogleAuthResponse>('/auth/google/web', {
       method: 'POST',
       body: JSON.stringify({ idToken }),
+    });
+  }
+
+  /**
+   * Logout user
+   * POST /auth/logout
+   */
+  async logout() {
+    return this.request<{ message: string }>('/auth/logout', {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Refresh access token
+   * POST /auth/refresh
+   */
+  async refreshToken() {
+    const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+    if (!refreshToken) {
+      return {
+        success: false,
+        error: 'No refresh token available',
+      };
+    }
+    return this.request<{ accessToken: string; refreshToken: string }>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
     });
   }
 

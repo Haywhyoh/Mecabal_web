@@ -3,16 +3,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useAuthStore } from '@/store/authStore';
 import { apiClient } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function EmailVerificationForm() {
-  const { user, setCurrentStep, updateUser, setTokens } = useOnboarding();
+  const { user, setCurrentStep, updateUser, setTokens, isLoginMode } = useOnboarding();
+  const { loginWithEmail, setUser: setAuthUser } = useAuthStore();
+  const router = useRouter();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  // Detect if this is login mode (no firstName means login)
+  const isLogin = isLoginMode || !user.firstName;
 
   useEffect(() => {
     if (timer > 0) {
@@ -52,36 +59,63 @@ export default function EmailVerificationForm() {
     setIsLoading(true);
 
     try {
-      const response = await apiClient.verifyEmailOTP(
-        user.email!,
-        otp.join(''),
-        {
-          first_name: user.firstName!,
-          last_name: user.lastName!,
-          preferred_language: 'en',
+      if (isLogin) {
+        // Login flow
+        const success = await loginWithEmail(user.email!, otp.join(''));
+        
+        if (success) {
+          const { user: authUser } = useAuthStore.getState();
+          
+          if (authUser) {
+            // Check if user needs onboarding
+            const needsOnboarding = !authUser.isVerified || !authUser.phoneVerified;
+            
+            if (needsOnboarding) {
+              // Continue to phone verification
+              setCurrentStep('phone-verification');
+            } else {
+              // User is fully verified - redirect to dashboard
+              router.push('/dashboard');
+            }
+          } else {
+            setError('Login successful but user data not available');
+          }
+        } else {
+          setError('Invalid verification code or login failed');
         }
-      );
-
-      if (response.success && response.data) {
-        const userData = response.data.user;
-        const tokens = response.data;
-
-        if (tokens.accessToken && tokens.refreshToken) {
-          setTokens(tokens.accessToken, tokens.refreshToken);
-        }
-
-        updateUser({
-          id: userData?.id,
-          email: userData?.email || user.email,
-          firstName: userData?.firstName || user.firstName,
-          lastName: userData?.lastName || user.lastName,
-          phoneVerified: userData?.phoneVerified,
-          isVerified: userData?.isVerified,
-        });
-
-        setCurrentStep('phone-verification');
       } else {
-        setError(response.error || 'Invalid verification code');
+        // Registration flow
+        const response = await apiClient.verifyEmailOTP(
+          user.email!,
+          otp.join(''),
+          {
+            first_name: user.firstName!,
+            last_name: user.lastName!,
+            preferred_language: 'en',
+          }
+        );
+
+        if (response.success && response.data) {
+          const userData = response.data.user;
+          const tokens = response.data;
+
+          if (tokens.accessToken && tokens.refreshToken) {
+            setTokens(tokens.accessToken, tokens.refreshToken);
+          }
+
+          updateUser({
+            id: userData?.id,
+            email: userData?.email || user.email,
+            firstName: userData?.firstName || user.firstName,
+            lastName: userData?.lastName || user.lastName,
+            phoneVerified: userData?.phoneVerified,
+            isVerified: userData?.isVerified,
+          });
+
+          setCurrentStep('phone-verification');
+        } else {
+          setError(response.error || 'Invalid verification code');
+        }
       }
     } catch (err) {
       setError('Verification failed. Please try again.');
@@ -97,7 +131,8 @@ export default function EmailVerificationForm() {
     setIsLoading(true);
 
     try {
-      const response = await apiClient.sendEmailOTP(user.email!, 'registration');
+      const purpose = isLogin ? 'login' : 'registration';
+      const response = await apiClient.sendEmailOTP(user.email!, purpose);
       if (response.success) {
         setTimer(60);
         setCanResend(false);

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 import Sidebar from './Sidebar';
 import Feed from './Feed';
 import RightSidebar from './RightSidebar';
@@ -14,22 +15,14 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const checkAuthentication = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    // Redirect to onboarding if not authenticated
+    if (!isLoading && !isAuthenticated) {
       router.push('/onboarding');
-      return;
     }
-    setIsAuthenticated(true);
-    setIsLoading(false);
-  };
+  }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
     return (

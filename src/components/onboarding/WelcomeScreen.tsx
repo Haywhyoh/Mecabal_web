@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Mail, Phone, Loader2 } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { initializeGoogleSignIn, loadGoogleScript } from '@/lib/google-auth';
-import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 
 // Google icon SVG
@@ -30,7 +30,8 @@ const GoogleIcon = () => (
 );
 
 export default function WelcomeScreen() {
-  const { setCurrentStep, setTokens, updateUser } = useOnboarding();
+  const { setCurrentStep } = useOnboarding();
+  const { signInWithGoogle, setUser } = useAuthStore();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
   const router = useRouter();
@@ -42,50 +43,32 @@ export default function WelcomeScreen() {
 
       console.log('🔵 Google sign-in initiated with ID token');
 
-      // Send ID token to backend
-      const response = await apiClient.googleAuthWeb(idToken);
+      // Use auth store to sign in
+      const success = await signInWithGoogle(idToken);
 
-      console.log('🔵 Google auth response:', response);
-
-      if (!response.success) {
-        throw new Error(response.error || 'Google authentication failed');
+      if (!success) {
+        throw new Error('Google authentication failed');
       }
 
-      // Extract data from ApiResponse
-      if (!response.data) {
-        throw new Error('Invalid response: missing data');
-      }
+      // Get user from store after successful sign in
+      const { user } = useAuthStore.getState();
 
-      const { accessToken, refreshToken, user, isNewUser } = response.data;
-
-      if (!accessToken || !refreshToken) {
-        throw new Error('Missing authentication tokens');
-      }
-
-      // Store tokens
-      setTokens(accessToken, refreshToken);
-
-      // Update user context - handle Google auth response structure
-      if (user) {
-        updateUser({
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName || user.name?.split(' ')[0] || '',
-          lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
-          phoneNumber: user.phoneNumber ?? undefined,
-          phoneVerified: user.phoneVerified || false,
-          isVerified: user.isVerified || user.isEmailVerified || user.verified_email || false,
-        });
+      if (!user) {
+        throw new Error('User data not available after sign in');
       }
 
       // Check if user needs to complete onboarding
       // Google users might not have phone verified yet
-      const needsOnboarding = isNewUser || !user?.isVerified || !user?.phoneVerified;
+      const needsOnboarding = !user.isVerified || !user.phoneVerified;
       
-      console.log('🔵 Onboarding check:', { isNewUser, isVerified: user?.isVerified, phoneVerified: user?.phoneVerified, needsOnboarding });
+      console.log('🔵 Onboarding check:', { 
+        isVerified: user.isVerified, 
+        phoneVerified: user.phoneVerified, 
+        needsOnboarding 
+      });
 
       if (needsOnboarding) {
-        // New user or incomplete profile - proceed to phone verification
+        // Incomplete profile - proceed to phone verification
         setCurrentStep('phone-verification');
       } else {
         // User is fully verified - redirect to dashboard
@@ -99,7 +82,7 @@ export default function WelcomeScreen() {
     } finally {
       setIsGoogleLoading(false);
     }
-  }, [setTokens, updateUser, setCurrentStep, router]);
+  }, [signInWithGoogle, setCurrentStep, router]);
 
   useEffect(() => {
     // Initialize Google Sign-In when component mounts
@@ -213,7 +196,7 @@ export default function WelcomeScreen() {
         <p className="text-sm text-gray-500 text-center mt-8">
           Already have an account?{' '}
           <button
-            onClick={() => setCurrentStep('email-registration')}
+            onClick={() => setCurrentStep('login')}
             className="text-green-600 hover:text-green-700 font-medium"
           >
             Sign in

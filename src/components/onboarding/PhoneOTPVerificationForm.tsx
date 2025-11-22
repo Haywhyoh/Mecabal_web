@@ -3,16 +3,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useAuthStore } from '@/store/authStore';
 import { apiClient } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function PhoneOTPVerificationForm() {
-  const { phoneNumber, setCurrentStep, updateUser, setTokens } = useOnboarding();
+  const { phoneNumber, setCurrentStep, updateUser, setTokens, user, isLoginMode } = useOnboarding();
+  const { loginWithPhone } = useAuthStore();
+  const router = useRouter();
   const [otp, setOtp] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  // Detect if this is login mode
+  const isLogin = isLoginMode || !user?.firstName;
 
   useEffect(() => {
     if (timer > 0) {
@@ -62,32 +69,59 @@ export default function PhoneOTPVerificationForm() {
     setIsLoading(true);
 
     try {
-      const response = await apiClient.verifyPhoneOTP(
-        phoneNumber!,
-        otp.join(''),
-        'registration'
-      );
-
-      if (response.success && response.data?.verified) {
-        const userData = response.data.user;
-        const tokens = response.data.tokens;
-
-        if (tokens?.accessToken && tokens?.refreshToken) {
-          setTokens(tokens.accessToken, tokens.refreshToken);
+      if (isLogin) {
+        // Login flow
+        const success = await loginWithPhone(phoneNumber!, otp.join(''));
+        
+        if (success) {
+          const { user: authUser } = useAuthStore.getState();
+          
+          if (authUser) {
+            // Check if user needs onboarding
+            const needsOnboarding = !authUser.isVerified || !authUser.phoneVerified;
+            
+            if (needsOnboarding) {
+              // Continue to location setup
+              setCurrentStep('location-setup');
+            } else {
+              // User is fully verified - redirect to dashboard
+              router.push('/dashboard');
+            }
+          } else {
+            setError('Login successful but user data not available');
+          }
+        } else {
+          setError('Invalid verification code or login failed');
         }
-
-        if (userData) {
-          updateUser({
-            id: userData.id,
-            phoneNumber: userData.phoneNumber,
-            phoneVerified: userData.phoneVerified,
-            isVerified: userData.isVerified,
-          });
-        }
-
-        setCurrentStep('location-setup');
       } else {
-        setError(response.error || 'Invalid verification code');
+        // Registration flow
+        const response = await apiClient.verifyPhoneOTP(
+          phoneNumber!,
+          otp.join(''),
+          'registration'
+        );
+
+        if (response.success && response.data?.verified) {
+          const userData = response.data.user;
+          const tokens = response.data.tokens;
+
+          if (tokens?.accessToken && tokens?.refreshToken) {
+            setTokens(tokens.accessToken, tokens.refreshToken);
+          }
+
+          if (userData) {
+            updateUser({
+              id: userData.id,
+              phoneNumber: userData.phoneNumber,
+              phoneVerified: userData.phoneVerified,
+              isVerified: userData.isVerified,
+            });
+          }
+
+          setCurrentStep('location-setup');
+        } else {
+          setError(response.error || 'Invalid verification code');
+        }
       }
     } catch (err) {
       setError('Verification failed. Please try again.');
@@ -103,7 +137,8 @@ export default function PhoneOTPVerificationForm() {
     setIsLoading(true);
 
     try {
-      const response = await apiClient.sendPhoneOTP(phoneNumber!, 'registration', 'sms');
+      const purpose = isLogin ? 'login' : 'registration';
+      const response = await apiClient.sendPhoneOTP(phoneNumber!, purpose, 'sms');
       if (response.success) {
         setTimer(30);
         setCanResend(false);

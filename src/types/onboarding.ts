@@ -4,6 +4,7 @@
 
 export type OnboardingStep =
   | 'welcome'
+  | 'login'
   | 'email-registration'
   | 'email-verification'
   | 'phone-verification'
