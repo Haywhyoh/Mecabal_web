@@ -692,7 +692,7 @@ class ApiClient {
    * GET /business/my-business
    * Returns null if user has no business profile (404)
    */
-  async getMyBusiness() {
+  async getMyBusiness(): Promise<ApiResponse<BusinessProfile | null>> {
     try {
       const response = await this.request<BusinessProfile>('/business/my-business');
       
@@ -700,7 +700,7 @@ class ApiClient {
       if (!response.success && response.statusCode === 404) {
         return {
           success: true,
-          data: null as any, // Return null to indicate no business found
+          data: null,
         };
       }
       

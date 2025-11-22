@@ -61,14 +61,20 @@ export default function EditBusinessProfilePage() {
         });
       } else {
         // Handle other errors
-        console.error('Error loading business:', businessResponse.error);
-        alert(businessResponse.error || 'Failed to load business data');
+        const errorMessage = !businessResponse.success && businessResponse.error 
+          ? businessResponse.error 
+          : 'Failed to load business data';
+        console.error('Error loading business:', errorMessage);
+        alert(errorMessage);
       }
 
       if (categoriesResponse.success && categoriesResponse.data) {
         setCategories(categoriesResponse.data);
       } else {
-        console.warn('Failed to load categories:', categoriesResponse.error);
+        const errorMessage = !categoriesResponse.success && categoriesResponse.error
+          ? categoriesResponse.error
+          : 'Failed to load categories';
+        console.warn('Failed to load categories:', errorMessage);
         // Categories are not critical, continue without them
       }
     } catch (error: any) {
@@ -165,7 +171,10 @@ export default function EditBusinessProfilePage() {
       if (response.success) {
         router.push('/business/profile');
       } else {
-        alert(response.error || 'Failed to update business');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to update business';
+        alert(errorMessage);
       }
     } catch (error: any) {
       console.error('Update error:', error);

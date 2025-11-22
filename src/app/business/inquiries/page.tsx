@@ -67,7 +67,10 @@ export default function BusinessInquiriesPage() {
         setResponseMessage('');
         loadData();
       } else {
-        alert(response.error || 'Failed to send response');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to send response';
+        alert(errorMessage);
       }
     } catch (error: any) {
       console.error('Error sending response:', error);

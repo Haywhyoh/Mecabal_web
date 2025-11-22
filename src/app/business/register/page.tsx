@@ -108,7 +108,10 @@ export default function BusinessRegisterPage() {
       if (response.success && response.data) {
         router.push('/business/profile');
       } else {
-        alert(response.error || 'Failed to register business');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to register business';
+        alert(errorMessage);
       }
     } catch (error: any) {
       console.error('Registration error:', error);

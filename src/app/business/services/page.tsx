@@ -68,7 +68,10 @@ export default function BusinessServicesPage() {
         });
         setShowAddForm(false);
       } else {
-        alert(response.error || 'Failed to create service');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to create service';
+        alert(errorMessage);
       }
     } catch (error: any) {
       console.error('Error creating service:', error);
@@ -96,7 +99,10 @@ export default function BusinessServicesPage() {
           isActive: true,
         });
       } else {
-        alert(response.error || 'Failed to update service');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to update service';
+        alert(errorMessage);
       }
     } catch (error: any) {
       console.error('Error updating service:', error);
@@ -112,7 +118,10 @@ export default function BusinessServicesPage() {
       if (response.success) {
         setServices(services.filter((s) => s.id !== serviceId));
       } else {
-        alert(response.error || 'Failed to delete service');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to delete service';
+        alert(errorMessage);
       }
     } catch (error: any) {
       console.error('Error deleting service:', error);
@@ -126,7 +135,10 @@ export default function BusinessServicesPage() {
       if (response.success && response.data) {
         setServices(services.map((s) => (s.id === serviceId ? response.data! : s)));
       } else {
-        alert(response.error || 'Failed to update service status');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to update service status';
+        alert(errorMessage);
       }
     } catch (error: any) {
       console.error('Error toggling service:', error);

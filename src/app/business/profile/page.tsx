@@ -60,7 +60,9 @@ export default function BusinessProfilePage() {
           return;
         } else {
           // Handle other errors
-          const errorMessage = response.error || 'Failed to load business profile';
+          const errorMessage = !response.success && response.error 
+            ? response.error 
+            : 'Failed to load business profile';
           setError(errorMessage);
           console.error('Error loading business:', errorMessage);
         }
@@ -94,7 +96,10 @@ export default function BusinessProfilePage() {
       if (response.success && response.data) {
         setBusiness(response.data);
       } else {
-        alert(response.error || 'Failed to update status');
+        const errorMessage = !response.success && response.error 
+          ? response.error 
+          : 'Failed to update status';
+        alert(errorMessage);
       }
     } catch (err: any) {
       console.error('Error updating status:', err);
