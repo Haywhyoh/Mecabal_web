@@ -56,7 +56,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Connecting Nigerian Communities
+          Modern Estates across Nigeria use MeCabal
         </motion.h1>
         <motion.p 
           className="text-lg md:text-xl text-white/90 max-w-4xl mx-auto mb-12 font-light"
@@ -64,69 +64,80 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          Discover, connect, and trade safely within your neighborhood. MeCabal is your digital town square for trusted local interactions.
+          Residents of gated estates and communities can easily manage visitors, find trusted service providers, pay bills, and connect with neighbors—all from their phones in seconds.
         </motion.p>
 
-        {/* Countdown Timer */}
+        {/* Stats Preview */}
         <motion.div 
-          className="mb-12"
+          className="mb-12 flex flex-col sm:flex-row items-center justify-center gap-8"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
-          <p className="text-sm uppercase tracking-widest text-white/80 mb-4">Launching in</p>
-          <div className="flex justify-center gap-4 md:gap-8">
-            {[
-              { value: timeLeft.days, label: "Days" },
-              { value: timeLeft.hours, label: "Hours" },
-              { value: timeLeft.minutes, label: "Minutes" },
-              { value: timeLeft.seconds, label: "Seconds" }
-            ].map((item, index) => (
-              <motion.div 
-                key={item.label}
-                className="flex flex-col items-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
-              >
-                <motion.div 
-                  className="text-5xl md:text-6xl font-semibold text-white"
-                  key={item.value}
-                  initial={{ scale: 1.2 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {item.value}
-                </motion.div>
-                <div className="text-sm uppercase tracking-wide text-white/80 mt-2">{item.label}</div>
-              </motion.div>
-            ))}
+          <div className="text-center">
+            <div className="text-4xl md:text-5xl font-bold text-white mb-1">10k+</div>
+            <div className="text-sm uppercase tracking-wide text-white/80">Users</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl md:text-5xl font-bold text-white mb-1">4.8</div>
+            <div className="text-sm uppercase tracking-wide text-white/80">Rating</div>
           </div>
         </motion.div>
 
         {/* CTAs */}
         <motion.div 
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.2 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
         >
           <motion.a 
             href="/onboarding" 
-            className="px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium min-w-[280px] text-center"
+            className="px-8 py-4 bg-green-600 text-white text-lg rounded-full hover:bg-green-700 transition-all duration-200 font-medium min-w-[200px] text-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Create Your Neighborhood
+            Get Started
           </motion.a>
           <motion.a 
-            href="/onboarding" 
-            className="px-8 py-4 border-2 border-green-600 text-green-600 text-lg rounded-full hover:bg-green-50 transition-all duration-200 font-medium min-w-[280px] text-center"
+            href="/contact" 
+            className="px-8 py-4 border-2 border-white text-white text-lg rounded-full hover:bg-white/10 transition-all duration-200 font-medium min-w-[200px] text-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Join a neighborhood
+            Book a Demo
           </motion.a>
+        </motion.div>
+
+        {/* App Store Badges */}
+        <motion.div 
+          className="flex flex-col sm:flex-row justify-center items-center gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+        >
+          <a 
+            href="#" 
+            className="block transition-transform duration-200 hover:scale-105"
+            aria-label="Download on the App Store"
+          >
+            <img 
+              src="/assets/images/appstore.png" 
+              alt="Download on the App Store" 
+              className="h-12 w-auto object-contain"
+            />
+          </a>
+          <a 
+            href="#" 
+            className="block transition-transform duration-200 hover:scale-105"
+            aria-label="Get it on Google Play"
+          >
+            <img 
+              src="/assets/images/googleplay.png" 
+              alt="Get it on Google Play" 
+              className="h-12 w-auto object-contain"
+            />
+          </a>
         </motion.div>
       </motion.div>
     </section>

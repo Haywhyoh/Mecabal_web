@@ -11,18 +11,18 @@ export default function ForWhomSection() {
   const audiences = [
     {
       image: "/assets/images/neighbors.jpg",
-      title: "Residents",
-      description: "Build trust with your neighbors and stay updated on everything happening around you."
-    },
-    {
-      image: "/assets/images/market.jpg",
-      title: "Businesses",
-      description: "Reach verified, local customers who are looking for trusted services nearby."
+      title: "Gated Community Residents",
+      description: "Find trusted service providers, pay estate dues, manage visitors, and connect with neighbors—all from your phone. Perfect for residents who want safe, efficient estate living."
     },
     {
       image: "/assets/images/people.jpg",
-      title: "Communities and Estates",
-      description: "Coordinate events and safety initiatives with ease and transparency."
+      title: "Estate Managers & Associations",
+      description: "Manage your community effortlessly: automate collections, communicate with residents, track issues, and generate reports. Reduce manual work and improve resident satisfaction."
+    },
+    {
+      image: "/assets/images/market.jpg",
+      title: "Service Providers",
+      description: "Reach verified estate customers, build your reputation through reviews, and get paid faster. Access steady customers within estates without expensive marketing."
     }
   ];
 

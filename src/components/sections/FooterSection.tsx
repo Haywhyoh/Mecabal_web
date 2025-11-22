@@ -142,7 +142,7 @@ export default function FooterSection() {
 
         {/* Footer Links */}
         <motion.div 
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16"
+          className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16"
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -157,47 +157,72 @@ export default function FooterSection() {
           <motion.div variants={itemVariants}>
             <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Company</h4>
             <ul className="space-y-3 text-gray-400 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Press Kit</a></li>
+              <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
+              <li><a href="#faq" className="hover:text-white transition-colors">FAQs</a></li>
             </ul>
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Support</h4>
+            <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Use Cases</h4>
             <ul className="space-y-3 text-gray-400 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="/use-cases" className="hover:text-white transition-colors">All Use Cases</a></li>
+              <li><a href="/use-cases/residents" className="hover:text-white transition-colors">For Residents</a></li>
+              <li><a href="/use-cases/estate-managers" className="hover:text-white transition-colors">For Estate Managers</a></li>
+              <li><a href="/use-cases/service-providers" className="hover:text-white transition-colors">For Service Providers</a></li>
+              <li><a href="/use-cases/other" className="hover:text-white transition-colors">Other Use Cases</a></li>
             </ul>
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Contact</h4>
-            <ul className="space-y-4 text-gray-400 text-sm">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-                <span className="leading-relaxed">
-                  14 Amusa Alabi, Abesan<br />
-                  Lagos, Nigeria
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-green-600 shrink-0" />
-                <a href="tel:+2348142064474" className="hover:text-white transition-colors">
-                  +234 814 206 4474
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-green-600 shrink-0" />
-                <a href="mailto:info@mecabal.com" className="hover:text-white transition-colors">
-                  support@mecabal.com
-                </a>
-              </li>
+            <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Resources</h4>
+            <ul className="space-y-3 text-gray-400 text-sm">
+              <li><a href="/resources/blog" className="hover:text-white transition-colors">Blog</a></li>
+              <li><a href="/resources/videos" className="hover:text-white transition-colors">Videos</a></li>
+              <li><a href="/resources/knowledgebase" className="hover:text-white transition-colors">Knowledge Base</a></li>
+              <li><a href="/resources" className="hover:text-white transition-colors">Links</a></li>
             </ul>
           </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <h4 className="font-semibold mb-6 text-sm uppercase tracking-wide">Features</h4>
+            <ul className="space-y-3 text-gray-400 text-sm">
+              <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="#core-features" className="hover:text-white transition-colors">Estate Management</a></li>
+              <li><a href="#core-features" className="hover:text-white transition-colors">Verified Services</a></li>
+              <li><a href="#core-features" className="hover:text-white transition-colors">Community</a></li>
+            </ul>
+          </motion.div>
+        </motion.div>
+
+        {/* Contact Section */}
+        <motion.div 
+          className="border-t border-gray-800 pt-8 mb-8"
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
+          <div className="grid md:grid-cols-3 gap-8 text-gray-400 text-sm">
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+              <span className="leading-relaxed">
+                14 Amusa Alabi, Abesan<br />
+                Lagos, Nigeria
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Phone className="w-5 h-5 text-green-600 shrink-0" />
+              <a href="tel:+2348142064474" className="hover:text-white transition-colors">
+                +234 814 206 4474
+              </a>
+            </div>
+            <div className="flex items-center gap-3">
+              <Mail className="w-5 h-5 text-green-600 shrink-0" />
+              <a href="mailto:support@mecabal.com" className="hover:text-white transition-colors">
+                support@mecabal.com
+              </a>
+            </div>
+          </div>
         </motion.div>
 
         {/* Bottom Bar */}

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { MessageSquare, CheckCircle2, CalendarDays, Clock, Store, Heart } from "lucide-react";
+import { MessageSquare, CheckCircle2, CalendarDays, Clock, Store, Heart, Users, AlertTriangle, CreditCard, ShieldCheck } from "lucide-react";
 import { containerVariants, itemVariants } from "@/lib/animations";
 
 export default function FeaturesSection() {
@@ -17,12 +17,12 @@ export default function FeaturesSection() {
   };
 
   const features = [
-    { colSpan: 5, icon: MessageSquare, title: "Community Feed", description: "Talk to real neighbors, share updates, and stay connected with your community in real-time.", bg: "from-green-50 via-green-100 to-emerald-50", border: "border-green-200", iconBg: "bg-green-600" },
-    { colSpan: 4, icon: CheckCircle2, title: "Verified Neighbors", description: "Buy and sell locally with trust, knowing you are dealing with verified neighbors.", bg: "from-blue-50 via-blue-100 to-cyan-50", border: "border-blue-200", iconBg: "bg-blue-600", center: true },
-    { colSpan: 3, icon: CalendarDays, title: "Local Events", description: "Discover what is happening nearby and join local events that matter to you.", bg: "from-purple-50 via-purple-100 to-pink-50", border: "border-purple-200", iconBg: "bg-purple-600", center: true },
-    { colSpan: 3, icon: Clock, title: "Instant Account Setup", description: "Get started in minutes with our simple verification process.", bg: "from-orange-50 via-orange-100 to-amber-50", border: "border-orange-200", iconBg: "bg-orange-600", center: true },
-    { colSpan: 4, icon: Store, title: "Safe Marketplace", description: "Trade within your verified community with confidence and security.", bg: "from-emerald-50 via-emerald-100 to-teal-50", border: "border-emerald-200", iconBg: "bg-emerald-600" },
-    { colSpan: 5, icon: Heart, title: "Neighborhood Support", description: "Ask or offer help to neighbors, building stronger bonds and a more connected community.", bg: "from-rose-50 via-rose-100 to-pink-50", border: "border-rose-200", iconBg: "bg-rose-600" }
+    { colSpan: 4, icon: Users, title: "Visitor Management", description: "Digital visitor registration with QR codes, real-time logs, and automated access control for enhanced security.", bg: "from-blue-50 via-blue-100 to-cyan-50", border: "border-blue-200", iconBg: "bg-blue-600", center: true },
+    { colSpan: 4, icon: ShieldCheck, title: "Verified Service Providers", description: "Access estate-approved service providers with NIN verification, trade certifications, and community ratings.", bg: "from-green-50 via-green-100 to-emerald-50", border: "border-green-200", iconBg: "bg-green-600", center: true },
+    { colSpan: 4, icon: AlertTriangle, title: "Emergency Alerts", description: "Instant notifications for security alerts, safety issues, and community emergencies. Stay informed and safe.", bg: "from-red-50 via-red-100 to-rose-50", border: "border-red-200", iconBg: "bg-red-600", center: true },
+    { colSpan: 4, icon: CreditCard, title: "Estate Payments", description: "Pay estate dues, service charges, and utility bills directly from the app. Automated reminders and payment tracking.", bg: "from-purple-50 via-purple-100 to-pink-50", border: "border-purple-200", iconBg: "bg-purple-600", center: true },
+    { colSpan: 4, icon: MessageSquare, title: "Community Feed", description: "Share updates, announcements, and stay connected with neighbors in real-time through the community feed.", bg: "from-emerald-50 via-emerald-100 to-teal-50", border: "border-emerald-200", iconBg: "bg-emerald-600", center: true },
+    { colSpan: 4, icon: Store, title: "Marketplace", description: "Buy and sell items within your verified community. Trade with confidence knowing you're dealing with verified neighbors.", bg: "from-orange-50 via-orange-100 to-amber-50", border: "border-orange-200", iconBg: "bg-orange-600", center: true }
   ];
 
   return (
@@ -35,11 +35,11 @@ export default function FeaturesSection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
-            The Benefits
+            Features That Stand Us Out
           </h2>
-          <h3 className="text-4xl md:text-5xl font-semibold text-gray-900">
-            That Set Us Apart
-          </h3>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Here's a few of the features that make MeCabal the all-in-one estate management solution
+          </p>
         </motion.div>
 
         <motion.div 

@@ -9,6 +9,19 @@ import type { ReverseGeocodeResponse } from '@/types/geocoding';
 import type { State, LGA, Ward } from '@/types/location';
 import type { EmailVerificationResponse, PhoneVerificationResponse, LocationSetupResponse, GoogleAuthResponse } from '@/types/auth';
 import type { CulturalBackground, ProfessionalCategory } from '@/types/profile';
+import type {
+  BusinessProfile,
+  BusinessService,
+  BusinessInquiry,
+  BusinessReview,
+  BusinessCategory,
+  BusinessFilter,
+  PaginatedBusinesses,
+  CreateBusinessProfileDto,
+  UpdateBusinessProfileDto,
+  CreateBusinessServiceDto,
+  UpdateBusinessServiceDto,
+} from '@/types/business';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -561,6 +574,737 @@ class ApiClient {
   async deactivateAccount() {
     return this.request<{ message: string }>('/users/me', {
       method: 'DELETE',
+    });
+  }
+
+  // ==================== Business Profile APIs ====================
+
+  /**
+   * Register a new business profile
+   * POST /business-profile/register
+   */
+  async registerBusiness(data: CreateBusinessProfileDto) {
+    return this.request<BusinessProfile>('/business-profile/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Get current user's business profile
+   * GET /business-profile/my-business
+   */
+  async getMyBusiness() {
+    return this.request<BusinessProfile>('/business-profile/my-business');
+  }
+
+  /**
+   * Get business profile by ID
+   * GET /business-profile/:id
+   */
+  async getBusinessById(id: string) {
+    return this.request<BusinessProfile>(`/business-profile/${id}`);
+  }
+
+  /**
+   * Update business profile
+   * PUT /business-profile/:id
+   */
+  async updateBusiness(id: string, data: UpdateBusinessProfileDto) {
+    return this.request<BusinessProfile>(`/business-profile/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update business online/offline status
+   * PUT /business-profile/:id/status
+   */
+  async updateBusinessStatus(id: string, isActive: boolean) {
+    return this.request<BusinessProfile>(`/business-profile/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive }),
+    });
+  }
+
+  /**
+   * Delete business profile
+   * DELETE /business-profile/:id
+   */
+  async deleteBusiness(id: string) {
+    return this.request<{ message: string }>(`/business-profile/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ==================== Business Services APIs ====================
+
+  /**
+   * Add a new service to a business
+   * POST /business-services/:businessId
+   */
+  async createBusinessService(businessId: string, data: CreateBusinessServiceDto) {
+    return this.request<BusinessService>(`/business-services/${businessId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Get all services for a business
+   * GET /business-services/business/:businessId
+   */
+  async getBusinessServices(businessId: string) {
+    return this.request<BusinessService[]>(`/business-services/business/${businessId}`);
+  }
+
+  /**
+   * Get business service by ID
+   * GET /business-services/:id
+   */
+  async getBusinessServiceById(id: string) {
+    return this.request<BusinessService>(`/business-services/${id}`);
+  }
+
+  /**
+   * Update business service
+   * PUT /business-services/:id
+   */
+  async updateBusinessService(id: string, data: UpdateBusinessServiceDto) {
+    return this.request<BusinessService>(`/business-services/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Toggle service active status
+   * PUT /business-services/:id/toggle-active
+   */
+  async toggleServiceActive(id: string) {
+    return this.request<BusinessService>(`/business-services/${id}/toggle-active`, {
+      method: 'PUT',
+    });
+  }
+
+  /**
+   * Delete business service
+   * DELETE /business-services/:id
+   */
+  async deleteBusinessService(id: string) {
+    return this.request<{ message: string }>(`/business-services/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ==================== Business Search APIs ====================
+
+  /**
+   * Search businesses
+   * GET /search?query=...
+   */
+  async searchBusinesses(filter: BusinessFilter = {}) {
+    const queryParams = new URLSearchParams();
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString());
+      }
+    });
+    const queryString = queryParams.toString();
+    return this.request<PaginatedBusinesses>(`/search${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get featured businesses
+   * GET /search/featured
+   */
+  async getFeaturedBusinesses(limit: number = 10) {
+    return this.request<BusinessProfile[]>(`/search/featured?limit=${limit}`);
+  }
+
+  /**
+   * Get trending businesses
+   * GET /search/trending
+   */
+  async getTrendingBusinesses(limit: number = 10) {
+    return this.request<BusinessProfile[]>(`/search/trending?limit=${limit}`);
+  }
+
+  /**
+   * Get businesses by service area
+   * GET /search/by-service-area
+   */
+  async getBusinessesByServiceArea(params: {
+    latitude: number;
+    longitude: number;
+    radius?: number;
+    serviceArea?: string;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('latitude', params.latitude.toString());
+    queryParams.append('longitude', params.longitude.toString());
+    if (params.radius) queryParams.append('radius', params.radius.toString());
+    if (params.serviceArea) queryParams.append('serviceArea', params.serviceArea);
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    return this.request<BusinessProfile[]>(`/search/by-service-area?${queryParams.toString()}`);
+  }
+
+  // ==================== Business Category APIs ====================
+
+  /**
+   * Get all business categories
+   * GET /categories
+   */
+  async getBusinessCategories() {
+    return this.request<BusinessCategory[]>('/categories');
+  }
+
+  /**
+   * Get subcategories for a category
+   * GET /categories/:id/subcategories
+   */
+  async getSubcategories(categoryId: string) {
+    return this.request<string[]>(`/categories/${categoryId}/subcategories`);
+  }
+
+  /**
+   * Search categories
+   * GET /categories/search?query=...
+   */
+  async searchCategories(query: string) {
+    return this.request<BusinessCategory[]>(`/categories/search?query=${encodeURIComponent(query)}`);
+  }
+
+  // ==================== Business Inquiry APIs ====================
+
+  /**
+   * Get business inquiries
+   * GET /business/:businessId/inquiries
+   */
+  async getBusinessInquiries(businessId: string, params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      inquiries: BusinessInquiry[];
+      total: number;
+      page: number;
+      limit: number;
+    }>(`/business/${businessId}/inquiries${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Create business inquiry
+   * POST /business/:businessId/inquiries
+   */
+  async createBusinessInquiry(businessId: string, data: {
+    serviceType?: string;
+    subject?: string;
+    message: string;
+    urgency?: 'low' | 'normal' | 'high' | 'urgent';
+    budgetMin?: number;
+    budgetMax?: number;
+    preferredContact?: 'call' | 'message' | 'whatsapp';
+    phone?: string;
+    email?: string;
+  }) {
+    return this.request<BusinessInquiry>(`/business/${businessId}/inquiries`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Respond to inquiry
+   * POST /business/:businessId/inquiries/:inquiryId/respond
+   */
+  async respondToInquiry(businessId: string, inquiryId: string, data: {
+    message: string;
+  }) {
+    return this.request<BusinessInquiry>(`/business/${businessId}/inquiries/${inquiryId}/respond`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update inquiry status
+   * PUT /business/:businessId/inquiries/:inquiryId/status
+   */
+  async updateInquiryStatus(businessId: string, inquiryId: string, status: string) {
+    return this.request<BusinessInquiry>(`/business/${businessId}/inquiries/${inquiryId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  /**
+   * Get inquiry stats
+   * GET /business/:businessId/inquiries/stats
+   */
+  async getInquiryStats(businessId: string) {
+    return this.request<{
+      total: number;
+      pending: number;
+      inProgress: number;
+      responded: number;
+      closed: number;
+    }>(`/business/${businessId}/inquiries/stats`);
+  }
+
+  // ==================== Business Review APIs ====================
+
+  /**
+   * Get business reviews
+   * GET /business/:businessId/reviews
+   */
+  async getBusinessReviews(businessId: string, params?: {
+    page?: number;
+    limit?: number;
+    rating?: number;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      reviews: BusinessReview[];
+      total: number;
+      averageRating: number;
+      page: number;
+      limit: number;
+    }>(`/business/${businessId}/reviews${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Create business review
+   * POST /business/:businessId/reviews
+   */
+  async createReview(businessId: string, data: {
+    rating: number;
+    comment: string;
+    serviceType?: string;
+  }) {
+    return this.request<BusinessReview>(`/business/${businessId}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Respond to review
+   * POST /business/:businessId/reviews/:reviewId/respond
+   */
+  async respondToReview(businessId: string, reviewId: string, response: string) {
+    return this.request<BusinessReview>(`/business/${businessId}/reviews/${reviewId}/respond`, {
+      method: 'POST',
+      body: JSON.stringify({ response }),
+    });
+  }
+
+  /**
+   * Get review stats
+   * GET /business/:businessId/reviews/stats
+   */
+  async getReviewStats(businessId: string) {
+    return this.request<{
+      averageRating: number;
+      totalReviews: number;
+      ratingDistribution: {
+        5: number;
+        4: number;
+        3: number;
+        2: number;
+        1: number;
+      };
+    }>(`/business/${businessId}/reviews/stats`);
+  }
+
+  // ==================== SOCIAL SERVICE API METHODS ====================
+
+  /**
+   * Posts API Methods
+   */
+
+  /**
+   * Get posts with filtering and pagination
+   * GET /social/posts
+   */
+  async getPosts(filters?: {
+    page?: number;
+    limit?: number;
+    postType?: 'general' | 'event' | 'alert' | 'marketplace' | 'lost_found' | 'help';
+    privacyLevel?: 'neighborhood' | 'group' | 'public';
+    categoryId?: number;
+    userId?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+    isPinned?: boolean;
+    isApproved?: boolean;
+    sortBy?: 'createdAt' | 'updatedAt' | 'title';
+    sortOrder?: 'ASC' | 'DESC';
+    helpCategory?: 'errand' | 'task' | 'recommendation' | 'advice' | 'borrow';
+    urgency?: 'low' | 'medium' | 'high';
+  }) {
+    const queryParams = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/social/posts${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get a single post by ID
+   * GET /social/posts/:id
+   */
+  async getPostById(id: string) {
+    return this.request(`/social/posts/${id}`);
+  }
+
+  /**
+   * Create a new post
+   * POST /social/posts
+   */
+  async createPost(data: {
+    title?: string;
+    content: string;
+    postType: 'general' | 'event' | 'alert' | 'marketplace' | 'lost_found' | 'help';
+    privacyLevel: 'neighborhood' | 'group' | 'public';
+    categoryId?: number;
+    expiresAt?: string;
+    media?: Array<{ url: string; type: 'image' | 'video'; caption?: string }>;
+    isPinned?: boolean;
+    helpCategory?: 'errand' | 'task' | 'recommendation' | 'advice' | 'borrow';
+    urgency?: 'low' | 'medium' | 'high';
+    budget?: string;
+    deadline?: string;
+    borrowDuration?: 'few_hours' | 'day' | 'few_days' | 'week';
+    borrowItem?: string;
+    itemCondition?: string;
+    taskType?: string;
+    estimatedDuration?: string;
+  }) {
+    return this.request('/social/posts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update a post
+   * PUT /social/posts/:id
+   */
+  async updatePost(id: string, data: {
+    title?: string;
+    content?: string;
+    postType?: 'general' | 'event' | 'alert' | 'marketplace' | 'lost_found' | 'help';
+    privacyLevel?: 'neighborhood' | 'group' | 'public';
+    categoryId?: number;
+    expiresAt?: string;
+    media?: Array<{ url: string; type: 'image' | 'video'; caption?: string }>;
+    isPinned?: boolean;
+    helpCategory?: 'errand' | 'task' | 'recommendation' | 'advice' | 'borrow';
+    urgency?: 'low' | 'medium' | 'high';
+    budget?: string;
+    deadline?: string;
+  }) {
+    return this.request(`/social/posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete a post
+   * DELETE /social/posts/:id
+   */
+  async deletePost(id: string) {
+    return this.request(`/social/posts/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Pin or unpin a post
+   * POST /social/posts/:id/pin
+   */
+  async pinPost(id: string, isPinned: boolean) {
+    return this.request(`/social/posts/${id}/pin?isPinned=${isPinned}`, {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Get post categories
+   * GET /social/posts/categories
+   */
+  async getPostCategories() {
+    return this.request('/social/posts/categories');
+  }
+
+  /**
+   * Comments API Methods
+   */
+
+  /**
+   * Get comments for a post
+   * GET /social/comments/posts/:postId
+   */
+  async getPostComments(postId: string) {
+    return this.request(`/social/comments/posts/${postId}`);
+  }
+
+  /**
+   * Create a comment on a post
+   * POST /social/comments/posts/:postId
+   */
+  async createComment(postId: string, data: {
+    content: string;
+    parentCommentId?: string;
+    media?: Array<{ url: string; type: 'image' | 'video'; caption?: string }>;
+  }) {
+    return this.request(`/social/comments/posts/${postId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update a comment
+   * PUT /social/comments/:commentId
+   */
+  async updateComment(commentId: string, data: {
+    content: string;
+  }) {
+    return this.request(`/social/comments/${commentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete a comment
+   * DELETE /social/comments/:commentId
+   */
+  async deleteComment(commentId: string) {
+    return this.request(`/social/comments/${commentId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Get replies to a comment
+   * GET /social/comments/:commentId/replies
+   */
+  async getCommentReplies(commentId: string) {
+    return this.request(`/social/comments/${commentId}/replies`);
+  }
+
+  /**
+   * Get comment statistics for a post
+   * GET /social/comments/posts/:postId/stats
+   */
+  async getCommentStats(postId: string) {
+    return this.request(`/social/comments/posts/${postId}/stats`);
+  }
+
+  /**
+   * Reactions API Methods
+   */
+
+  /**
+   * Add or update reaction to a post
+   * POST /social/reactions/posts/:postId
+   */
+  async addReaction(postId: string, reactionType: 'like' | 'love' | 'laugh' | 'angry' | 'sad') {
+    return this.request(`/social/reactions/posts/${postId}`, {
+      method: 'POST',
+      body: JSON.stringify({ type: reactionType }),
+    });
+  }
+
+  /**
+   * Remove reaction from a post
+   * DELETE /social/reactions/posts/:postId
+   */
+  async removeReaction(postId: string) {
+    return this.request(`/social/reactions/posts/${postId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Get all reactions for a post
+   * GET /social/reactions/posts/:postId
+   */
+  async getPostReactions(postId: string) {
+    return this.request(`/social/reactions/posts/${postId}`);
+  }
+
+  /**
+   * Get reaction counts for a post
+   * GET /social/reactions/posts/:postId/counts
+   */
+  async getPostReactionCounts(postId: string) {
+    return this.request(`/social/reactions/posts/${postId}/counts`);
+  }
+
+  /**
+   * Get reaction statistics for a post
+   * GET /social/reactions/posts/:postId/stats
+   */
+  async getPostReactionStats(postId: string) {
+    return this.request(`/social/reactions/posts/${postId}/stats`);
+  }
+
+  /**
+   * Media API Methods
+   */
+
+  /**
+   * Upload media files
+   * POST /social/media/upload
+   */
+  async uploadMedia(files: File[], options?: {
+    type?: string;
+    caption?: string;
+    quality?: string;
+    maxWidth?: number;
+    maxHeight?: number;
+  }) {
+    try {
+      const url = `${this.baseUrl}/social/media/upload`;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+      if (options?.type) formData.append('type', options.type);
+      if (options?.caption) formData.append('caption', options.caption);
+      if (options?.quality) formData.append('quality', options.quality);
+      if (options?.maxWidth) formData.append('maxWidth', options.maxWidth.toString());
+      if (options?.maxHeight) formData.append('maxHeight', options.maxHeight.toString());
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...(process.env.NODE_ENV === 'development' && {
+            'ngrok-skip-browser-warning': '69420',
+          }),
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || data.message || 'Upload failed',
+        };
+      }
+
+      return {
+        success: true,
+        data,
+        ...data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Get media files with filtering
+   * GET /social/media
+   */
+  async getMedia(filters?: {
+    type?: string;
+    userId?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/social/media${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get a single media file by ID
+   * GET /social/media/:id
+   */
+  async getMediaById(id: string) {
+    return this.request(`/social/media/${id}`);
+  }
+
+  /**
+   * Delete a media file
+   * DELETE /social/media/:id
+   */
+  async deleteMedia(id: string) {
+    return this.request(`/social/media/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Moderation API Methods
+   */
+
+  /**
+   * Report content for moderation
+   * POST /social/moderation/report/:contentType/:contentId
+   */
+  async reportContent(
+    contentType: 'post' | 'comment',
+    contentId: string,
+    data: {
+      reason: 'spam' | 'harassment' | 'inappropriate_content' | 'false_information' | 'hate_speech' | 'violence' | 'copyright_violation' | 'privacy_violation' | 'other';
+      details?: string;
+    }
+  ) {
+    return this.request(`/social/moderation/report/${contentType}/${contentId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 }

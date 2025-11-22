@@ -1,10 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
@@ -20,6 +33,74 @@ export default function Header() {
       });
     }
     setIsMenuOpen(false);
+    setOpenDropdown(null);
+  };
+
+  const companyLinks = [
+    { href: "/about", label: "About Us" },
+    { href: "/contact", label: "Contact Us" },
+    { href: "#faq", label: "FAQs", onClick: (e: React.MouseEvent) => handleNavClick(e, "faq") }
+  ];
+
+  const useCasesLinks = [
+    { href: "/use-cases", label: "All Use Cases" },
+    { href: "/use-cases/residents", label: "For Residents" },
+    { href: "/use-cases/estate-managers", label: "For Estate Managers" },
+    { href: "/use-cases/service-providers", label: "For Service Providers" },
+    { href: "/use-cases/other", label: "Other Use Cases" }
+  ];
+
+  const resourcesLinks = [
+    { href: "/resources/blog", label: "Blog" },
+    { href: "/resources/videos", label: "Videos" },
+    { href: "/resources/knowledgebase", label: "Knowledge Base" },
+    { href: "/resources", label: "Links" }
+  ];
+
+  const featuresLinks = [
+    { href: "#core-features", label: "Estate Management", onClick: (e: React.MouseEvent) => handleNavClick(e, "core-features") },
+    { href: "#core-features", label: "Verified Services", onClick: (e: React.MouseEvent) => handleNavClick(e, "core-features") },
+    { href: "#core-features", label: "Community", onClick: (e: React.MouseEvent) => handleNavClick(e, "core-features") }
+  ];
+
+  const DropdownMenu = ({ title, links, id }: { title: string; links: Array<{ href: string; label: string; onClick?: (e: React.MouseEvent) => void }>; id: string }) => {
+    const isOpen = openDropdown === id;
+    return (
+      <div className="relative" ref={id === "company" ? dropdownRef : undefined}>
+        <button
+          onClick={() => setOpenDropdown(isOpen ? null : id)}
+          className="flex items-center gap-1 text-gray-700 hover:text-green-600 transition-colors font-medium"
+        >
+          {title}
+          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {isOpen && (
+          <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+            {links.map((link, index) => (
+              link.onClick ? (
+                <a
+                  key={index}
+                  href={link.href}
+                  onClick={link.onClick}
+                  className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={index}
+                  href={link.href}
+                  onClick={() => setOpenDropdown(null)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
+                >
+                  {link.label}
+                </Link>
+              )
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -27,54 +108,33 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="#hero" onClick={(e) => handleNavClick(e, "hero")} className="flex items-center">
+          <Link href="/" className="flex items-center">
             <img 
               src="/assets/images/logo.png" 
               alt="MeCabal" 
               className="h-10 w-auto"
             />
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <a 
-              href="#features" 
-              onClick={(e) => handleNavClick(e, "features")}
-              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-            >
-              Features
-            </a>
-            <a 
-              href="#how-it-works" 
-              onClick={(e) => handleNavClick(e, "how-it-works")}
-              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-            >
-              How It Works
-            </a>
-            <a 
-              href="#for-whom" 
-              onClick={(e) => handleNavClick(e, "for-whom")}
-              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-            >
-              For Whom
-            </a>
-            <a 
-              href="#faq" 
-              onClick={(e) => handleNavClick(e, "faq")}
-              className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-            >
-              FAQ
-            </a>
+          <nav className="hidden md:flex items-center gap-6">
+            <DropdownMenu title="Company" links={companyLinks} id="company" />
+            <Link href="/pricing" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
+              Pricing
+            </Link>
+            <DropdownMenu title="Use Cases" links={useCasesLinks} id="use-cases" />
+            <DropdownMenu title="Resources" links={resourcesLinks} id="resources" />
+            <DropdownMenu title="Features" links={featuresLinks} id="features" />
           </nav>
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <a href="/onboarding" className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium">
-              Join
-            </a>
-            <a href="/onboarding" className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium">
-              Create Neighborhood
-            </a>
+            <Link href="/onboarding" className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium">
+              Get Started
+            </Link>
+            <Link href="/contact" className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium">
+              Book a Demo
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -90,41 +150,130 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-gray-200">
             <nav className="flex flex-col gap-4 pt-4">
-              <a 
-                href="#features" 
-                onClick={(e) => handleNavClick(e, "features")}
-                className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-              >
-                Features
-              </a>
-              <a 
-                href="#how-it-works" 
-                onClick={(e) => handleNavClick(e, "how-it-works")}
-                className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-              >
-                How It Works
-              </a>
-              <a 
-                href="#for-whom" 
-                onClick={(e) => handleNavClick(e, "for-whom")}
-                className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-              >
-                For Whom
-              </a>
-              <a 
-                href="#faq" 
-                onClick={(e) => handleNavClick(e, "faq")}
-                className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-              >
-                FAQ
-              </a>
+              <div>
+                <button
+                  onClick={() => setOpenDropdown(openDropdown === "mobile-company" ? null : "mobile-company")}
+                  className="flex items-center justify-between w-full text-gray-700 hover:text-green-600 transition-colors font-medium"
+                >
+                  Company
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "mobile-company" ? 'rotate-180' : ''}`} />
+                </button>
+                {openDropdown === "mobile-company" && (
+                  <div className="pl-4 mt-2 space-y-2">
+                    {companyLinks.map((link, index) => (
+                      link.onClick ? (
+                        <a
+                          key={index}
+                          href={link.href}
+                          onClick={link.onClick}
+                          className="block text-gray-600 hover:text-green-600"
+                        >
+                          {link.label}
+                        </a>
+                      ) : (
+                        <Link
+                          key={index}
+                          href={link.href}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="block text-gray-600 hover:text-green-600"
+                        >
+                          {link.label}
+                        </Link>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Link href="/pricing" onClick={() => setIsMenuOpen(false)} className="text-gray-700 hover:text-green-600 transition-colors font-medium">
+                Pricing
+              </Link>
+              <div>
+                <button
+                  onClick={() => setOpenDropdown(openDropdown === "mobile-use-cases" ? null : "mobile-use-cases")}
+                  className="flex items-center justify-between w-full text-gray-700 hover:text-green-600 transition-colors font-medium"
+                >
+                  Use Cases
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "mobile-use-cases" ? 'rotate-180' : ''}`} />
+                </button>
+                {openDropdown === "mobile-use-cases" && (
+                  <div className="pl-4 mt-2 space-y-2">
+                    {useCasesLinks.map((link, index) => (
+                      <Link
+                        key={index}
+                        href={link.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="block text-gray-600 hover:text-green-600"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <button
+                  onClick={() => setOpenDropdown(openDropdown === "mobile-resources" ? null : "mobile-resources")}
+                  className="flex items-center justify-between w-full text-gray-700 hover:text-green-600 transition-colors font-medium"
+                >
+                  Resources
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "mobile-resources" ? 'rotate-180' : ''}`} />
+                </button>
+                {openDropdown === "mobile-resources" && (
+                  <div className="pl-4 mt-2 space-y-2">
+                    {resourcesLinks.map((link, index) => (
+                      <Link
+                        key={index}
+                        href={link.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="block text-gray-600 hover:text-green-600"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <button
+                  onClick={() => setOpenDropdown(openDropdown === "mobile-features" ? null : "mobile-features")}
+                  className="flex items-center justify-between w-full text-gray-700 hover:text-green-600 transition-colors font-medium"
+                >
+                  Features
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "mobile-features" ? 'rotate-180' : ''}`} />
+                </button>
+                {openDropdown === "mobile-features" && (
+                  <div className="pl-4 mt-2 space-y-2">
+                    {featuresLinks.map((link, index) => (
+                      link.onClick ? (
+                        <a
+                          key={index}
+                          href={link.href}
+                          onClick={(e) => { link.onClick!(e); setIsMenuOpen(false); }}
+                          className="block text-gray-600 hover:text-green-600"
+                        >
+                          {link.label}
+                        </a>
+                      ) : (
+                        <Link
+                          key={index}
+                          href={link.href}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="block text-gray-600 hover:text-green-600"
+                        >
+                          {link.label}
+                        </Link>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="flex flex-col gap-3 pt-4">
-                <a href="/onboarding" className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium text-left">
-                  Join
-                </a>
-                <a href="/onboarding" className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium text-center">
-                  Create Neighborhood
-                </a>
+                <Link href="/onboarding" onClick={() => setIsMenuOpen(false)} className="px-6 py-2 text-gray-700 hover:text-green-600 transition-colors font-medium text-left">
+                  Get Started
+                </Link>
+                <Link href="/contact" onClick={() => setIsMenuOpen(false)} className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-200 font-medium text-center">
+                  Book a Demo
+                </Link>
               </div>
             </nav>
           </div>
