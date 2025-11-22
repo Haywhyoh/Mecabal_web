@@ -380,6 +380,189 @@ class ApiClient {
       body: JSON.stringify({ idToken }),
     });
   }
+
+  // User Profile Methods
+  /**
+   * Get current user profile
+   * GET /users/me
+   */
+  async getCurrentUserProfile() {
+    return this.request<User>('/users/me');
+  }
+
+  /**
+   * Update current user profile
+   * PUT /users/me
+   */
+  async updateUserProfile(data: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    bio?: string;
+    occupation?: string;
+    professionalSkills?: string;
+    culturalBackground?: string;
+    nativeLanguages?: string;
+    preferredLanguage?: string;
+    state?: string;
+    city?: string;
+    estate?: string;
+    landmark?: string;
+    address?: string;
+  }) {
+    return this.request<User>('/users/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Get profile completion status
+   * GET /users/me/completion
+   */
+  async getProfileCompletion() {
+    return this.request<{
+      percentage: number;
+      missingFields: string[];
+    }>('/users/me/completion');
+  }
+
+  /**
+   * Upload user avatar
+   * POST /users/me/avatar
+   */
+  async uploadAvatar(file: File) {
+    try {
+      const url = `${this.baseUrl}/users/me/avatar`;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          // Don't set Content-Type, let browser set it with boundary for multipart/form-data
+          ...(process.env.NODE_ENV === 'development' && {
+            'ngrok-skip-browser-warning': '69420',
+          }),
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || data.message || 'Upload failed',
+        };
+      }
+
+      return {
+        success: true,
+        data: data.avatarUrl ? { avatarUrl: data.avatarUrl } : data,
+        ...data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Delete user avatar
+   * DELETE /users/me/avatar
+   */
+  async deleteAvatar() {
+    return this.request<{ message: string }>('/users/me/avatar', {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Get cultural profile for user
+   * GET /cultural-profile/:userId
+   */
+  async getCulturalProfile(userId: string) {
+    return this.request('/cultural-profile/' + userId);
+  }
+
+  /**
+   * Create or update cultural profile
+   * POST /cultural-profile/:userId
+   */
+  async createOrUpdateCulturalProfile(
+    userId: string,
+    data: {
+      stateOfOriginId: string;
+      culturalBackgroundId: string;
+      professionalCategoryId: string;
+      professionalTitle: string;
+      languages: Array<{
+        languageId: string;
+        proficiency: 'beginner' | 'intermediate' | 'advanced' | 'native';
+      }>;
+      privacySettings: {
+        showCulturalBackground: boolean;
+        showLanguages: boolean;
+        showProfessionalCategory: boolean;
+        showStateOfOrigin: boolean;
+        allowCulturalMatching: boolean;
+      };
+    }
+  ) {
+    return this.request('/cultural-profile/' + userId, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update cultural profile
+   * PUT /cultural-profile/:userId
+   */
+  async updateCulturalProfile(
+    userId: string,
+    data: {
+      stateOfOriginId?: string;
+      culturalBackgroundId?: string;
+      professionalCategoryId?: string;
+      professionalTitle?: string;
+      languages?: Array<{
+        languageId: string;
+        proficiency: 'beginner' | 'intermediate' | 'advanced' | 'native';
+      }>;
+      privacySettings?: {
+        showCulturalBackground?: boolean;
+        showLanguages?: boolean;
+        showProfessionalCategory?: boolean;
+        showStateOfOrigin?: boolean;
+        allowCulturalMatching?: boolean;
+      };
+    }
+  ) {
+    return this.request('/cultural-profile/' + userId, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Deactivate user account
+   * DELETE /users/me
+   */
+  async deactivateAccount() {
+    return this.request<{ message: string }>('/users/me', {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);

@@ -59,8 +59,8 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose }: Sidebar
     { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace', active: pathname === '/marketplace', phase2: true },
     { icon: Calendar, label: 'Events', href: '/events', active: pathname === '/events', phase2: true },
     { icon: MessageSquare, label: 'Messages', href: '/messages', active: pathname === '/messages', phase2: true },
-    { icon: User, label: 'Profile', href: '/profile', active: pathname === '/profile' },
-    { icon: Settings, label: 'Settings', href: '/settings', active: pathname === '/settings' },
+    { icon: User, label: 'Profile', href: '/profile', active: pathname?.startsWith('/profile') },
+    { icon: Settings, label: 'Settings', href: '/settings', active: pathname?.startsWith('/settings') },
   ];
 
   return (
