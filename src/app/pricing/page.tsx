@@ -23,7 +23,13 @@ export default function PricingPage() {
         "Email support"
       ],
       popular: false,
-      color: "green"
+      color: "green",
+      borderClass: "border-gray-200",
+      badgeClass: "",
+      iconBgClass: "bg-green-100",
+      iconTextClass: "text-green-600",
+      checkClass: "text-green-600",
+      buttonClass: "bg-green-600 hover:bg-green-700"
     },
     {
       name: "Standard Estate",
@@ -41,7 +47,13 @@ export default function PricingPage() {
         "API access"
       ],
       popular: true,
-      color: "blue"
+      color: "blue",
+      borderClass: "border-blue-600 shadow-lg",
+      badgeClass: "bg-blue-600",
+      iconBgClass: "bg-blue-100",
+      iconTextClass: "text-blue-600",
+      checkClass: "text-blue-600",
+      buttonClass: "bg-blue-600 hover:bg-blue-700"
     },
     {
       name: "Premium Estate",
@@ -59,7 +71,13 @@ export default function PricingPage() {
         "24/7 support"
       ],
       popular: false,
-      color: "purple"
+      color: "purple",
+      borderClass: "border-gray-200",
+      badgeClass: "",
+      iconBgClass: "bg-purple-100",
+      iconTextClass: "text-purple-600",
+      checkClass: "text-purple-600",
+      buttonClass: "bg-purple-600 hover:bg-purple-700"
     }
   ];
 
@@ -77,7 +95,11 @@ export default function PricingPage() {
         "Payment processing",
         "Basic analytics"
       ],
-      color: "green"
+      color: "green",
+      iconBgClass: "bg-green-100",
+      iconTextClass: "text-green-600",
+      checkClass: "text-green-600",
+      buttonClass: "bg-green-600 hover:bg-green-700"
     },
     {
       name: "Service Company",
@@ -93,7 +115,11 @@ export default function PricingPage() {
         "Marketing tools",
         "Dedicated support"
       ],
-      color: "blue"
+      color: "blue",
+      iconBgClass: "bg-blue-100",
+      iconTextClass: "text-blue-600",
+      checkClass: "text-blue-600",
+      buttonClass: "bg-blue-600 hover:bg-blue-700"
     }
   ];
 
@@ -138,21 +164,19 @@ export default function PricingPage() {
               return (
                 <motion.div
                   key={index}
-                  className={`relative bg-white border-2 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 ${
-                    tier.popular ? `border-${tier.color}-600 shadow-lg` : 'border-gray-200'
-                  }`}
+                  className={`relative bg-white border-2 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 ${tier.borderClass}`}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ y: -10 }}
                 >
-                  {tier.popular && (
-                    <div className={`absolute -top-4 left-1/2 transform -translate-x-1/2 bg-${tier.color}-600 text-white px-4 py-1 rounded-full text-sm font-semibold`}>
+                  {tier.popular && tier.badgeClass && (
+                    <div className={`absolute -top-4 left-1/2 transform -translate-x-1/2 ${tier.badgeClass} text-white px-4 py-1 rounded-full text-sm font-semibold`}>
                       Most Popular
                     </div>
                   )}
-                  <div className={`w-16 h-16 bg-${tier.color}-100 rounded-xl flex items-center justify-center mb-6`}>
-                    <Icon className={`w-8 h-8 text-${tier.color}-600`} />
+                  <div className={`w-16 h-16 ${tier.iconBgClass} rounded-xl flex items-center justify-center mb-6`}>
+                    <Icon className={`w-8 h-8 ${tier.iconTextClass}`} />
                   </div>
                   <h3 className="text-2xl font-semibold text-gray-900 mb-2">{tier.name}</h3>
                   <p className="text-gray-600 mb-6">{tier.target}</p>
@@ -163,14 +187,14 @@ export default function PricingPage() {
                   <ul className="space-y-4 mb-8">
                     {tier.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start gap-3">
-                        <Check className={`w-5 h-5 text-${tier.color}-600 flex-shrink-0 mt-0.5`} />
+                        <Check className={`w-5 h-5 ${tier.checkClass} flex-shrink-0 mt-0.5`} />
                         <span className="text-gray-600">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <a
                     href="/contact"
-                    className={`block w-full text-center px-6 py-3 bg-${tier.color}-600 text-white rounded-full hover:bg-${tier.color}-700 transition-all duration-200 font-medium`}
+                    className={`block w-full text-center px-6 py-3 ${tier.buttonClass} text-white rounded-full transition-all duration-200 font-medium`}
                   >
                     Get Started
                   </a>
@@ -198,14 +222,14 @@ export default function PricingPage() {
               return (
                 <motion.div
                   key={index}
-                  className={`bg-white border-2 border-gray-200 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300`}
+                  className="bg-white border-2 border-gray-200 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ y: -10 }}
                 >
-                  <div className={`w-16 h-16 bg-${tier.color}-100 rounded-xl flex items-center justify-center mb-6`}>
-                    <Icon className={`w-8 h-8 text-${tier.color}-600`} />
+                  <div className={`w-16 h-16 ${tier.iconBgClass} rounded-xl flex items-center justify-center mb-6`}>
+                    <Icon className={`w-8 h-8 ${tier.iconTextClass}`} />
                   </div>
                   <h3 className="text-2xl font-semibold text-gray-900 mb-6">{tier.name}</h3>
                   <div className="mb-6">
@@ -215,14 +239,14 @@ export default function PricingPage() {
                   <ul className="space-y-4 mb-8">
                     {tier.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start gap-3">
-                        <Check className={`w-5 h-5 text-${tier.color}-600 flex-shrink-0 mt-0.5`} />
+                        <Check className={`w-5 h-5 ${tier.checkClass} flex-shrink-0 mt-0.5`} />
                         <span className="text-gray-600">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <a
                     href="/onboarding"
-                    className={`block w-full text-center px-6 py-3 bg-${tier.color}-600 text-white rounded-full hover:bg-${tier.color}-700 transition-all duration-200 font-medium`}
+                    className={`block w-full text-center px-6 py-3 ${tier.buttonClass} text-white rounded-full transition-all duration-200 font-medium`}
                   >
                     Get Verified
                   </a>

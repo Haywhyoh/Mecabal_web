@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ThumbsUp, Heart, Laugh, Angry, Sad } from 'lucide-react';
+import { ThumbsUp, Heart, Laugh, Angry, Frown } from 'lucide-react';
 import type { ReactionType } from '@/types/social';
 
 interface ReactionPickerProps {
@@ -16,7 +16,7 @@ const reactionConfig: Record<ReactionType, { icon: React.ComponentType<{ classNa
   love: { icon: Heart, label: 'Love', color: 'text-red-600 hover:bg-red-100' },
   laugh: { icon: Laugh, label: 'Laugh', color: 'text-yellow-600 hover:bg-yellow-100' },
   angry: { icon: Angry, label: 'Angry', color: 'text-orange-600 hover:bg-orange-100' },
-  sad: { icon: Sad, label: 'Sad', color: 'text-purple-600 hover:bg-purple-100' },
+  sad: { icon: Frown, label: 'Sad', color: 'text-purple-600 hover:bg-purple-100' },
 };
 
 export default function ReactionPicker({

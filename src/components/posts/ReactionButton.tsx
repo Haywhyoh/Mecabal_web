@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ThumbsUp, Heart, Laugh, Angry, Sad } from 'lucide-react';
+import { ThumbsUp, Heart, Laugh, Angry, Frown } from 'lucide-react';
 import ReactionPicker from './ReactionPicker';
 import type { ReactionType, ReactionCounts } from '@/types/social';
 
@@ -19,7 +19,7 @@ const reactionConfig: Record<ReactionType, { icon: React.ComponentType<{ classNa
   love: { icon: Heart, label: 'Love', emoji: '❤️' },
   laugh: { icon: Laugh, label: 'Laugh', emoji: '😂' },
   angry: { icon: Angry, label: 'Angry', emoji: '😠' },
-  sad: { icon: Sad, label: 'Sad', emoji: '😢' },
+  sad: { icon: Frown, label: 'Sad', emoji: '😢' },
 };
 
 export default function ReactionButton({

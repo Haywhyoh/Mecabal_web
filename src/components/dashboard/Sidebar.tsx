@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   X,
+  Store,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
@@ -56,6 +57,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose }: Sidebar
   const navItems = [
     { icon: Home, label: 'Home', href: '/dashboard', active: pathname === '/dashboard' },
     { icon: MapPin, label: 'Neighborhoods', href: '/neighborhoods/browse', active: pathname?.startsWith('/neighborhoods') },
+    { icon: Store, label: 'Business', href: '/business/profile', active: pathname?.startsWith('/business') },
     { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace', active: pathname === '/marketplace', phase2: true },
     { icon: Calendar, label: 'Events', href: '/events', active: pathname === '/events', phase2: true },
     { icon: MessageSquare, label: 'Messages', href: '/messages', active: pathname === '/messages', phase2: true },
