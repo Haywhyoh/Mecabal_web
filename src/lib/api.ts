@@ -654,14 +654,37 @@ class ApiClient {
   // The gateway strips the /business prefix and forwards to the service
 
   /**
+   * Normalize business profile data to ensure rating and reviewCount are always numbers
+   */
+  private normalizeBusinessProfile(business: any): BusinessProfile {
+    if (!business) return business;
+    
+    return {
+      ...business,
+      rating: business.rating !== null && business.rating !== undefined
+        ? (typeof business.rating === 'string' ? parseFloat(business.rating) : Number(business.rating)) || 0
+        : 0,
+      reviewCount: Number(business.reviewCount) || 0,
+      completedJobs: Number(business.completedJobs) || 0,
+      yearsOfExperience: Number(business.yearsOfExperience) || 0,
+    };
+  }
+
+  /**
    * Register a new business profile
    * POST /business/register
    */
   async registerBusiness(data: CreateBusinessProfileDto) {
-    return this.request<BusinessProfile>('/business/register', {
+    const response = await this.request<BusinessProfile>('/business/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    
+    if (response.success && response.data) {
+      response.data = this.normalizeBusinessProfile(response.data);
+    }
+    
+    return response;
   }
 
   /**
@@ -681,6 +704,11 @@ class ApiClient {
         };
       }
       
+      // Normalize business data
+      if (response.success && response.data) {
+        response.data = this.normalizeBusinessProfile(response.data);
+      }
+      
       return response;
     } catch (error) {
       // Handle network errors
@@ -696,7 +724,13 @@ class ApiClient {
    * GET /business/:id
    */
   async getBusinessById(id: string) {
-    return this.request<BusinessProfile>(`/business/${id}`);
+    const response = await this.request<BusinessProfile>(`/business/${id}`);
+    
+    if (response.success && response.data) {
+      response.data = this.normalizeBusinessProfile(response.data);
+    }
+    
+    return response;
   }
 
   /**
@@ -704,10 +738,16 @@ class ApiClient {
    * PUT /business/:id
    */
   async updateBusiness(id: string, data: UpdateBusinessProfileDto) {
-    return this.request<BusinessProfile>(`/business/${id}`, {
+    const response = await this.request<BusinessProfile>(`/business/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+    
+    if (response.success && response.data) {
+      response.data = this.normalizeBusinessProfile(response.data);
+    }
+    
+    return response;
   }
 
   /**
@@ -715,10 +755,16 @@ class ApiClient {
    * PUT /business/:id/status
    */
   async updateBusinessStatus(id: string, isActive: boolean) {
-    return this.request<BusinessProfile>(`/business/${id}/status`, {
+    const response = await this.request<BusinessProfile>(`/business/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify({ isActive }),
     });
+    
+    if (response.success && response.data) {
+      response.data = this.normalizeBusinessProfile(response.data);
+    }
+    
+    return response;
   }
 
   /**
@@ -805,7 +851,32 @@ class ApiClient {
       }
     });
     const queryString = queryParams.toString();
-    return this.request<PaginatedBusinesses>(`/search${queryString ? `?${queryString}` : ''}`);
+    const response = await this.request<PaginatedBusinesses>(`/search${queryString ? `?${queryString}` : ''}`);
+    
+    // Normalize businesses in paginated response
+    if (response.success && response.data) {
+      const paginatedData = response.data as any;
+      if (Array.isArray(paginatedData.data)) {
+        paginatedData.data = paginatedData.data.map((business: any) => 
+          this.normalizeBusinessProfile(business)
+        );
+      } else if (Array.isArray(paginatedData)) {
+        // If response is just an array
+        response.data = {
+          data: paginatedData.map((business: any) => 
+            this.normalizeBusinessProfile(business)
+          ),
+          total: paginatedData.length,
+          page: 1,
+          limit: paginatedData.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        } as PaginatedBusinesses;
+      }
+    }
+    
+    return response;
   }
 
   /**
@@ -813,7 +884,17 @@ class ApiClient {
    * GET /search/featured
    */
   async getFeaturedBusinesses(limit: number = 10) {
-    return this.request<BusinessProfile[]>(`/search/featured?limit=${limit}`);
+    const response = await this.request<BusinessProfile[]>(`/search/featured?limit=${limit}`);
+    
+    if (response.success && response.data) {
+      if (Array.isArray(response.data)) {
+        response.data = response.data.map((business: any) => 
+          this.normalizeBusinessProfile(business)
+        ) as BusinessProfile[];
+      }
+    }
+    
+    return response;
   }
 
   /**
@@ -821,7 +902,17 @@ class ApiClient {
    * GET /search/trending
    */
   async getTrendingBusinesses(limit: number = 10) {
-    return this.request<BusinessProfile[]>(`/search/trending?limit=${limit}`);
+    const response = await this.request<BusinessProfile[]>(`/search/trending?limit=${limit}`);
+    
+    if (response.success && response.data) {
+      if (Array.isArray(response.data)) {
+        response.data = response.data.map((business: any) => 
+          this.normalizeBusinessProfile(business)
+        ) as BusinessProfile[];
+      }
+    }
+    
+    return response;
   }
 
   /**
@@ -841,7 +932,17 @@ class ApiClient {
     if (params.radius) queryParams.append('radius', params.radius.toString());
     if (params.serviceArea) queryParams.append('serviceArea', params.serviceArea);
     if (params.limit) queryParams.append('limit', params.limit.toString());
-    return this.request<BusinessProfile[]>(`/search/by-service-area?${queryParams.toString()}`);
+    const response = await this.request<BusinessProfile[]>(`/search/by-service-area?${queryParams.toString()}`);
+    
+    if (response.success && response.data) {
+      if (Array.isArray(response.data)) {
+        response.data = response.data.map((business: any) => 
+          this.normalizeBusinessProfile(business)
+        ) as BusinessProfile[];
+      }
+    }
+    
+    return response;
   }
 
   // ==================== Business Category APIs ====================

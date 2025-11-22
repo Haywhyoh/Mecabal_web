@@ -67,7 +67,7 @@ export interface BusinessProfile {
   verificationLevel?: 'basic' | 'enhanced' | 'premium';
   profileImageUrl?: string;
   coverImageUrl?: string;
-  rating: number;
+  rating: number | null;
   reviewCount: number;
   completedJobs: number;
   hasInsurance: boolean;

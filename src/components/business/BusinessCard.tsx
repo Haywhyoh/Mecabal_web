@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Star, CheckCircle, Clock } from 'lucide-react';
+import { MapPin, CheckCircle, Clock } from 'lucide-react';
+import StarRating from '@/components/business/StarRating';
 import type { BusinessProfile } from '@/types/business';
 
 interface BusinessCardProps {
@@ -57,11 +58,13 @@ export default function BusinessCard({ business, showDetails = true }: BusinessC
                 )}
 
                 <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                    <span className="font-medium">{business.rating.toFixed(1)}</span>
-                    <span>({business.reviewCount})</span>
-                  </div>
+                  <StarRating
+                    rating={business.rating}
+                    size="small"
+                    showValue={true}
+                    className="items-center"
+                  />
+                  <span className="text-gray-600">({business.reviewCount ?? 0})</span>
                   {business.serviceArea && (
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />

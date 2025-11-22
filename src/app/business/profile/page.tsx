@@ -6,6 +6,7 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { apiClient } from '@/lib/api';
 import type { BusinessProfile } from '@/types/business';
+import StarRating from '@/components/business/StarRating';
 import {
   Edit,
   Settings,
@@ -186,11 +187,13 @@ export default function BusinessProfilePage() {
                   {business.yearsOfExperience} years experience
                 </p>
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                    <span className="font-semibold">{business.rating.toFixed(1)}</span>
-                    <span className="text-gray-500">({business.reviewCount} reviews)</span>
-                  </div>
+                  <StarRating
+                    rating={business.rating}
+                    size="medium"
+                    showValue={true}
+                    className="items-center"
+                  />
+                  <span className="text-gray-500">({business.reviewCount ?? 0} reviews)</span>
                 </div>
               </div>
 
@@ -258,9 +261,13 @@ export default function BusinessProfilePage() {
               <p className="text-sm text-gray-600">Response Time</p>
             </div>
             <div className="text-center">
-              <Star className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-gray-900">{business.rating.toFixed(1)}</p>
-              <p className="text-sm text-gray-600">Average Rating</p>
+              <StarRating
+                rating={business.rating}
+                size="large"
+                showValue={true}
+                className="justify-center mb-2"
+              />
+              <p className="text-sm text-gray-600 mt-2">Average Rating</p>
             </div>
           </div>
         </div>

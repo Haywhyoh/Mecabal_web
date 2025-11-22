@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { apiClient } from '@/lib/api';
 import ServiceCard from '@/components/business/ServiceCard';
 import ReviewCard from '@/components/business/ReviewCard';
+import StarRating from '@/components/business/StarRating';
 import type { BusinessProfile, BusinessService, BusinessReview } from '@/types/business';
 import { Phone, MessageSquare, MapPin, Star, ArrowLeft } from 'lucide-react';
 
@@ -115,11 +116,13 @@ export default function BusinessDetailPage() {
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">{business.businessName}</h1>
                 <p className="text-gray-600 mb-3">{business.subcategory || business.category}</p>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                    <span className="font-semibold">{business.rating.toFixed(1)}</span>
-                    <span className="text-gray-500">({business.reviewCount} reviews)</span>
-                  </div>
+                  <StarRating
+                    rating={business.rating}
+                    size="medium"
+                    showValue={true}
+                    className="items-center"
+                  />
+                  <span className="text-gray-500">({business.reviewCount ?? 0} reviews)</span>
                 </div>
 
                 <div className="flex items-center gap-4">
