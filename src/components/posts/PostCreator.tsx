@@ -58,7 +58,10 @@ export default function PostCreator({
       setLoadingCategories(true);
       const response = await apiClient.getPostCategories();
       if (response.success && response.data) {
-        setCategories(response.data);
+        const data = response.data;
+        setCategories(Array.isArray(data) ? data : []);
+      } else {
+        setCategories([]);
       }
     } catch (err) {
       console.error('Error loading categories:', err);
@@ -173,7 +176,7 @@ export default function PostCreator({
     setContent('');
     setTitle('');
     setPostType(initialPostType);
-    setPrivacyLevel('neighborhood');
+        setPrivacyLevel(PrivacyLevel.NEIGHBORHOOD);
     setSelectedCategory(undefined);
     setMediaFiles([]);
     setUploadedMedia([]);

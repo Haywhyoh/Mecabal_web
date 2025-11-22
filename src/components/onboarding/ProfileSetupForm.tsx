@@ -73,11 +73,13 @@ export default function ProfileSetupForm() {
         ]);
 
         if (culturalResponse.success && culturalResponse.data) {
-          setCulturalBackgrounds(culturalResponse.data);
+          const data = culturalResponse.data;
+          setCulturalBackgrounds(Array.isArray(data) ? data : (data as any).culturalBackgrounds || []);
         }
 
         if (professionalResponse.success && professionalResponse.data) {
-          setProfessionalCategories(professionalResponse.data);
+          const data = professionalResponse.data;
+          setProfessionalCategories(Array.isArray(data) ? data : (data as any).professionalCategories || []);
         }
       }
     } catch (err) {

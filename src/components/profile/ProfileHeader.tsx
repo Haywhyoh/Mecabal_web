@@ -42,7 +42,7 @@ export default function ProfileHeader({ user, showEditButton = false, onEditClic
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-2xl font-bold text-gray-900">{fullName}</h1>
                 {user.isVerified && (
-                  <CheckCircle2 className="w-5 h-5 text-green-600" title="Verified" />
+                  <CheckCircle2 className="w-5 h-5 text-green-600" aria-label="Verified" />
                 )}
               </div>
               {user.email && (
