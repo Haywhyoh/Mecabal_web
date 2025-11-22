@@ -578,13 +578,15 @@ class ApiClient {
   }
 
   // ==================== Business Profile APIs ====================
+  // Note: These routes go through the API gateway which routes /business/* to business-service
+  // The gateway strips the /business prefix and forwards to the service
 
   /**
    * Register a new business profile
-   * POST /business-profile/register
+   * POST /business/register
    */
   async registerBusiness(data: CreateBusinessProfileDto) {
-    return this.request<BusinessProfile>('/business-profile/register', {
+    return this.request<BusinessProfile>('/business/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -592,26 +594,26 @@ class ApiClient {
 
   /**
    * Get current user's business profile
-   * GET /business-profile/my-business
+   * GET /business/my-business
    */
   async getMyBusiness() {
-    return this.request<BusinessProfile>('/business-profile/my-business');
+    return this.request<BusinessProfile>('/business/my-business');
   }
 
   /**
    * Get business profile by ID
-   * GET /business-profile/:id
+   * GET /business/:id
    */
   async getBusinessById(id: string) {
-    return this.request<BusinessProfile>(`/business-profile/${id}`);
+    return this.request<BusinessProfile>(`/business/${id}`);
   }
 
   /**
    * Update business profile
-   * PUT /business-profile/:id
+   * PUT /business/:id
    */
   async updateBusiness(id: string, data: UpdateBusinessProfileDto) {
-    return this.request<BusinessProfile>(`/business-profile/${id}`, {
+    return this.request<BusinessProfile>(`/business/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -619,10 +621,10 @@ class ApiClient {
 
   /**
    * Update business online/offline status
-   * PUT /business-profile/:id/status
+   * PUT /business/:id/status
    */
   async updateBusinessStatus(id: string, isActive: boolean) {
-    return this.request<BusinessProfile>(`/business-profile/${id}/status`, {
+    return this.request<BusinessProfile>(`/business/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify({ isActive }),
     });
@@ -630,10 +632,10 @@ class ApiClient {
 
   /**
    * Delete business profile
-   * DELETE /business-profile/:id
+   * DELETE /business/:id
    */
   async deleteBusiness(id: string) {
-    return this.request<{ message: string }>(`/business-profile/${id}`, {
+    return this.request<{ message: string }>(`/business/${id}`, {
       method: 'DELETE',
     });
   }

@@ -42,10 +42,17 @@ export default function Feed() {
       try {
         const response = await apiClient.getPostCategories();
         if (response.success && response.data) {
-          setCategories(response.data);
+          // Ensure response.data is an array
+          const categoriesData = Array.isArray(response.data) 
+            ? response.data 
+            : Array.isArray(response.data?.data) 
+              ? response.data.data 
+              : [];
+          setCategories(categoriesData);
         }
       } catch (err) {
         console.error('Failed to load categories:', err);
+        setCategories([]); // Set empty array on error
       }
     };
     loadCategories();

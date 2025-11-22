@@ -15,6 +15,9 @@ export default function PostFilters({
   onFiltersChange,
   categories = [],
 }: PostFiltersProps) {
+  // Ensure categories is always an array
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   const hasActiveFilters =
     filters.postType ||
     filters.privacyLevel ||
@@ -79,14 +82,14 @@ export default function PostFilters({
         </select>
 
         {/* Category Filter */}
-        {categories.length > 0 && (
+        {safeCategories.length > 0 && (
           <select
             value={filters.categoryId || ''}
             onChange={(e) => updateFilter('categoryId', e.target.value ? parseInt(e.target.value) : undefined)}
             className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-green-600"
           >
             <option value="">All Categories</option>
-            {categories.map((cat) => (
+            {safeCategories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
