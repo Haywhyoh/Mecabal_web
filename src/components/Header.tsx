@@ -39,7 +39,7 @@ export default function Header() {
   const companyLinks = [
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact Us" },
-    { href: "#faq", label: "FAQs", onClick: (e: React.MouseEvent) => handleNavClick(e, "faq") }
+    { href: "#faq", label: "FAQs", onClick: (e: React.MouseEvent<HTMLAnchorElement>) => handleNavClick(e, "faq") }
   ];
 
   const useCasesLinks = [
@@ -58,12 +58,12 @@ export default function Header() {
   ];
 
   const featuresLinks = [
-    { href: "#core-features", label: "Estate Management", onClick: (e: React.MouseEvent) => handleNavClick(e, "core-features") },
-    { href: "#core-features", label: "Verified Services", onClick: (e: React.MouseEvent) => handleNavClick(e, "core-features") },
-    { href: "#core-features", label: "Community", onClick: (e: React.MouseEvent) => handleNavClick(e, "core-features") }
+    { href: "#core-features", label: "Estate Management", onClick: (e: React.MouseEvent<HTMLAnchorElement>) => handleNavClick(e, "core-features") },
+    { href: "#core-features", label: "Verified Services", onClick: (e: React.MouseEvent<HTMLAnchorElement>) => handleNavClick(e, "core-features") },
+    { href: "#core-features", label: "Community", onClick: (e: React.MouseEvent<HTMLAnchorElement>) => handleNavClick(e, "core-features") }
   ];
 
-  const DropdownMenu = ({ title, links, id }: { title: string; links: Array<{ href: string; label: string; onClick?: (e: React.MouseEvent) => void }>; id: string }) => {
+  const DropdownMenu = ({ title, links, id }: { title: string; links: Array<{ href: string; label: string; onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void }>; id: string }) => {
     const isOpen = openDropdown === id;
     return (
       <div className="relative" ref={id === "company" ? dropdownRef : undefined}>

@@ -128,14 +128,14 @@ export default function FeedCard({
                 {post.author.firstName} {post.author.lastName}
               </Link>
               {post.author.isVerified && (
-                <CheckCircle2 className="w-4 h-4 text-blue-600" title="Verified user" />
+                <CheckCircle2 className="w-4 h-4 text-blue-600" aria-label="Verified user" />
               )}
               <span className="text-gray-500">·</span>
               <time className="text-gray-500 text-sm">{formatTimeAgo(post.createdAt)}</time>
               {post.isPinned && (
                 <>
                   <span className="text-gray-500">·</span>
-                  <Pin className="w-3 h-3 text-green-600" title="Pinned post" />
+                  <Pin className="w-3 h-3 text-green-600" aria-label="Pinned post" />
                 </>
               )}
               <div className="ml-auto flex items-center gap-2">
@@ -289,7 +289,7 @@ export default function FeedCard({
                 />
 
                 <button
-                  onClick={() => onComment(post.id)}
+                  onClick={() => onComment?.(post.id)}
                   className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors"
                 >
                   <MessageCircle className="w-5 h-5" />

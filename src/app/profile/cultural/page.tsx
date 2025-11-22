@@ -6,7 +6,8 @@ import { ArrowLeft, Save, MapPin, Languages, Users, Briefcase, Eye, EyeOff } fro
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ProfileSection from '@/components/profile/ProfileSection';
 import { apiClient } from '@/lib/api';
-import type { ReferenceData, LanguageProficiency, UserPrivacySettings } from '@/types/profile';
+import type { ReferenceData, UserPrivacySettings, CulturalProfile } from '@/types/profile';
+import { LanguageProficiency } from '@/types/profile';
 import type { User } from '@/types/user';
 
 interface CulturalFormData {
@@ -67,7 +68,7 @@ export default function CulturalProfilePage() {
         if (userData.id) {
           const culturalResponse = await apiClient.getCulturalProfile(userData.id);
           if (culturalResponse.success && culturalResponse.data) {
-            const cultural = culturalResponse.data;
+            const cultural = culturalResponse.data as CulturalProfile;
             setFormData({
               stateOfOriginId: cultural.stateOfOrigin?.id || '',
               culturalBackgroundId: cultural.culturalBackground?.id || '',

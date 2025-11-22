@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
-import type { ReportReason } from '@/types/social';
+import { ReportReason } from '@/types/social';
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -12,15 +12,15 @@ interface ReportModalProps {
 }
 
 const reportReasons: Array<{ value: ReportReason; label: string; description: string }> = [
-  { value: 'spam', label: 'Spam', description: 'Repetitive, unwanted, or promotional content' },
-  { value: 'harassment', label: 'Harassment', description: 'Bullying, threats, or targeted abuse' },
-  { value: 'inappropriate_content', label: 'Inappropriate Content', description: 'Content that violates community guidelines' },
-  { value: 'false_information', label: 'False Information', description: 'Misleading or factually incorrect information' },
-  { value: 'hate_speech', label: 'Hate Speech', description: 'Content that attacks or discriminates against groups' },
-  { value: 'violence', label: 'Violence', description: 'Content that promotes or threatens violence' },
-  { value: 'copyright_violation', label: 'Copyright Violation', description: 'Unauthorized use of copyrighted material' },
-  { value: 'privacy_violation', label: 'Privacy Violation', description: 'Sharing private information without consent' },
-  { value: 'other', label: 'Other', description: 'Another reason not listed above' },
+  { value: ReportReason.SPAM, label: 'Spam', description: 'Repetitive, unwanted, or promotional content' },
+  { value: ReportReason.HARASSMENT, label: 'Harassment', description: 'Bullying, threats, or targeted abuse' },
+  { value: ReportReason.INAPPROPRIATE_CONTENT, label: 'Inappropriate Content', description: 'Content that violates community guidelines' },
+  { value: ReportReason.FALSE_INFORMATION, label: 'False Information', description: 'Misleading or factually incorrect information' },
+  { value: ReportReason.HATE_SPEECH, label: 'Hate Speech', description: 'Content that attacks or discriminates against groups' },
+  { value: ReportReason.VIOLENCE, label: 'Violence', description: 'Content that promotes or threatens violence' },
+  { value: ReportReason.COPYRIGHT_VIOLATION, label: 'Copyright Violation', description: 'Unauthorized use of copyrighted material' },
+  { value: ReportReason.PRIVACY_VIOLATION, label: 'Privacy Violation', description: 'Sharing private information without consent' },
+  { value: ReportReason.OTHER, label: 'Other', description: 'Another reason not listed above' },
 ];
 
 export default function ReportModal({
@@ -44,7 +44,7 @@ export default function ReportModal({
       return;
     }
 
-    if (selectedReason === 'other' && !details.trim()) {
+    if (selectedReason === ReportReason.OTHER && !details.trim()) {
       setError('Please provide details about why you are reporting this content');
       return;
     }
@@ -130,7 +130,7 @@ export default function ReportModal({
               htmlFor="details"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Additional details {selectedReason === 'other' && '*'}
+              Additional details {selectedReason === ReportReason.OTHER && '*'}
             </label>
             <textarea
               id="details"
@@ -139,7 +139,7 @@ export default function ReportModal({
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600"
               placeholder="Provide any additional information that might help us review this content..."
-              required={selectedReason === 'other'}
+              required={selectedReason === ReportReason.OTHER}
             />
           </div>
 

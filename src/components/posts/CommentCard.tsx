@@ -115,7 +115,7 @@ export default function CommentCard({
               <span className="text-gray-500 text-xs">
                 {formatTimeAgo(comment.createdAt)}
               </span>
-              {comment.isEdited && (
+              {(comment as any).isEdited && (
                 <span className="text-gray-400 text-xs italic">(edited)</span>
               )}
               {isOwner && (

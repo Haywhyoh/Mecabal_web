@@ -8,7 +8,7 @@ import type { Neighborhood } from '@/types/neighborhood';
 import type { ReverseGeocodeResponse } from '@/types/geocoding';
 import type { State, LGA, Ward } from '@/types/location';
 import type { EmailVerificationResponse, PhoneVerificationResponse, LocationSetupResponse, GoogleAuthResponse } from '@/types/auth';
-import type { CulturalBackground, ProfessionalCategory } from '@/types/profile';
+import type { CulturalBackground, ProfessionalCategory, ReferenceData } from '@/types/profile';
 import type {
   BusinessProfile,
   BusinessService,
@@ -319,7 +319,12 @@ class ApiClient {
   // Profile Reference Data
   async getCulturalBackgrounds() {
     // Try to get from reference-data endpoint, fallback to direct endpoint if needed
-    return this.request<CulturalBackground[]>('/cultural-profile/reference-data').then((response) => {
+    return this.request<{
+      states?: any[];
+      culturalBackgrounds?: CulturalBackground[];
+      professionalCategories?: ProfessionalCategory[];
+      languages?: any[];
+    }>('/cultural-profile/reference-data').then((response) => {
       if (response.success && response.data?.culturalBackgrounds) {
         return {
           success: true,
@@ -332,7 +337,12 @@ class ApiClient {
 
   async getProfessionalCategories() {
     // Try to get from reference-data endpoint, fallback to direct endpoint if needed
-    return this.request<ProfessionalCategory[]>('/cultural-profile/reference-data').then((response) => {
+    return this.request<{
+      states?: any[];
+      culturalBackgrounds?: CulturalBackground[];
+      professionalCategories?: ProfessionalCategory[];
+      languages?: any[];
+    }>('/cultural-profile/reference-data').then((response) => {
       if (response.success && response.data?.professionalCategories) {
         return {
           success: true,
@@ -344,11 +354,7 @@ class ApiClient {
   }
 
   async getReferenceData() {
-    return this.request<{
-      states: State[];
-      culturalBackgrounds: CulturalBackground[];
-      professionalCategories: ProfessionalCategory[];
-    }>('/cultural-profile/reference-data');
+    return this.request<ReferenceData>('/cultural-profile/reference-data');
   }
 
   // Update Neighborhood

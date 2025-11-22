@@ -45,8 +45,8 @@ export default function Feed() {
           // Ensure response.data is an array
           const categoriesData = Array.isArray(response.data) 
             ? response.data 
-            : Array.isArray(response.data?.data) 
-              ? response.data.data 
+            : (response.data as any)?.data && Array.isArray((response.data as any).data)
+              ? (response.data as any).data 
               : [];
           setCategories(categoriesData);
         }

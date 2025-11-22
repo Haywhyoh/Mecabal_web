@@ -5,7 +5,8 @@ import { X, Send, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import MediaUpload, { type MediaFile } from './MediaUpload';
 import { apiClient } from '@/lib/api';
 import { usePosts } from '@/hooks/usePosts';
-import type { PostType, PrivacyLevel, HelpCategory, Urgency, CreatePostRequest } from '@/types/social';
+import type { HelpCategory, Urgency, CreatePostRequest } from '@/types/social';
+import { PostType, PrivacyLevel } from '@/types/social';
 
 interface PostCreatorProps {
   isOpen: boolean;
@@ -24,13 +25,13 @@ export default function PostCreator({
   isOpen,
   onClose,
   onPostCreated,
-  initialPostType = 'general',
+  initialPostType = PostType.GENERAL,
 }: PostCreatorProps) {
   const { createPost, loading: postsLoading } = usePosts();
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [postType, setPostType] = useState<PostType>(initialPostType);
-  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>('neighborhood');
+  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>(PrivacyLevel.NEIGHBORHOOD);
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [uploadedMedia, setUploadedMedia] = useState<Array<{ url: string; type: 'image' | 'video'; caption?: string }>>([]);
@@ -143,7 +144,7 @@ export default function PostCreator({
         setContent('');
         setTitle('');
         setPostType(initialPostType);
-        setPrivacyLevel('neighborhood');
+        setPrivacyLevel(PrivacyLevel.NEIGHBORHOOD);
         setSelectedCategory(undefined);
         setMediaFiles([]);
         setUploadedMedia([]);
@@ -209,7 +210,7 @@ export default function PostCreator({
               Post Type *
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {(['general', 'event', 'alert', 'marketplace', 'lost_found', 'help'] as PostType[]).map((type) => (
+              {[PostType.GENERAL, PostType.EVENT, PostType.ALERT, PostType.MARKETPLACE, PostType.LOST_FOUND, PostType.HELP].map((type) => (
                 <button
                   key={type}
                   type="button"
@@ -240,7 +241,7 @@ export default function PostCreator({
               Privacy Level *
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {(['neighborhood', 'group', 'public'] as PrivacyLevel[]).map((level) => (
+              {[PrivacyLevel.NEIGHBORHOOD, PrivacyLevel.GROUP, PrivacyLevel.PUBLIC].map((level) => (
                 <button
                   key={level}
                   type="button"
