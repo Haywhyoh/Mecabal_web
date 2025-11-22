@@ -37,10 +37,60 @@ export function usePosts(initialFilters?: PostFilter): UsePostsReturn {
       setLoading(true);
       setError(null);
       const filtersToUse = filters || currentFilters || {};
+      
+      console.log('🔵 Fetching posts with filters:', filtersToUse);
       const response = await apiClient.getPosts(filtersToUse);
+      console.log('🔵 Posts API response:', { 
+        success: response.success, 
+        hasData: !!response.data, 
+        error: response.error,
+        responseKeys: response.data ? Object.keys(response.data) : [],
+        responseDataType: typeof response.data,
+        isArray: Array.isArray(response.data)
+      });
 
       if (response.success && response.data) {
-        const data = response.data as PaginatedPosts;
+        // The API client spreads the response, so if backend returns { data: [...], total: 10, ... }
+        // We get { success: true, data: { data: [...], total: 10, ... }, total: 10, ... }
+        // So response.data should be the PaginatedPostsDto
+        let data: PaginatedPosts;
+        
+        if (Array.isArray(response.data)) {
+          // If response.data is an array, wrap it in pagination structure
+          data = {
+            data: response.data,
+            total: response.data.length,
+            page: 1,
+            limit: response.data.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false,
+          };
+        } else if ((response.data as any).data !== undefined) {
+          // response.data is the PaginatedPostsDto
+          data = response.data as PaginatedPosts;
+        } else {
+          // Try to get from spread properties
+          data = {
+            data: (response as any).data || [],
+            total: (response as any).total || 0,
+            page: (response as any).page || 1,
+            limit: (response as any).limit || 20,
+            totalPages: (response as any).totalPages || 0,
+            hasNext: (response as any).hasNext || false,
+            hasPrev: (response as any).hasPrev || false,
+          };
+        }
+        
+        console.log('🔵 Posts data parsed:', { 
+          postsCount: data.data?.length || 0, 
+          total: data.total, 
+          page: data.page,
+          limit: data.limit,
+          totalPages: data.totalPages,
+          hasNext: data.hasNext,
+          hasPrev: data.hasPrev
+        });
         setPosts(data.data || []);
         setPagination({
           page: data.page || 1,
@@ -52,10 +102,12 @@ export function usePosts(initialFilters?: PostFilter): UsePostsReturn {
         });
         setCurrentFilters(filtersToUse);
       } else {
+        console.error('❌ Failed to fetch posts:', response.error);
         setError(response.error || 'Failed to fetch posts');
         setPosts([]);
       }
     } catch (err) {
+      console.error('❌ Error fetching posts:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch posts');
       setPosts([]);
     } finally {

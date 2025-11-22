@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'api.mecabal.com',
       },
+      {
+        protocol: 'https',
+        hostname: '6unny.nyc3.cdn.digitaloceanspaces.com',
+      },
+      // Allow any DigitalOcean Spaces CDN subdomain (use specific pattern)
+      {
+        protocol: 'https',
+        hostname: '*.cdn.digitaloceanspaces.com',
+        pathname: '/**',
+      },
     ],
     unoptimized: process.env.NODE_ENV === 'production',
   },

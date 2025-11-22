@@ -60,7 +60,7 @@ export default function Feed() {
     // Get current user ID from API
     const loadUser = async () => {
       try {
-        const response = await apiClient.getCurrentUser();
+        const response = await apiClient.getCurrentUserProfile();
         if (response.success && response.data) {
           setCurrentUserId(response.data.id);
         }
@@ -73,8 +73,9 @@ export default function Feed() {
 
   // Fetch posts on mount and when filters change
   useEffect(() => {
+    console.log('🔵 Feed: Fetching posts with filters:', filters);
     fetchPosts(filters);
-  }, [filters]);
+  }, [fetchPosts, filters]);
 
   const handleReaction = async (postId: string, reactionType: string) => {
     try {
