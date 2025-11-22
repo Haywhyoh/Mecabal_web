@@ -34,6 +34,13 @@ export default function EditBusinessProfilePage() {
         apiClient.getBusinessCategories(),
       ]);
 
+      // Handle null business (user has no business profile)
+      if (businessResponse.success && businessResponse.data === null) {
+        // No business profile - redirect to registration
+        router.push('/business/register');
+        return;
+      }
+
       if (businessResponse.success && businessResponse.data) {
         const businessData = businessResponse.data;
         setBusiness(businessData);
@@ -52,14 +59,21 @@ export default function EditBusinessProfilePage() {
           paymentMethods: businessData.paymentMethods || [],
           hasInsurance: businessData.hasInsurance || false,
         });
+      } else {
+        // Handle other errors
+        console.error('Error loading business:', businessResponse.error);
+        alert(businessResponse.error || 'Failed to load business data');
       }
 
       if (categoriesResponse.success && categoriesResponse.data) {
         setCategories(categoriesResponse.data);
+      } else {
+        console.warn('Failed to load categories:', categoriesResponse.error);
+        // Categories are not critical, continue without them
       }
     } catch (error: any) {
       console.error('Error loading data:', error);
-      alert('Failed to load business data');
+      alert(error.message || 'Failed to load business data');
     } finally {
       setLoading(false);
     }

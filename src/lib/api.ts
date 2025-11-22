@@ -30,6 +30,7 @@ interface ApiResponse<T = any> {
   data?: T;
   error?: string;
   message?: string;
+  statusCode?: number;
 }
 
 class ApiClient {
@@ -60,12 +61,37 @@ class ApiClient {
         },
       });
 
-      const data = await response.json();
+      // Handle empty responses (e.g., 204 No Content)
+      const contentType = response.headers.get('content-type');
+      let data: any = null;
+      
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          // Response might be empty JSON
+          data = null;
+        }
+      }
 
+      // Handle different status codes
       if (!response.ok) {
+        const statusCode = response.status;
+        const errorMessage = data?.error || data?.message || `Request failed with status ${statusCode}`;
+        
+        // Handle service unavailable (503) - service is down
+        if (statusCode === 503) {
+          return {
+            success: false,
+            error: 'Service is currently unavailable. Please try again later.',
+            statusCode,
+          };
+        }
+        
         return {
           success: false,
-          error: data.error || data.message || 'Request failed',
+          error: errorMessage,
+          statusCode, // Include status code for better error handling
         };
       }
 
@@ -75,6 +101,7 @@ class ApiClient {
         ...data,
       };
     } catch (error) {
+      // Handle network errors or JSON parsing errors
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Network error',
@@ -640,9 +667,28 @@ class ApiClient {
   /**
    * Get current user's business profile
    * GET /business/my-business
+   * Returns null if user has no business profile (404)
    */
   async getMyBusiness() {
-    return this.request<BusinessProfile>('/business/my-business');
+    try {
+      const response = await this.request<BusinessProfile>('/business/my-business');
+      
+      // Handle 404 as "no business found" - return null like mobile app
+      if (!response.success && response.statusCode === 404) {
+        return {
+          success: true,
+          data: null as any, // Return null to indicate no business found
+        };
+      }
+      
+      return response;
+    } catch (error) {
+      // Handle network errors
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch business profile',
+      };
+    }
   }
 
   /**
@@ -1113,7 +1159,28 @@ class ApiClient {
    * GET /social/posts/categories
    */
   async getPostCategories() {
-    return this.request('/social/posts/categories');
+    try {
+      const response = await this.request('/social/posts/categories');
+      
+      // Handle errors gracefully
+      if (!response.success) {
+        console.error('Failed to fetch post categories:', response.error);
+        // Return empty array instead of failing completely
+        return {
+          success: true,
+          data: [] as any[],
+        };
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Error fetching post categories:', error);
+      // Return empty array on error to prevent UI crashes
+      return {
+        success: true,
+        data: [] as any[],
+      };
+    }
   }
 
   /**

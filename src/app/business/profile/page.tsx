@@ -39,17 +39,40 @@ export default function BusinessProfilePage() {
       setLoading(true);
       setError(null);
       const response = await apiClient.getMyBusiness();
-      if (response.success && response.data) {
-        setBusiness(response.data);
-      } else if (response.error?.includes('404') || response.error?.includes('not found')) {
+      
+      // Handle null business (user has no business profile)
+      if (response.success && response.data === null) {
         // No business profile - redirect to registration
         router.push('/business/register');
+        return;
+      }
+      
+      if (response.success && response.data) {
+        setBusiness(response.data);
       } else {
-        setError(response.error || 'Failed to load business profile');
+        // Handle service unavailable (503) - show user-friendly message
+        if (response.statusCode === 503) {
+          setError('Business service is temporarily unavailable. Please try again in a moment.');
+        } else if (response.statusCode === 404) {
+          // 404 means no business found - redirect to registration
+          router.push('/business/register');
+          return;
+        } else {
+          // Handle other errors
+          const errorMessage = response.error || 'Failed to load business profile';
+          setError(errorMessage);
+          console.error('Error loading business:', errorMessage);
+        }
       }
     } catch (err: any) {
       console.error('Error loading business:', err);
-      setError(err.message || 'Failed to load business profile');
+      const errorMessage = err.message || 'Failed to load business profile';
+      // Check if it's a service unavailable error
+      if (errorMessage.includes('unavailable') || errorMessage.includes('Cannot connect')) {
+        setError('Business service is temporarily unavailable. Please try again in a moment.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
