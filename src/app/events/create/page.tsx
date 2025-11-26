@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import MediaUpload, { type MediaFile } from '@/components/posts/MediaUpload';
 import { apiClient } from '@/lib/api';
 import { EVENT_CATEGORIES } from '@/types/event';
 import type { CreateEventDto } from '@/types/event';
@@ -47,7 +48,10 @@ export default function CreateEventPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [uploadedMedia, setUploadedMedia] = useState<Array<{ url: string; type: 'image' | 'video'; caption?: string }>>([]);
 
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -115,6 +119,45 @@ export default function CreateEventPage() {
     }
   };
 
+  const uploadMediaFiles = async (): Promise<Array<{ url: string; type: 'image' | 'video'; caption?: string }>> => {
+    if (mediaFiles.length === 0) {
+      return [];
+    }
+
+    try {
+      setUploading(true);
+      const files = mediaFiles.map((mf) => mf.file);
+      
+      const response = await apiClient.uploadMedia(files, {
+        quality: 'high',
+        maxWidth: 1920,
+        maxHeight: 1920,
+      });
+
+      if (response.success) {
+        const uploaded = response.data?.media || (response as any).media || response.data?.files || [];
+        
+        if (!Array.isArray(uploaded) || uploaded.length === 0) {
+          throw new Error('No media files returned from upload');
+        }
+        
+        const mediaArray = uploaded.map((file: any) => ({
+          url: file.url,
+          type: file.type,
+        }));
+        return mediaArray;
+      } else {
+        const errorMsg = response.error || 'Failed to upload media';
+        throw new Error(errorMsg);
+      }
+    } catch (err) {
+      console.error('Error uploading media:', err);
+      throw err;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) {
       setError('Please fill in all required fields');
@@ -125,6 +168,25 @@ export default function CreateEventPage() {
     setError(null);
 
     try {
+      // Upload media first
+      let media: Array<{ url: string; type: 'image' | 'video'; caption?: string }> = [];
+      
+      if (mediaFiles.length > 0) {
+        try {
+          media = await uploadMediaFiles();
+        } catch (uploadError) {
+          console.error('Media upload failed, continuing without media:', uploadError);
+          setError('Media upload failed. Event will be created without images.');
+          media = [];
+        }
+      }
+      
+      // Combine with existing uploaded media
+      media = [...uploadedMedia, ...media];
+
+      // Use first image as cover if no cover is set
+      const coverImageUrl = formData.coverImageUrl || (media.find(m => m.type === 'image')?.url);
+
       const eventData: CreateEventDto = {
         categoryId: formData.categoryId!,
         title: formData.title,
@@ -147,7 +209,13 @@ export default function CreateEventPage() {
         ageRestriction: formData.ageRestriction || undefined,
         languages: formData.languages,
         isPrivate: formData.isPrivate,
-        coverImageUrl: formData.coverImageUrl || undefined,
+        coverImageUrl: coverImageUrl || undefined,
+        media: media.length > 0 ? media.map((m, index) => ({
+          url: m.url,
+          type: m.type,
+          caption: m.caption,
+          displayOrder: index,
+        })) : undefined,
         specialRequirements: formData.specialRequirements || undefined,
       };
 
@@ -276,6 +344,23 @@ export default function CreateEventPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Event Images (Optional)
+                </label>
+                <MediaUpload
+                  maxFiles={10}
+                  maxFileSize={10}
+                  onMediaChange={setMediaFiles}
+                  existingMedia={uploadedMedia}
+                  onRemoveExisting={(index) => {
+                    setUploadedMedia((prev) => prev.filter((_, i) => i !== index));
+                  }}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  The first image will be used as the cover image
+                </p>
               </div>
             </div>
           )}
@@ -557,13 +642,13 @@ export default function CreateEventPage() {
             ) : (
               <button
                 onClick={handleSubmit}
-                disabled={!validateStep(currentStep) || submitting}
+                disabled={!validateStep(currentStep) || submitting || uploading}
                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {submitting ? (
+                {(submitting || uploading) ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Creating...
+                    {uploading ? 'Uploading images...' : 'Creating...'}
                   </>
                 ) : (
                   'Create Event'

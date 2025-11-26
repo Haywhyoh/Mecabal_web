@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import MediaUpload, { type MediaFile } from '@/components/posts/MediaUpload';
 import { apiClient } from '@/lib/api';
 import { EVENT_CATEGORIES } from '@/types/event';
 import type { Event, UpdateEventDto } from '@/types/event';
@@ -18,7 +19,10 @@ export default function EditEventPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [uploadedMedia, setUploadedMedia] = useState<Array<{ url: string; type: 'image' | 'video'; caption?: string }>>([]);
 
   const [formData, setFormData] = useState({
     title: '',
