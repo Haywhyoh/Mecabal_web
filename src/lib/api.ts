@@ -1440,6 +1440,7 @@ class ApiClient {
       });
 
       const data = await response.json();
+      console.log('📎 uploadMedia - Raw response data:', data);
 
       if (!response.ok) {
         return {
@@ -1448,11 +1449,13 @@ class ApiClient {
         };
       }
 
-      return {
+      const result = {
         success: true,
         data,
         ...data,
       };
+      console.log('📎 uploadMedia - Processed result:', result);
+      return result;
     } catch (error) {
       return {
         success: false,

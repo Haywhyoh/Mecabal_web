@@ -71,28 +71,53 @@ export default function PostCreator({
   };
 
   const uploadMediaFiles = async (): Promise<Array<{ url: string; type: 'image' | 'video'; caption?: string }>> => {
-    if (mediaFiles.length === 0) return [];
+    if (mediaFiles.length === 0) {
+      console.log('📎 No media files to upload');
+      return [];
+    }
 
     try {
       setUploading(true);
+      console.log('📎 Starting media upload for', mediaFiles.length, 'file(s)');
       const files = mediaFiles.map((mf) => mf.file);
+      console.log('📎 Files to upload:', files.map(f => ({ name: f.name, type: f.type, size: f.size })));
+      
       const response = await apiClient.uploadMedia(files, {
         quality: 'high',
         maxWidth: 1920,
         maxHeight: 1920,
       });
 
-      if (response.success && response.data) {
-        const uploaded = response.data.files || [];
-        return uploaded.map((file: any) => ({
+      console.log('📎 Upload response:', response);
+      console.log('📎 Upload response keys:', Object.keys(response));
+      console.log('📎 Upload response.data:', response.data);
+      console.log('📎 Upload response.media:', (response as any).media);
+
+      if (response.success) {
+        // The response structure is { media: MediaResponseDto[], uploadTime, totalSize }
+        // The apiClient returns { success: true, data: {...}, ...data }
+        // So we need to check both response.data.media and response.media
+        const uploaded = response.data?.media || (response as any).media || response.data?.files || [];
+        console.log('📎 Uploaded files from response:', uploaded);
+        
+        if (!Array.isArray(uploaded) || uploaded.length === 0) {
+          console.error('❌ No media files in response. Full response:', JSON.stringify(response, null, 2));
+          throw new Error('No media files returned from upload');
+        }
+        
+        const mediaArray = uploaded.map((file: any) => ({
           url: file.url,
           type: file.type,
         }));
+        console.log('📎 Processed media array:', mediaArray);
+        return mediaArray;
       } else {
-        throw new Error(response.error || 'Failed to upload media');
+        const errorMsg = response.error || 'Failed to upload media';
+        console.error('❌ Media upload failed:', errorMsg, response);
+        throw new Error(errorMsg);
       }
     } catch (err) {
-      console.error('Error uploading media:', err);
+      console.error('❌ Error uploading media:', err);
       throw err;
     } finally {
       setUploading(false);
@@ -118,11 +143,28 @@ export default function PostCreator({
 
       // Upload media first
       let media: Array<{ url: string; type: 'image' | 'video'; caption?: string }> = [];
+      console.log('📝 Starting post creation process');
+      console.log('📝 Media files count:', mediaFiles.length);
+      console.log('📝 Uploaded media count:', uploadedMedia.length);
+      
       if (mediaFiles.length > 0) {
-        media = await uploadMediaFiles();
+        console.log('📝 Uploading media files...');
+        try {
+          media = await uploadMediaFiles();
+          console.log('✅ Media uploaded successfully:', media);
+        } catch (uploadError) {
+          console.error('❌ Media upload failed, continuing without media:', uploadError);
+          // Don't throw - allow post creation without media if upload fails
+          // But show error to user
+          setError('Media upload failed. Post will be created without images.');
+          media = [];
+        }
       }
+      
       // Combine with existing uploaded media
       media = [...uploadedMedia, ...media];
+      console.log('📝 Final media array:', media);
+      console.log('📝 Media array length:', media.length);
 
       // Prepare post data
       const postData: CreatePostRequest = {
@@ -139,6 +181,12 @@ export default function PostCreator({
           ...(deadline && { deadline }),
         }),
       };
+
+      console.log('📝 Post data to be sent:', {
+        ...postData,
+        media: postData.media ? postData.media.map(m => ({ url: m.url?.substring(0, 50) + '...', type: m.type })) : undefined,
+      });
+      console.log('📝 Post data JSON:', JSON.stringify(postData, null, 2));
 
       const newPost = await createPost(postData);
 
