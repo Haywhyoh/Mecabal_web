@@ -57,7 +57,7 @@ export default function PostFilters({
         <select
           value={filters.postType || ''}
           onChange={(e) => updateFilter('postType', e.target.value || undefined)}
-          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-green-600"
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:ring-2 focus:ring-green-600 focus:border-green-600"
         >
           <option value="">All Types</option>
           {(['general', 'event', 'alert', 'marketplace', 'lost_found', 'help'] as PostType[]).map((type) => (
@@ -71,7 +71,7 @@ export default function PostFilters({
         <select
           value={filters.privacyLevel || ''}
           onChange={(e) => updateFilter('privacyLevel', e.target.value || undefined)}
-          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-green-600"
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:ring-2 focus:ring-green-600 focus:border-green-600"
         >
           <option value="">All Privacy Levels</option>
           {(['neighborhood', 'group', 'public'] as PrivacyLevel[]).map((level) => (
@@ -86,7 +86,7 @@ export default function PostFilters({
           <select
             value={filters.categoryId || ''}
             onChange={(e) => updateFilter('categoryId', e.target.value ? parseInt(e.target.value) : undefined)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-green-600"
+            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:ring-2 focus:ring-green-600 focus:border-green-600"
           >
             <option value="">All Categories</option>
             {safeCategories.map((cat) => (
@@ -105,7 +105,7 @@ export default function PostFilters({
             updateFilter('sortBy', sortBy);
             updateFilter('sortOrder', sortOrder);
           }}
-          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-green-600"
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:ring-2 focus:ring-green-600 focus:border-green-600"
         >
           <option value="createdAt-DESC">Newest First</option>
           <option value="createdAt-ASC">Oldest First</option>

@@ -1525,6 +1525,182 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  // ==================== ESTATE VISITOR MANAGEMENT API METHODS ====================
+
+  /**
+   * Pre-register a visitor
+   * POST /estate/:id/visitors/pre-register
+   */
+  async preRegisterVisitor(estateId: string, data: {
+    fullName: string;
+    phoneNumber?: string;
+    email?: string;
+    photoUrl?: string;
+    vehicleRegistration?: string;
+    vehicleMake?: string;
+    vehicleColor?: string;
+    idCardNumber?: string;
+    idCardType?: string;
+    companyName?: string;
+    purpose?: string;
+    notes?: string;
+  }) {
+    return this.request(`/estate/${estateId}/visitors/pre-register`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Get all visitors for an estate
+   * GET /estate/:id/visitors
+   */
+  async getVisitors(estateId: string) {
+    return this.request(`/estate/${estateId}/visitors`);
+  }
+
+  /**
+   * Get visitor by ID
+   * GET /estate/:id/visitors/:visitorId
+   */
+  async getVisitorById(estateId: string, visitorId: string) {
+    return this.request(`/estate/${estateId}/visitors/${visitorId}`);
+  }
+
+  /**
+   * Generate visitor pass
+   * POST /estate/:id/visitor-pass/generate
+   */
+  async generateVisitorPass(estateId: string, data: {
+    visitorId: string;
+    hostId: string;
+    expectedArrival: string;
+    expiresAt: string;
+    guestCount?: number;
+    purpose?: string;
+    notes?: string;
+  }) {
+    return this.request(`/estate/${estateId}/visitor-pass/generate`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Get visitor logs
+   * GET /estate/:id/visitor-logs
+   */
+  async getVisitorLogs(estateId: string, filters?: {
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    hostId?: string;
+    visitorId?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/estate/${estateId}/visitor-logs${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get current visitors
+   * GET /estate/:id/visitor-logs/current
+   */
+  async getCurrentVisitors(estateId: string) {
+    return this.request(`/estate/${estateId}/visitor-logs/current`);
+  }
+
+  /**
+   * Get visitor analytics
+   * GET /estate/:id/visitor-analytics
+   */
+  async getVisitorAnalytics(estateId: string, startDate?: string, endDate?: string) {
+    const queryParams = new URLSearchParams();
+    if (startDate) queryParams.append('startDate', startDate);
+    if (endDate) queryParams.append('endDate', endDate);
+    const queryString = queryParams.toString();
+    return this.request(`/estate/${estateId}/visitor-analytics${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get peak hours
+   * GET /estate/:id/visitor-analytics/peak-hours
+   */
+  async getPeakHours(estateId: string, startDate?: string, endDate?: string) {
+    const queryParams = new URLSearchParams();
+    if (startDate) queryParams.append('startDate', startDate);
+    if (endDate) queryParams.append('endDate', endDate);
+    const queryString = queryParams.toString();
+    return this.request(`/estate/${estateId}/visitor-analytics/peak-hours${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get frequent visitors
+   * GET /estate/:id/visitor-analytics/frequent-visitors
+   */
+  async getFrequentVisitors(estateId: string, limit?: number, startDate?: string, endDate?: string) {
+    const queryParams = new URLSearchParams();
+    if (limit) queryParams.append('limit', limit.toString());
+    if (startDate) queryParams.append('startDate', startDate);
+    if (endDate) queryParams.append('endDate', endDate);
+    const queryString = queryParams.toString();
+    return this.request(`/estate/${estateId}/visitor-analytics/frequent-visitors${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get security alerts
+   * GET /estate/:id/alerts
+   */
+  async getAlerts(estateId: string, filters?: {
+    severity?: string;
+    status?: string;
+    type?: string;
+    startDate?: string;
+    endDate?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/estate/${estateId}/alerts${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Create security alert
+   * POST /estate/:id/alerts
+   */
+  async createAlert(estateId: string, data: {
+    type: string;
+    severity: string;
+    title: string;
+    description: string;
+    location?: string;
+    gateName?: string;
+    visitorId?: string;
+    visitorPassId?: string;
+  }) {
+    return this.request(`/estate/${estateId}/alerts`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);

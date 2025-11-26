@@ -27,7 +27,7 @@ export default function RightSidebar() {
           <input
             type="text"
             placeholder="Search Mecabal"
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-full border-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white"
+            className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-full border-none text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white"
           />
         </div>
 

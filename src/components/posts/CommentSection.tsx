@@ -97,7 +97,7 @@ export default function CommentSection({
             onChange={(e) => setCommentContent(e.target.value)}
             placeholder={replyingTo ? 'Write a reply...' : 'Write a comment...'}
             rows={3}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 resize-none"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-600 focus:border-green-600 resize-none"
             autoFocus={autoFocus}
           />
         </div>
