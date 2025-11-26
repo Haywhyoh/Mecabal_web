@@ -272,7 +272,7 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-3">
             <Link
               href="/profile/edit"
-              className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               <Edit className="w-4 h-4" />
               <span>Edit Profile</span>

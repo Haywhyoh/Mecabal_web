@@ -371,7 +371,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   required
                 />
               </div>
@@ -385,7 +385,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   required
                 />
               </div>
@@ -400,7 +400,7 @@ export default function EditProfilePage() {
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   rows={4}
                   maxLength={500}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
                   placeholder="Tell your neighbors about yourself..."
                 />
                 <p className="text-xs text-gray-500 mt-1 text-right">
@@ -422,7 +422,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.occupation}
                   onChange={(e) => handleInputChange('occupation', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Software Engineer, Teacher"
                 />
               </div>
@@ -436,7 +436,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.professionalSkills}
                   onChange={(e) => handleInputChange('professionalSkills', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Plumbing, Electrical, Catering"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -458,7 +458,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.state}
                   onChange={(e) => handleInputChange('state', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Lagos"
                 />
               </div>
@@ -472,7 +472,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Victoria Island"
                 />
               </div>
@@ -486,7 +486,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.estate}
                   onChange={(e) => handleInputChange('estate', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Lekki Gardens Estate"
                 />
               </div>
@@ -500,7 +500,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={formData.landmark}
                   onChange={(e) => handleInputChange('landmark', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Near Shoprite"
                 />
               </div>
