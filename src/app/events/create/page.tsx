@@ -94,7 +94,7 @@ export default function CreateEventPage() {
       case 3:
         return !!(formData.locationName.trim() && formData.locationAddress.trim() && formData.city.trim() && formData.state);
       case 4:
-        return formData.isFree || (formData.price.trim() && parseFloat(formData.price) > 0);
+        return formData.isFree || !!(formData.price.trim() && parseFloat(formData.price) > 0);
       case 5:
         return true;
       default:

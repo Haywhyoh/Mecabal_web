@@ -21,7 +21,7 @@ export default function VisitorLogsPage() {
         setLoading(true);
         const response = await apiClient.getVisitorLogs(estateId, filters);
         if (response.success && response.data) {
-          setLogs(response.data);
+          setLogs(Array.isArray(response.data) ? response.data : []);
         }
       } catch (error) {
         console.error('Error fetching logs:', error);

@@ -22,9 +22,9 @@ export default function AnalyticsPage() {
           apiClient.getFrequentVisitors(estateId, 10),
         ]);
 
-        if (statsRes.success) setStats(statsRes.data);
-        if (peakHoursRes.success) setPeakHours(peakHoursRes.data || []);
-        if (frequentRes.success) setFrequentVisitors(frequentRes.data || []);
+        if (statsRes.success && statsRes.data) setStats(statsRes.data);
+        if (peakHoursRes.success) setPeakHours(Array.isArray(peakHoursRes.data) ? peakHoursRes.data : []);
+        if (frequentRes.success) setFrequentVisitors(Array.isArray(frequentRes.data) ? frequentRes.data : []);
       } catch (error) {
         console.error('Error fetching analytics:', error);
       } finally {

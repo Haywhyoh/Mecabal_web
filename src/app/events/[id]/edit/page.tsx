@@ -87,6 +87,15 @@ export default function EditEventPage() {
           isPrivate: eventData.isPrivate,
           specialRequirements: eventData.specialRequirements || '',
         });
+
+        // Load existing media
+        if (eventData.media && eventData.media.length > 0) {
+          setUploadedMedia(eventData.media.map((m) => ({
+            url: m.url,
+            type: m.type,
+            caption: m.caption,
+          })));
+        }
       } else {
         setError(response.error || 'Event not found');
       }
@@ -98,6 +107,45 @@ export default function EditEventPage() {
     }
   };
 
+  const uploadMediaFiles = async (): Promise<Array<{ url: string; type: 'image' | 'video'; caption?: string }>> => {
+    if (mediaFiles.length === 0) {
+      return [];
+    }
+
+    try {
+      setUploading(true);
+      const files = mediaFiles.map((mf) => mf.file);
+      
+      const response = await apiClient.uploadMedia(files, {
+        quality: 'high',
+        maxWidth: 1920,
+        maxHeight: 1920,
+      });
+
+      if (response.success) {
+        const uploaded = response.data?.media || (response as any).media || response.data?.files || [];
+        
+        if (!Array.isArray(uploaded) || uploaded.length === 0) {
+          throw new Error('No media files returned from upload');
+        }
+        
+        const mediaArray = uploaded.map((file: any) => ({
+          url: file.url,
+          type: file.type,
+        }));
+        return mediaArray;
+      } else {
+        const errorMsg = response.error || 'Failed to upload media';
+        throw new Error(errorMsg);
+      }
+    } catch (err) {
+      console.error('Error uploading media:', err);
+      throw err;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!event) return;
@@ -106,6 +154,22 @@ export default function EditEventPage() {
     setError(null);
 
     try {
+      // Upload new media first
+      let newMedia: Array<{ url: string; type: 'image' | 'video'; caption?: string }> = [];
+      
+      if (mediaFiles.length > 0) {
+        try {
+          newMedia = await uploadMediaFiles();
+        } catch (uploadError) {
+          console.error('Media upload failed, continuing without new media:', uploadError);
+          setError('Media upload failed. Event will be updated without new images.');
+          newMedia = [];
+        }
+      }
+      
+      // Combine existing and new media
+      const allMedia = [...uploadedMedia, ...newMedia];
+
       const updateData: UpdateEventDto = {
         title: formData.title,
         description: formData.description,
@@ -128,6 +192,12 @@ export default function EditEventPage() {
         ageRestriction: formData.ageRestriction || undefined,
         languages: formData.languages,
         isPrivate: formData.isPrivate,
+        media: allMedia.length > 0 ? allMedia.map((m, index) => ({
+          url: m.url,
+          type: m.type,
+          caption: m.caption,
+          displayOrder: index,
+        })) : undefined,
         specialRequirements: formData.specialRequirements || undefined,
       };
 
@@ -249,6 +319,20 @@ export default function EditEventPage() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Event Images
+              </label>
+              <MediaUpload
+                maxFiles={10}
+                maxFileSize={10}
+                onMediaChange={setMediaFiles}
+                existingMedia={uploadedMedia}
+                onRemoveExisting={(index) => {
+                  setUploadedMedia((prev) => prev.filter((_, i) => i !== index));
+                }}
+              />
             </div>
           </div>
 
@@ -415,13 +499,13 @@ export default function EditEventPage() {
             </button>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || uploading}
               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {submitting ? (
+              {(submitting || uploading) ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Saving...
+                  {uploading ? 'Uploading images...' : 'Saving...'}
                 </>
               ) : (
                 'Save Changes'

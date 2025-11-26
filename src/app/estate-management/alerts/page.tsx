@@ -16,7 +16,7 @@ export default function AlertsPage() {
         setLoading(true);
         const response = await apiClient.getAlerts(estateId);
         if (response.success && response.data) {
-          setAlerts(response.data);
+          setAlerts(Array.isArray(response.data) ? response.data : []);
         }
       } catch (error) {
         console.error('Error fetching alerts:', error);

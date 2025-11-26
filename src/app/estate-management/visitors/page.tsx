@@ -39,7 +39,7 @@ export default function VisitorsPage() {
         setLoading(true);
         const response = await apiClient.getVisitors(estateId);
         if (response.success && response.data) {
-          setVisitors(response.data);
+          setVisitors(Array.isArray(response.data) ? response.data : []);
         }
       } catch (error) {
         console.error('Error fetching visitors:', error);
@@ -71,7 +71,7 @@ export default function VisitorsPage() {
         // Refresh visitors list
         const visitorsRes = await apiClient.getVisitors(estateId);
         if (visitorsRes.success && visitorsRes.data) {
-          setVisitors(visitorsRes.data);
+          setVisitors(Array.isArray(visitorsRes.data) ? visitorsRes.data : []);
         }
       }
     } catch (error) {

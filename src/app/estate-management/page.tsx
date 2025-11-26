@@ -30,16 +30,16 @@ export default function EstateManagementDashboard() {
       try {
         setLoading(true);
         // Fetch current visitors
-        const currentVisitorsRes = await apiClient.request(`/estate/${estateId}/visitor-logs/current`);
-        const currentVisitors = currentVisitorsRes.data?.count || 0;
+        const currentVisitorsRes = await apiClient.getCurrentVisitors(estateId);
+        const currentVisitors = (currentVisitorsRes.data as any)?.count || 0;
 
         // Fetch today's stats
-        const analyticsRes = await apiClient.request(`/estate/${estateId}/visitor-analytics`);
-        const todayVisitors = analyticsRes.data?.today || 0;
+        const analyticsRes = await apiClient.getVisitorAnalytics(estateId);
+        const todayVisitors = (analyticsRes.data as any)?.today || 0;
 
         // Fetch alerts
-        const alertsRes = await apiClient.request(`/estate/${estateId}/alerts?status=OPEN`);
-        const pendingAlerts = alertsRes.data?.total || 0;
+        const alertsRes = await apiClient.getAlerts(estateId, { status: 'OPEN' });
+        const pendingAlerts = (alertsRes.data as any)?.total || 0;
 
         setStats({
           currentVisitors,
