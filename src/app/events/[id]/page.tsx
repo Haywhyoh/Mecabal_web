@@ -15,11 +15,15 @@ import {
   MessageCircle,
   CheckCircle2,
   ExternalLink,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Play,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import RSVPButton from '@/components/events/RSVPButton';
 import { apiClient } from '@/lib/api';
-import type { Event } from '@/types/event';
+import type { Event, EventMedia } from '@/types/event';
 import { useAuthStore } from '@/store/authStore';
 
 export default function EventDetailsPage() {
@@ -31,6 +35,8 @@ export default function EventDetailsPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showMediaGallery, setShowMediaGallery] = useState(false);
+  const [mediaGalleryIndex, setMediaGalleryIndex] = useState(0);
 
   useEffect(() => {
     if (eventId) {
@@ -301,6 +307,74 @@ export default function EventDetailsPage() {
             <p className="text-gray-700 whitespace-pre-wrap">{event.description}</p>
           </div>
 
+          {/* Media Gallery */}
+          {event.media && event.media.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Event Gallery</h3>
+              {event.media.length === 1 ? (
+                <div
+                  className="relative rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => {
+                    setMediaGalleryIndex(0);
+                    setShowMediaGallery(true);
+                  }}
+                >
+                  {event.media[0].type === 'image' ? (
+                    <div className="relative w-full h-96">
+                      <Image
+                        src={event.media[0].url}
+                        alt={event.media[0].caption || 'Event image'}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <video
+                      src={event.media[0].url}
+                      className="w-full h-96 object-cover"
+                      controls
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {event.media.slice(0, 6).map((media, index) => (
+                    <div
+                      key={media.id || index}
+                      className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => {
+                        setMediaGalleryIndex(index);
+                        setShowMediaGallery(true);
+                      }}
+                    >
+                      {media.type === 'image' ? (
+                        <Image
+                          src={media.url}
+                          alt={media.caption || `Event image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <Play className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
+                      {event.media.length > 6 && index === 5 && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <span className="text-white font-semibold">
+                            +{event.media.length - 6} more
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Requirements */}
           {(event.requireVerification || event.ageRestriction || event.languages.length > 0) && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -410,6 +484,101 @@ export default function EventDetailsPage() {
           )}
         </div>
       </div>
+
+      {/* Media Gallery Lightbox */}
+      {showMediaGallery && event.media && event.media.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
+          onClick={() => setShowMediaGallery(false)}
+        >
+          <button
+            onClick={() => setShowMediaGallery(false)}
+            className="absolute top-4 right-4 p-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full text-white transition-colors z-10"
+            aria-label="Close gallery"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {event.media.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMediaGalleryIndex((prev) => (prev === 0 ? event.media.length - 1 : prev - 1));
+                }}
+                className="absolute left-4 p-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full text-white transition-colors z-10"
+                aria-label="Previous media"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMediaGalleryIndex((prev) => (prev === event.media.length - 1 ? 0 : prev + 1));
+                }}
+                className="absolute right-4 p-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full text-white transition-colors z-10"
+                aria-label="Next media"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+
+          <div
+            className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {event.media[mediaGalleryIndex].type === 'image' ? (
+              <div className="relative w-full h-full">
+                <Image
+                  src={event.media[mediaGalleryIndex].url}
+                  alt={event.media[mediaGalleryIndex].caption || 'Event media'}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <video
+                src={event.media[mediaGalleryIndex].url}
+                controls
+                className="max-w-full max-h-full"
+                autoPlay
+              />
+            )}
+
+            {event.media[mediaGalleryIndex].caption && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg max-w-2xl">
+                <p className="text-sm">{event.media[mediaGalleryIndex].caption}</p>
+              </div>
+            )}
+          </div>
+
+          {event.media.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+              {event.media.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMediaGalleryIndex(index);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === mediaGalleryIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                  }`}
+                  aria-label={`Go to media ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {event.media.length > 1 && (
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
+              {mediaGalleryIndex + 1} / {event.media.length}
+            </div>
+          )}
+        </div>
+      )}
     </DashboardLayout>
   );
 }
