@@ -120,13 +120,13 @@ export default function EventAttendeesPage() {
                 placeholder="Search attendees..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full pl-10 pr-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
               />
             </div>
             <select
               value={rsvpFilter}
               onChange={(e) => setRsvpFilter(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
             >
               <option value="all">All Status</option>
               <option value="going">Going</option>
@@ -155,7 +155,7 @@ export default function EventAttendeesPage() {
               <p className="text-red-600 mb-4">{error}</p>
               <button
                 onClick={fetchAttendees}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
               >
                 Try Again
               </button>
@@ -241,7 +241,7 @@ export default function EventAttendeesPage() {
                       fetchAttendees();
                     }}
                     disabled={!pagination.hasPrev}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     Previous
                   </button>
@@ -254,7 +254,7 @@ export default function EventAttendeesPage() {
                       fetchAttendees();
                     }}
                     disabled={!pagination.hasNext}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     Next
                   </button>

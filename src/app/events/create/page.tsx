@@ -237,7 +237,7 @@ export default function CreateEventPage() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => updateFormData('title', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Community Cleanup Drive"
                   maxLength={100}
                 />
@@ -250,7 +250,7 @@ export default function CreateEventPage() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => updateFormData('description', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   rows={4}
                   placeholder="Describe your event..."
                   maxLength={500}
@@ -266,10 +266,10 @@ export default function CreateEventPage() {
                     <button
                       key={category.id}
                       onClick={() => updateFormData('categoryId', category.id)}
-                      className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
+                      className={`p-3 rounded-lg border-2 text-sm font-semibold transition-colors ${
                         formData.categoryId === category.id
-                          ? 'border-green-600 bg-green-50 text-green-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-green-600 bg-green-600 text-white shadow-md'
+                          : 'border-gray-400 bg-white text-gray-900 hover:border-gray-500 hover:bg-gray-50'
                       }`}
                     >
                       {category.name}
@@ -293,7 +293,7 @@ export default function CreateEventPage() {
                   value={formData.eventDate}
                   onChange={(e) => updateFormData('eventDate', e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -305,7 +305,7 @@ export default function CreateEventPage() {
                     type="time"
                     value={formData.startTime}
                     onChange={(e) => updateFormData('startTime', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
                 <div>
@@ -316,7 +316,7 @@ export default function CreateEventPage() {
                     type="time"
                     value={formData.endTime}
                     onChange={(e) => updateFormData('endTime', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
               </div>
@@ -335,7 +335,7 @@ export default function CreateEventPage() {
                   type="text"
                   value={formData.locationName}
                   onChange={(e) => updateFormData('locationName', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Community Hall"
                 />
               </div>
@@ -347,7 +347,7 @@ export default function CreateEventPage() {
                   type="text"
                   value={formData.locationAddress}
                   onChange={(e) => updateFormData('locationAddress', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="Street address"
                 />
               </div>
@@ -360,7 +360,7 @@ export default function CreateEventPage() {
                     type="text"
                     value={formData.city}
                     onChange={(e) => updateFormData('city', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="e.g., Lagos"
                   />
                 </div>
@@ -372,7 +372,7 @@ export default function CreateEventPage() {
                     type="text"
                     value={formData.state}
                     onChange={(e) => updateFormData('state', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="e.g., Lagos"
                   />
                 </div>
@@ -385,7 +385,7 @@ export default function CreateEventPage() {
                   type="text"
                   value={formData.landmark}
                   onChange={(e) => updateFormData('landmark', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g., Near Ikeja City Mall"
                 />
               </div>
@@ -417,7 +417,7 @@ export default function CreateEventPage() {
                     type="number"
                     value={formData.price}
                     onChange={(e) => updateFormData('price', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="0.00"
                     min="0"
                   />
@@ -431,7 +431,7 @@ export default function CreateEventPage() {
                   type="number"
                   value={formData.maxAttendees}
                   onChange={(e) => updateFormData('maxAttendees', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="Leave empty for unlimited"
                   min="1"
                 />
@@ -495,10 +495,10 @@ export default function CreateEventPage() {
                           : [...formData.languages, lang];
                         updateFormData('languages', newLangs);
                       }}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-3 py-1 rounded-lg text-sm font-semibold transition-colors ${
                         formData.languages.includes(lang)
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-white border-2 border-gray-400 text-gray-900 hover:bg-gray-100 hover:border-gray-500'
                       }`}
                     >
                       {lang}
@@ -513,7 +513,7 @@ export default function CreateEventPage() {
                 <select
                   value={formData.ageRestriction}
                   onChange={(e) => updateFormData('ageRestriction', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 >
                   {ageRestrictions.map((restriction) => (
                     <option key={restriction.value} value={restriction.value}>
@@ -529,7 +529,7 @@ export default function CreateEventPage() {
                 <textarea
                   value={formData.specialRequirements}
                   onChange={(e) => updateFormData('specialRequirements', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   rows={3}
                   placeholder="Any special requirements, what to bring, dress code, etc."
                 />
@@ -542,7 +542,7 @@ export default function CreateEventPage() {
             <button
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               Back
             </button>

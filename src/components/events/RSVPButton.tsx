@@ -83,7 +83,7 @@ export default function RSVPButton({
               onClick={() => handleRsvp(button.status)}
               disabled={isDisabled}
               className={`
-                flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors
+                flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm
                 ${isActive ? button.activeColor : button.inactiveColor}
                 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               `}

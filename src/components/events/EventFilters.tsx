@@ -66,14 +66,14 @@ export default function EventFilters({ filters, onFiltersChange, onClear }: Even
           placeholder="Search events..."
           value={filters.search || ''}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 px-4 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
         />
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-lg border-2 transition-colors flex items-center gap-2 font-medium ${
             hasActiveFilters
-              ? 'bg-green-50 border-green-500 text-green-700'
-              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+              ? 'bg-green-600 border-green-600 text-white hover:bg-green-700'
+              : 'bg-white border-gray-400 text-gray-900 hover:bg-gray-100 hover:border-gray-500'
           }`}
         >
           <Filter className="w-4 h-4" />
@@ -143,7 +143,7 @@ export default function EventFilters({ filters, onFiltersChange, onClear }: Even
                   type="date"
                   value={filters.dateFrom || ''}
                   onChange={(e) => handleDateFromChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
               <div>
@@ -155,7 +155,7 @@ export default function EventFilters({ filters, onFiltersChange, onClear }: Even
                   value={filters.dateTo || ''}
                   onChange={(e) => handleDateToChange(e.target.value)}
                   min={filters.dateFrom}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 bg-white border-2 border-gray-400 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
             </div>

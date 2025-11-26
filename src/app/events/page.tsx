@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, List, Calendar as CalendarIcon, Map, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import EventCard from '@/components/events/EventCard';
 import EventCardSkeleton from '@/components/events/EventCardSkeleton';
 import EventFilters from '@/components/events/EventFilters';
+import EventCalendarView from '@/components/events/EventCalendarView';
+import EventMapView from '@/components/events/EventMapView';
 import { apiClient } from '@/lib/api';
 import type { Event, EventFilterDto, PaginatedResponse } from '@/types/event';
 
@@ -14,6 +17,7 @@ type ViewMode = 'list' | 'calendar' | 'map';
 type QuickFilter = 'upcoming' | 'this_weekend' | 'this_month' | 'my_events';
 
 export default function EventsPage() {
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,10 +202,10 @@ export default function EventsPage() {
               <button
                 key={filter}
                 onClick={() => setQuickFilter(filter)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
                   quickFilter === filter
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'bg-white border-2 border-gray-400 text-gray-900 hover:bg-gray-100 hover:border-gray-500'
                 }`}
               >
                 {filter === 'upcoming'
@@ -289,7 +293,7 @@ export default function EventsPage() {
               <p className="text-red-600 mb-4">{error}</p>
               <button
                 onClick={fetchEvents}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
               >
                 Try Again
               </button>
@@ -305,7 +309,7 @@ export default function EventsPage() {
               </p>
               <Link
                 href="/events/create"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
               >
                 <Plus className="w-5 h-5" />
                 Create Event
@@ -320,26 +324,26 @@ export default function EventsPage() {
               </div>
               {pagination.hasNext && (
                 <div className="text-center mt-8">
-                  <button
-                    onClick={handleLoadMore}
-                    disabled={loading}
-                    className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? 'Loading...' : 'Load More'}
-                  </button>
+              <button
+                onClick={handleLoadMore}
+                disabled={loading}
+                className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 font-medium"
+              >
+                {loading ? 'Loading...' : 'Load More'}
+              </button>
                 </div>
               )}
             </>
           ) : viewMode === 'calendar' ? (
-            <div className="text-center py-12">
-              <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Calendar view coming soon</p>
-            </div>
+            <EventCalendarView
+              events={events}
+              onEventPress={(event) => router.push(`/events/${event.id}`)}
+            />
           ) : (
-            <div className="text-center py-12">
-              <Map className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Map view coming soon</p>
-            </div>
+            <EventMapView
+              events={events}
+              onEventPress={(event) => router.push(`/events/${event.id}`)}
+            />
           )}
         </div>
       </div>
