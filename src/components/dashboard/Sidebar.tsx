@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   Home,
   MapPin,
@@ -16,13 +17,7 @@ import {
   X,
   Store,
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
-
-interface User {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-}
+import { useAuthStore } from '@/store/authStore';
 
 interface SidebarProps {
   isMobileOpen?: boolean;
@@ -31,26 +26,18 @@ interface SidebarProps {
 
 export default function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, logout, refreshUser } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
-    loadUser();
-  }, []);
-
-  const loadUser = async () => {
-    try {
-      const response = await apiClient.getCurrentUser();
-      if (response.success && response.data) {
-        setUser(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
+    // Refresh user data if not available
+    if (!user) {
+      refreshUser();
     }
-  };
+  }, [user, refreshUser]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
+  const handleLogout = async () => {
+    await logout();
     window.location.href = '/onboarding';
   };
 
@@ -59,7 +46,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose }: Sidebar
     { icon: MapPin, label: 'Neighborhoods', href: '/neighborhoods/browse', active: pathname?.startsWith('/neighborhoods') },
     { icon: Store, label: 'Business', href: '/business/profile', active: pathname?.startsWith('/business') },
     { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace', active: pathname === '/marketplace', phase2: true },
-    { icon: Calendar, label: 'Events', href: '/events', active: pathname === '/events', phase2: true },
+    { icon: Calendar, label: 'Events', href: '/events', active: pathname?.startsWith('/events') },
     { icon: MessageSquare, label: 'Messages', href: '/messages', active: pathname === '/messages', phase2: true },
     { icon: User, label: 'Profile', href: '/profile', active: pathname?.startsWith('/profile') },
     { icon: Settings, label: 'Settings', href: '/settings', active: pathname?.startsWith('/settings') },
@@ -155,17 +142,32 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose }: Sidebar
               flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors
               ${isCollapsed ? 'justify-center' : ''}
             `}>
-              <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-semibold text-sm">
-                  {user.firstName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
-                </span>
-              </div>
+              {user.profilePictureUrl ? (
+                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <Image
+                    src={user.profilePictureUrl}
+                    alt={user.fullName || `${user.firstName} ${user.lastName}` || 'User'}
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover"
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-semibold text-sm">
+                    {user.firstName?.[0]?.toUpperCase() || ''}
+                    {user.lastName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 truncate">
-                    {user.firstName && user.lastName
-                      ? `${user.firstName} ${user.lastName}`
-                      : user.email?.split('@')[0] || 'User'}
+                    {user.fullName || 
+                     (user.firstName && user.lastName 
+                       ? `${user.firstName} ${user.lastName}` 
+                       : user.firstName || user.email?.split('@')[0] || 'User')}
                   </p>
                   <p className="text-xs text-gray-500 truncate">{user.email}</p>
                 </div>

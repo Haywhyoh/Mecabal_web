@@ -22,6 +22,16 @@ import type {
   CreateBusinessServiceDto,
   UpdateBusinessServiceDto,
 } from '@/types/business';
+import type {
+  Event,
+  CreateEventDto,
+  UpdateEventDto,
+  EventFilterDto,
+  RsvpDto,
+  AttendeeFilterDto,
+  PaginatedResponse,
+  EventAttendee,
+} from '@/types/event';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -1700,6 +1710,265 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  // ==================== EVENTS API METHODS ====================
+
+  /**
+   * Get all events with filters
+   * GET /events
+   */
+  async getEvents(filters?: {
+    page?: number;
+    limit?: number;
+    categoryId?: number;
+    status?: 'draft' | 'published' | 'cancelled' | 'completed';
+    search?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    neighborhoodId?: string;
+    isFree?: boolean;
+    sortBy?: 'createdAt' | 'eventDate' | 'attendeesCount';
+    sortOrder?: 'ASC' | 'DESC';
+  }) {
+    const queryParams = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/events${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get single event by ID
+   * GET /events/:id
+   */
+  async getEventById(id: string) {
+    return this.request(`/events/${id}`);
+  }
+
+  /**
+   * Create new event
+   * POST /events
+   */
+  async createEvent(data: {
+    categoryId: number;
+    title: string;
+    description: string;
+    eventDate: string;
+    startTime: string;
+    endTime?: string;
+    location: {
+      name: string;
+      address: string;
+      latitude: number;
+      longitude: number;
+      landmark?: string;
+    };
+    isFree: boolean;
+    price?: number;
+    maxAttendees?: number;
+    allowGuests?: boolean;
+    requireVerification?: boolean;
+    ageRestriction?: string;
+    languages?: string[];
+    isPrivate?: boolean;
+    coverImageUrl?: string;
+    media?: Array<{
+      url: string;
+      type: 'image' | 'video';
+      caption?: string;
+      displayOrder?: number;
+    }>;
+    specialRequirements?: string;
+  }) {
+    return this.request('/events', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update event
+   * PATCH /events/:id
+   */
+  async updateEvent(id: string, data: {
+    categoryId?: number;
+    title?: string;
+    description?: string;
+    eventDate?: string;
+    startTime?: string;
+    endTime?: string;
+    location?: {
+      name: string;
+      address: string;
+      latitude: number;
+      longitude: number;
+      landmark?: string;
+    };
+    isFree?: boolean;
+    price?: number;
+    maxAttendees?: number;
+    allowGuests?: boolean;
+    requireVerification?: boolean;
+    ageRestriction?: string;
+    languages?: string[];
+    isPrivate?: boolean;
+    coverImageUrl?: string;
+    media?: Array<{
+      url: string;
+      type: 'image' | 'video';
+      caption?: string;
+      displayOrder?: number;
+    }>;
+    specialRequirements?: string;
+  }) {
+    return this.request(`/events/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete event
+   * DELETE /events/:id
+   */
+  async deleteEvent(id: string) {
+    return this.request(`/events/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * RSVP to event
+   * POST /events/:id/rsvp
+   */
+  async rsvpEvent(id: string, data: {
+    rsvpStatus: 'going' | 'maybe' | 'not_going';
+    guestsCount?: number;
+  }) {
+    return this.request(`/events/${id}/rsvp`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Cancel RSVP
+   * DELETE /events/:id/rsvp
+   */
+  async cancelRsvp(id: string) {
+    return this.request(`/events/${id}/rsvp`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Get event attendees
+   * GET /events/:id/attendees
+   */
+  async getEventAttendees(id: string, filters?: {
+    page?: number;
+    limit?: number;
+    rsvpStatus?: 'going' | 'maybe' | 'not_going';
+    search?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/events/${id}/attendees${queryString ? `?${queryString}` : ''}`);
+  }
+
+  /**
+   * Get nearby events
+   * GET /events/nearby
+   */
+  async getNearbyEvents(params: {
+    latitude: number;
+    longitude: number;
+    radiusKm?: number;
+    page?: number;
+    limit?: number;
+    categoryId?: number;
+    search?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    isFree?: boolean;
+  }) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('latitude', params.latitude.toString());
+    queryParams.append('longitude', params.longitude.toString());
+    if (params.radiusKm) queryParams.append('radiusKm', params.radiusKm.toString());
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.categoryId) queryParams.append('categoryId', params.categoryId.toString());
+    if (params.search) queryParams.append('search', params.search);
+    if (params.dateFrom) queryParams.append('dateFrom', params.dateFrom);
+    if (params.dateTo) queryParams.append('dateTo', params.dateTo);
+    if (params.isFree !== undefined) queryParams.append('isFree', params.isFree.toString());
+    return this.request(`/events/nearby?${queryParams.toString()}`);
+  }
+
+  /**
+   * Get user's events
+   * GET /events/my-events
+   */
+  async getMyEvents(type: 'organizing' | 'attending' | 'all' = 'all', filters?: {
+    page?: number;
+    limit?: number;
+    categoryId?: number;
+    search?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    status?: 'draft' | 'published' | 'cancelled' | 'completed';
+    sortBy?: 'createdAt' | 'eventDate' | 'attendeesCount';
+    sortOrder?: 'ASC' | 'DESC';
+  }) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('type', type);
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/events/my-events?${queryString}`);
+  }
+
+  /**
+   * Get featured events
+   * GET /events/featured
+   */
+  async getFeaturedEvents(limit: number = 5) {
+    return this.request(`/events/featured?limit=${limit}`);
+  }
+
+  /**
+   * Increment event view count
+   * POST /events/:id/increment-views
+   */
+  async incrementEventViews(id: string) {
+    try {
+      return await this.request(`/events/${id}/increment-views`, {
+        method: 'POST',
+      });
+    } catch (error) {
+      // Silently fail - view counting is not critical
+      console.warn('Failed to increment event view count:', error);
+      return { success: false, error: 'Failed to increment views' };
+    }
   }
 }
 
