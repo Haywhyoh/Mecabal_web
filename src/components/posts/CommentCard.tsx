@@ -81,22 +81,33 @@ export default function CommentCard({
       <div className="flex gap-3">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          {comment.user?.profilePicture ? (
-            <Image
-              src={comment.user.profilePicture}
-              alt={`${comment.user.firstName} ${comment.user.lastName}`}
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-          ) : (
-            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-semibold">
-                {comment.user?.firstName?.[0] || 'U'}
-                {comment.user?.lastName?.[0] || ''}
-              </span>
-            </div>
-          )}
+          {(() => {
+            const profilePicture = comment.user?.profilePicture || (comment.user as any)?.profilePictureUrl;
+            const firstName = comment.user?.firstName || '';
+            const lastName = comment.user?.lastName || '';
+            const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}` || 'U';
+            
+            if (profilePicture) {
+              return (
+                <Image
+                  src={profilePicture}
+                  alt={`${firstName} ${lastName}`}
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                  unoptimized
+                />
+              );
+            }
+            
+            return (
+              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-semibold">
+                  {initials}
+                </span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Content */}
