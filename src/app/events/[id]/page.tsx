@@ -203,33 +203,41 @@ export default function EventDetailsPage() {
         {/* Content */}
         <div className="p-4 space-y-6">
           {/* Cover Image */}
-          {event.coverImageUrl ? (
-            <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
-              <Image
-                src={event.coverImageUrl}
-                alt={event.title}
-                fill
-                className="object-cover"
-                unoptimized
-              />
+          {(() => {
+            // Get cover image - use coverImageUrl or first image from media
+            const coverImage = event.coverImageUrl || 
+              (event.media && event.media.length > 0 
+                ? event.media.find(m => m.type === 'image')?.url 
+                : null);
+            
+            return coverImage ? (
+              <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
+                <Image
+                  src={coverImage}
+                  alt={event.title}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                <div
+                  className="absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-semibold"
+                  style={{ backgroundColor: category.colorCode }}
+                >
+                  {category.name}
+                </div>
+              </div>
+            ) : (
               <div
-                className="absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-semibold"
+                className="w-full h-64 md:h-96 rounded-lg flex items-center justify-center text-white"
                 style={{ backgroundColor: category.colorCode }}
               >
-                {category.name}
+                <div className="text-center">
+                  <Calendar className="w-16 h-16 mx-auto mb-2 opacity-80" />
+                  <p className="text-lg font-medium opacity-80">{category.name}</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div
-              className="w-full h-64 md:h-96 rounded-lg flex items-center justify-center text-white"
-              style={{ backgroundColor: category.colorCode }}
-            >
-              <div className="text-center">
-                <Calendar className="w-16 h-16 mx-auto mb-2 opacity-80" />
-                <p className="text-lg font-medium opacity-80">{category.name}</p>
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Title and Price */}
           <div className="flex items-start justify-between">

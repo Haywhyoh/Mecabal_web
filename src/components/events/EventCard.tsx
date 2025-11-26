@@ -39,6 +39,21 @@ export default function EventCard({ event, onPress }: EventCardProps) {
     }
   };
 
+  // Get cover image - use coverImageUrl or first image from media
+  const getCoverImage = () => {
+    if (event.coverImageUrl) {
+      return event.coverImageUrl;
+    }
+    // Use first image from media array if available
+    if (event.media && event.media.length > 0) {
+      const firstImage = event.media.find(m => m.type === 'image');
+      return firstImage?.url;
+    }
+    return null;
+  };
+
+  const coverImage = getCoverImage();
+
   return (
     <Link
       href={`/events/${event.id}`}
@@ -46,10 +61,10 @@ export default function EventCard({ event, onPress }: EventCardProps) {
       className="block bg-white rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-lg transition-all duration-200 overflow-hidden"
     >
       {/* Cover Image */}
-      {event.coverImageUrl ? (
+      {coverImage ? (
         <div className="relative w-full h-48 bg-gray-100">
           <Image
-            src={event.coverImageUrl}
+            src={coverImage}
             alt={event.title}
             fill
             className="object-cover"
